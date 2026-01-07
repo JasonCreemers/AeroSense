@@ -135,7 +135,7 @@ class Camera:
             
         except subprocess.CalledProcessError:
             # Handle runtime errors
-            self.log.error("Failed to launch preview. Ensure a monitor is attached.")
+            self.log.error("Failed to launch preview. Ensure a camera is attached.")
         except FileNotFoundError:
             # Handle missing system dependency
-            self.log.critical("Command 'rpicam-hello' not found.")
+            self.log.critical("Command 'rpicam-still' not found. Ensure the camera library is installed.")

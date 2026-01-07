@@ -78,7 +78,7 @@ class Scheduler:
             # Update every cycle available
             for key in self.cycles.keys():
                 self.cycles[key] = state
-            self.log.info(f"Macro: ALL System cycles set to {state}")
+            self.log.info(f"Macro: All System cycles set to {state}")
 
         elif target == "hardware":
             # Update only physical actuators

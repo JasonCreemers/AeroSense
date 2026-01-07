@@ -111,7 +111,7 @@ class Arduino:
                     
                     # --- Command Ackowledgments ---
                     elif line.startswith("ACK"):
-                        self.log.info(f"Arduino: {line}")
+                        self.log.info(f"ARDUINO: {line}")
                         
                     # --- Sensor Data ---
                     elif line.startswith("DATA"):

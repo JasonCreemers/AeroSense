@@ -25,7 +25,7 @@ def main():
     )
     log = logging.getLogger("AeroSense.Main")
     
-    print(f"\n=== AEROSENSE GARDEN CONTROLLER V{aerosense.__version__} ({aerosense.__release__}) ===")
+    print(f"\n=== AEROSENSE GARDEN CONTROLLER V{aerosense.__version__} | ({aerosense.__release__}) ===")
     log.info("System initializing...")
 
     # --- Start and Run Application ---
@@ -43,7 +43,7 @@ def main():
         # --- Start Interface ---
         cli.start()
         
-        log.info("System Active. Automation loops running.")
+        log.info("System Active.")
 
         # --- Main Automation Loop ---
         while cli.running:
