@@ -220,6 +220,26 @@ class CLI:
             str: The canonical system name if an alias exists, otherwise returns the original `term` unchanged.
         """
         return COMPONENT_ALIASES.get(term, term)
+    
+    def _parse_arg(self, args: List[str], index: int, default=None):
+        """
+        Helper to safely get an integer argument or return a default.
+
+        Args:
+            args (List[str]): The list of arguments provided by the user.
+            index (int): The index of the argument to parse.
+            default (Optional[int]): The value to return if the argument is missing.
+
+        Returns:
+            Optional[int]: The parsed integer, the default value, or None on error.
+        """
+        if len(args) > index:
+            try:
+                return int(args[index])
+            except ValueError:
+                print(">> Error: Argument must be an integer.")
+                return None
+        return default
 
     # --- COMMAND HANDLERS ---
     def _handle_cycle(self, args: List[str]):
@@ -252,21 +272,14 @@ class CLI:
             return
 
         state = args[0] == "ON"
-        duration = 0 
+        duration = self._parse_arg(args, 1, default=0) 
         
-        if len(args) > 1 and state:
-            try:
-                duration = int(args[1])
-            except ValueError:
-                print(">> Error: Duration must be an integer.")
-                return
-        
-        if state and duration == 0:
-            print(">> No duration specified. Using default max safety time.")
-
-        # Enable/Disable pump
-        self.controller.set_pump(state, duration)
-        print(f">> Pump set to {'ON' if state else 'OFF'}")
+        if duration is not None:
+            if state and duration == 0:
+                print(">> No duration specified. Using default max safety time.")
+            # Enable/Disable pump
+            self.controller.set_pump(state, duration)
+            print(f">> Pump set to {'ON' if state else 'OFF'}")
 
 
     def _handle_lights(self, args: List[str]):
@@ -279,19 +292,14 @@ class CLI:
             return
 
         state = args[0] == "ON"
-        duration = 0
-        
-        if len(args) > 1 and state:
-            try:
-                duration = int(args[1])
-            except ValueError:
-                print(">> Error: Duration must be an integer.")
-                return
+        duration = self._parse_arg(args, 1, default=0)
 
         # Enable/Disable lights
-        self.controller.set_lights(state, duration)
-        self.scheduler.register_manual_light_change(state)
-        print(f">> Lights set to {'ON' if state else 'OFF'}" + (f" for {duration}s" if duration > 0 else ""))
+        if duration is not None:
+            self.controller.set_lights(state, duration)
+            self.scheduler.register_manual_light_change(state)
+            suffix = f" for {duration}s" if duration > 0 else ""
+            print(f">> Lights set to {'ON' if state else 'OFF'}{suffix}")
 
     def _handle_run(self, args: List[str]):
         """
@@ -306,70 +314,44 @@ class CLI:
 
         if target == "SENSORS":
             data = self.controller.run_full_diagnostic()
+            env_str = f"{data['env'][0]}°F | {data['env'][1]}% RH" if data['env'] else "[TIMEOUT]"
+            water_str = f"{data['water']}mm" if data['water'] is not None else "[TIMEOUT]"
 
-            # Environment
-            if data["env"]:
-                print(f">> Environment: {data['env'][0]}°F | {data['env'][1]}% RH")
-            else:
-                print(">> Environment: [TIMEOUT]")
-
-            # Water Level
-            if data["water"] is not None:
-                print(f">> Water Level: {data['water']}mm")
-            else:
-                print(">> Water Level: [TIMEOUT]")
-
-            # Pi Health
+            print(f"\n--- DIAGNOSTIC SWEEP ---")
+            print(f">> Environment: {env_str}")
+            print(f">> Water Level: {water_str}")
             print(f">> Pi Health:   {data['pi']}°C")
-            
-            print(">> Sweep Complete.")
+            print("------------------------")
             
         elif target == "ENVIRONMENT":
             print(">> Reading Environment...")
             data = self.controller.read_environment()
-            if data:
-                print(f">> Temp: {data[0]}F | Humidity: {data[1]}%")
-            else:
-                print(">> Error: Sensor timeout.")
+            print(f">> Temp: {data[0]}F | Humidity: {data[1]}%" if data else ">> Error: Sensor timeout.")
 
         elif target == "WATER_LEVEL":
             print(">> Reading Water Level...")
             level = self.controller.read_water_level()
-            if level is not None:
-                print(f">> Water Level: {level}mm")
-            else:
-                print(">> Error: Sensor timeout.")
+            print(f">> Water Level: {level}mm" if level is not None else ">> Error: Sensor timeout.")
 
         elif target == "CAMERA":
-            # Check for optional count argument
-            count = None
-            if len(args) > 1:
-                try:
-                    count = int(args[1])
-                except ValueError:
-                    print(">> Error: Count must be an integer.")
-                    return
+            # Parse count
+            count = self._parse_arg(args, 1, default=-1)
+            if count is None: return
             
             # If count is None, controller will use settings default
-            count_str = f"{count}" if count else "Default"
+            final_count = None if count == -1 else count
+            
+            count_str = f"{final_count}" if final_count else "Default"
             print(f">> Capturing images (Count: {count_str})...")
             
-            files = self.controller.capture_smart_image(count=count)
-            
-            if files:
-                print(f">> Saved {len(files)} images: {files}")
-            else:
-                print(">> Error: Camera failed.")
+            files = self.controller.capture_smart_image(count=final_count)
+            print(f">> Saved {len(files)} images: {files}" if files else ">> Error: Camera failed.")
 
         elif target == "LIVE_CAMERA":
-            duration = 0
+            duration = self._parse_arg(args, 1, default=0)
+
+            if duration is None: return
             
-            if len(args) > 1:
-                try:
-                    duration = int(args[1])
-                except ValueError:
-                    print(">> Error: Duration must be an integer.")
-                    return
             if duration == 0:
                 print(">> Starting Live Camera (Indefinite).")
                 print(">> Close the video window to return to CLI.")

@@ -7,7 +7,6 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
 
 ## To Do List
 ### Immediate Tasks
-* Clean up code (Make less redundant)
 * New Songs
    * Scales/Notes demonstration
 * In arduino.py they fight for data between get_latest_data with the pop, make look at timestamp instead?
@@ -49,6 +48,7 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
    * Added a new `Reset` command.
    * Cleaned up many print statements.
    * Changed morning tune to only occur at 8AM instead of whenever cycle is enabled.
+   * General code cleanup and optimization.
 * **v2.1.0** | 2026-01-07
    * Incorporated GitHub.
    * Fixed issue with camera lights not working outside active window.
