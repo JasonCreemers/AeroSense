@@ -1,0 +1,20 @@
+# --- Python Junk ---
+__pycache__/
+*.pyc
+
+# --- Virtual Environment ---
+.venv/
+env/
+
+# Sensitive Variables
+.env
+
+# --- System Logs ---
+*.log
+data/logs/*
+
+# --- Images ---
+data/images/*
+
+# --- VS Code Settings ---
+.vscode/
