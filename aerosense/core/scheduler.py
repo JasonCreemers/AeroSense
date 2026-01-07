@@ -73,29 +73,22 @@ class Scheduler:
         """
         target = component.lower()
         
-        # --- Macro Groups ---
-        if target == "system":
-            # Update every cycle available
-            for key in self.cycles.keys():
+        # Define groups using sets of keys
+        groups = {
+            "hardware": ["lights", "pump"],
+            "sensors": ["environment", "water_level", "camera", "pi_health"],
+            # "system" is just the union of the two above
+            "system": ["lights", "pump", "environment", "water_level", "camera", "pi_health"]
+        }
+
+        if target in groups:
+            # Update all keys in the group at once
+            for key in groups[target]:
                 self.cycles[key] = state
-            self.log.info(f"Macro: All System cycles set to {state}")
+            self.log.info(f"Macro: {target.upper()} cycles set to {state}")
 
-        elif target == "hardware":
-            # Update only physical actuators
-            self.cycles["lights"] = state
-            self.cycles["pump"] = state
-            self.log.info(f"Macro: HARDWARE cycles set to {state}")
-
-        elif target == "sensors":
-            # Update all sensing and logging capabilities
-            self.cycles["environment"] = state
-            self.cycles["water_level"] = state
-            self.cycles["camera"] = state
-            self.cycles["pi_health"] = state
-            self.log.info(f"Macro: SENSOR cycles set to {state}")
-
-        # --- Individual Components ---
         elif target in self.cycles:
+            # Update individual component
             self.cycles[target] = state
             self.log.info(f"Cycle '{target}' set to {state}")
             

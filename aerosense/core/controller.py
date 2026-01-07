@@ -183,6 +183,24 @@ class Controller:
             scheduler.stop_all_cycles()
 
     # --- Sensor Operations ---
+    def _read_sensor_raw(self, trigger_cmd: str, data_tag: str, timeout: float = 2.0) -> Optional[str]:
+        """
+        Generic wrapper to send a command and fetch the raw response string.
+
+        Args:
+            trigger_cmd (str): The serial command to send to the Arduino.
+            data_tag (str): The data prefix to listen for in the response.
+            timeout (float): Max time to wait for a response in seconds.
+
+        Returns:
+            Optional[str]: The raw data string from the Arduino, or None on timeout.
+        """
+        self.arduino.send(trigger_cmd)
+        data = self.arduino.get_latest_data(data_tag, timeout=timeout)
+        if not data:
+            self.log.error(f"Timeout waiting for {trigger_cmd}")
+        return data
+    
     def read_environment(self) -> Optional[Tuple[float, float]]:
         """
         Read temperature and humidity from the sensor.
@@ -190,25 +208,18 @@ class Controller:
         Returns:
             Optional[Tuple[float, float]]: (Temp_F, Humidity_RH) or None on failure.
         """
-        self.arduino.send("READ_TEMP")
-        data = self.arduino.get_latest_data("DATA_TEMP", timeout=3.0)
+        # Read data
+        data = self._read_sensor_raw("READ_TEMP", "DATA_TEMP", 3.0)
         
         if data:
             try:
-                # Format: "72.5,45.0"
                 parts = data.split(",")
-                temp_f = float(parts[0])
-                humidity = float(parts[1])
-                
-                self.logger.log_environment(temp_f, humidity)
-                return temp_f, humidity
+                vals = (float(parts[0]), float(parts[1]))
+                self.logger.log_environment(*vals)
+                return vals
             except (ValueError, IndexError):
                 # Handle data errors
-                self.log.error(f"Malformed temp data received: {data}")
-        else:
-            # Handle timeout errors
-            self.log.error("Timeout waiting for temp sensor.")
-            
+                self.log.error(f"Malformed temp data: {data}")
         return None
 
     def read_water_level(self, log_data: bool = True) -> Optional[int]:
@@ -221,20 +232,18 @@ class Controller:
         Returns:
             Optional[int]: Distance in mm (larger number = lower water), or None.
         """
-        self.arduino.send("READ_DISTANCE")
-        data = self.arduino.get_latest_data("DATA_DISTANCE", timeout=2.0)
+        # Read data
+        data = self._read_sensor_raw("READ_DISTANCE", "DATA_DISTANCE", 2.0)
         
         if data:
             try:
-                # Read data
                 level = int(data)
-                if log_data:
+                if log_data: 
                     self.logger.log_water(level)
                 return level
             except ValueError:
                 # Handle data errors
-                self.log.error(f"Malformed distance data received: {data}")
-        
+                self.log.error(f"Malformed distance data: {data}")
         return None
 
     def run_master_task(self, blocking: bool = True):
