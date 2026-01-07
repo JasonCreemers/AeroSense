@@ -179,13 +179,15 @@ class Scheduler:
                     self.log.info(f"Schedule: Window active. Turning Lights ON.")
                     self.controller.set_lights(True)
 
-                    # Check for birthdays
-                    if (now.month, now.day) in BIRTHDAYS:
-                        self.log.info("Schedule: Special Date detected. Happy Birthday!")
-                        self.controller.play_music("CURIOSITY")
-                    else:
-                        self.log.info("Schedule: Routine Start. Good Morning.")
-                        self.controller.play_music("MORNING")
+                    # Play morning music
+                    if current_hour == start:
+                        # Check for birthdays
+                        if (now.month, now.day) in BIRTHDAYS:
+                            self.log.info("Schedule: Special Date detected. Happy Birthday!")
+                            self.controller.play_music("CURIOSITY")
+                        else:
+                            self.log.info("Schedule: Routine Start. Good Morning.")
+                            self.controller.play_music("MORNING")
             
             else:
                 # Turn off lights
