@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: 2.1.0** | **Release: 2026-01-07** | **Authors: Jason, JTC, Worlds Biggest Max Fan, Lead Project Manager, Lead Mechanical Engineer, Lead Electrical Engineer, Lead Software Engineer, Lead Designer, Lead Coder, Lead QA, Lead Researcher, Lead Machine Learning Trainer, Head Investor, Lead Purchaser** | **Co-Authors: Me, Myself & I** | **Documentation Manager: Gemini**
+**Version: 2.1.1** | **Release: 2026-01-07** | **Authors: Jason, JTC, Worlds Biggest Max Fan, Lead Project Manager, Lead Mechanical Engineer, Lead Electrical Engineer, Lead Software Engineer, Lead Designer, Lead Coder, Lead QA, Lead Researcher, Lead Machine Learning Trainer, Head Investor, Lead Purchaser** | **Co-Authors: Me, Myself & I** | **Documentation Manager: Gemini**
 
 AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -46,6 +46,9 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
 ---
 
 ## Changelog
+* **v2.1.1** | 2026-01-07
+   * Added a new `Reset` command.
+   * Cleaned up print statements.
 * **v2.1.0** | 2026-01-07
    * Incorporated GitHub.
    * Fixed issue with camera lights not working outside active window.
