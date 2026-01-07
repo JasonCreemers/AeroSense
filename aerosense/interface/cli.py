@@ -197,6 +197,10 @@ class CLI:
                 self.controller.sync_state()
                 print(">> Sync Complete.")
 
+            elif cmd == "RESET":
+                self.scheduler.reset_overrides()
+                print(">> Manual overrides cleared. Resuming automation.")
+
             # --- UNKNOWN ---
             else:
                 print(f">> Unknown Command: {cmd}")
@@ -527,61 +531,62 @@ class CLI:
         print("""
 --- COMMAND LIST ---
 CYCLES (AUTOMATION):
-  CYCLE SYSTEM [ON/OFF]   - Enable/Disable all cycles
-  CYCLE HARDWARE [ON/OFF] - Enable/Disable Pump and Lights cycles
-  CYCLE SENSORS [ON/OFF]  - Enable/Disable Environment, Water Level, Camera, and Pi Health cycles
+  CYCLE SYSTEM [ON/OFF]        - Enable/Disable all cycles
+  CYCLE HARDWARE [ON/OFF]      - Enable/Disable Pump and Lights cycles
+  CYCLE SENSORS [ON/OFF]       - Enable/Disable Environment, Water Level, Camera, and Pi Health cycles
   
   INDIVIDUAL:
-  CYCLE PUMP [ON/OFF]     - Enable/Disable Pump cycle
-  CYCLE LIGHTS [ON/OFF]   - Enable/Disable Lights cycle
-  CYCLE ENVIRONMENT [ON/OFF] - Enable/Disable Environment cycle
-  CYCLE WATER_LEVEL [ON/OFF] - Enable/Disable Water Level cycle
-  CYCLE CAMERA [ON/OFF] - Enable/Disable Camera cycle
-  CYCLE PI_HEALTH [ON/OFF] - Enable/Disable Pi Health cycle                
+  CYCLE PUMP [ON/OFF]          - Enable/Disable Pump cycle
+  CYCLE LIGHTS [ON/OFF]        - Enable/Disable Lights cycle
+  CYCLE ENVIRONMENT [ON/OFF]   - Enable/Disable Environment cycle
+  CYCLE WATER_LEVEL [ON/OFF]   - Enable/Disable Water Level cycle
+  CYCLE CAMERA [ON/OFF]        - Enable/Disable Camera cycle
+  CYCLE PI_HEALTH [ON/OFF]     - Enable/Disable Pi Health cycle
 
               
 HARDWARE (MANUAL):
-  LIGHTS ON [SEC]        - Turn lights on (0s for indefinite)
-  LIGHTS OFF             - Turn lights off
-  PUMP ON [SEC]          - Turn pump on (0s for 30s max)
-  PUMP OFF               - Turn pump off
+  LIGHTS ON [SEC]              - Turn lights on (0s for indefinite)
+  LIGHTS OFF                   - Turn lights off
+  PUMP ON [SEC]                - Turn pump on (0s for 30s max)
+  PUMP OFF                     - Turn pump off
 
 
 SENSORS (MANUAL):
-  RUN SENSORS            - Run Environment, Water Level, Camera, and Pi Health
-  RUN ENVIRONMENT        - Read Temperature & Humidity
-  RUN WATER LEVEL        - Read Water Level
-  RUN CAMERA [COUNT]     - Capture image(s) (3s is Default)
-  RUN PI HEALTH          - Check CPU Temp
+  RUN SENSORS                  - Run Environment, Water Level, Camera, and Pi Health
+  RUN ENVIRONMENT              - Read Temperature & Humidity
+  RUN WATER LEVEL              - Read Water Level
+  RUN CAMERA [COUNT]           - Capture image(s) (3s is Default)
+  RUN PI HEALTH                - Check CPU Temp
               
-  RUN LIVE CAMERA [SEC]  - Open live video preview (0s for indefinite)
+  RUN LIVE CAMERA [SEC]        - Open live video preview (0s for indefinite)
 
                       
 AUDIO
-  MUSIC PLAY [SONG/NOTE] - Play a song
+  MUSIC PLAY [SONG/NOTE]       - Play a song
   MUSIC PLAY NOTE [NOTE] [SEC] - Play a note (1s is Default)
-  MUSIC PLAY RANDOM      - Play a random song
-  MUSIC LIST             - List all songs and notes
-  MUSIC STOP             - Stop buzzer         
+  MUSIC PLAY RANDOM            - Play a random song
+  MUSIC LIST                   - List all songs and notes
+  MUSIC STOP                   - Stop buzzer
 
 
 DIAGNOSTICS
-  STATUS                 - Show system status
-  SYNC  - Ensure entire system is synced
+  STATUS                       - Show system status
+  SYNC                         - Ensure entire system is synced
+  RESET                        - Clear manual overrides
 
-  PING SYSTEM - Ping Arduino
+  PING SYSTEM                  - Ping Arduino
                             
-  PING HARDWARE - Ping Pump and Lights
-  PING PUMP - Ping Pump   
-  PING LIGHTS - Ping Lights
+  PING HARDWARE                - Ping Pump and Lights
+  PING PUMP                    - Ping Pump   
+  PING LIGHTS                  - Ping Lights
 
-  PING SENSORS - Ping Environment, Water Level, and Camera             
-  PING ENVIRONMENT - Ping Environment sensor                           
-  PING WATER LEVEL - Ping Water Level sensor
-  PING CAMERA - Ping Camera module
+  PING SENSORS                 - Ping Environment, Water Level, and Camera             
+  PING ENVIRONMENT             - Ping Environment sensor                           
+  PING WATER LEVEL             - Ping Water Level sensor
+  PING CAMERA                  - Ping Camera module
 
                           
 SYSTEM:
-  STOP                   - Emergency Stop
-  EXIT                   - Shutdown
+  STOP                         - Emergency Stop
+  EXIT                         - Shutdown
 """)
