@@ -18,3 +18,4 @@ data/images/*
 
 # --- VS Code Settings ---
 .vscode/
+*.code-workspace
