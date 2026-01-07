@@ -467,8 +467,15 @@ class CLI:
         cycles = self.scheduler.cycles
         fmt = lambda x: "[ON]" if x else "[OFF]"
 
+        # Check for overrides
+        light_status = fmt(cycles.get('lights'))
+        if self.scheduler.manual_override_on:
+            light_status += " [MANUAL: FORCE ON]"
+        elif self.scheduler.manual_override_off:
+            light_status += " [MANUAL: FORCE OFF]"
+
         print(f"  PUMP:         {fmt(cycles.get('pump'))}")
-        print(f"  LIGHTS:       {fmt(cycles.get('lights'))}")
+        print(f"  LIGHTS:       {light_status}")
         print(f"  ENVIRONMENT:  {fmt(cycles.get('environment'))}")
         print(f"  WATER_LEVEL:  {fmt(cycles.get('water_level'))}")
         print(f"  CAMERA:       {fmt(cycles.get('camera'))}")

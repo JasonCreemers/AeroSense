@@ -132,6 +132,15 @@ class Scheduler:
                 self.manual_override_off = True
                 self.log.info("Manual Override: Keeping lights OFF until evening.")
 
+    def reset_overrides(self):
+        """
+        Clears all manual overrides. 
+        The Scheduler will immediately enforce the programmed schedule on the next update.
+        """
+        self.manual_override_off = False
+        self.manual_override_on = False
+        self.log.info("Manual Overrides Cleared. Resuming strict schedule.")
+
     def get_status(self) -> str:
         """
         Retrieve a summary of the current automation state.
