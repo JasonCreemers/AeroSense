@@ -104,6 +104,8 @@ class Arduino:
                 if self.ser.in_waiting:
                     line = self.ser.readline().decode('utf-8', errors='ignore').strip()
                     if not line: continue
+
+                    now = time.time()
                     
                     # --- Critical Alerts ---
                     if line.startswith("ALERT"):
@@ -118,7 +120,7 @@ class Arduino:
                         if ":" in line:
                             tag, value = line.split(":", 1)
                             with self.data_lock:
-                                self.data_store[tag] = value
+                                self.data_store[tag] = (value, now)
                         
                     # --- Ping Response ---
                     elif line.startswith("PONG"):
@@ -127,7 +129,7 @@ class Arduino:
                             _, value = line.split(":", 1)
                             
                         with self.data_lock:
-                            self.data_store["PONG"] = value
+                            self.data_store["PONG"] = (value, now)
 
             except Exception as e:
                 # Catch unknown errors
@@ -178,15 +180,15 @@ class Arduino:
             self.disconnect() 
             return False
         
-    def get_latest_data(self, tag: str, timeout: float = 0.5) -> Optional[str]:
+    def get_latest_data(self, tag: str, min_timestamp: float, timeout: float = 0.5) -> Optional[str]:
         """
-        Retrieve specific data from the internal buffer.
+        Retrieve specific data from the internal buffer, ensuring it is fresh.
         
-        This method waits up to `timeout` seconds for the data to appear 
-        in the thread-safe `data_store`.
+        This method waits up to `timeout` seconds for data to appear in the thread-safe `data_store` that has a timestamp newer than `min_timestamp`.
 
         Args:
             tag (str): The data prefix to search for (e.g., "DATA_TEMP").
+            min_timestamp (float): The timestamp of the request. Data older than this is rejected.
             timeout (float): Max time to wait in seconds.
 
         Returns:
@@ -196,8 +198,11 @@ class Arduino:
         while (time.time() - start) < timeout:
             with self.data_lock:
                 if tag in self.data_store:
-                    # Return data and clear it so we don't read old stale data next time
-                    return self.data_store.pop(tag)
+                    val, ts = self.data_store[tag]
+                    
+                    if ts > min_timestamp:
+                        return val
+                        
             time.sleep(0.05)
                 
         return None
@@ -213,15 +218,12 @@ class Arduino:
         Returns:
             bool: True if 'PONG' received, False otherwise.
         """
-        # Clear old data to ensure we are getting a fresh response
-        with self.data_lock:
-            if "PONG" in self.data_store:
-                del self.data_store["PONG"]
+        start_time = time.time()
                 
         # Send command
         if not self.send("PING"):
             return False
             
-        # Wait for response
-        response = self.get_latest_data("PONG", timeout=timeout)
+        # Wait for response and clear old data
+        response = self.get_latest_data("PONG", min_timestamp=start_time, timeout=timeout)
         return response is not None

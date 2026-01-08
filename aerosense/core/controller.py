@@ -38,6 +38,7 @@ class Controller:
         self.camera = Camera()
 
         self.camera_lock = threading.Lock()
+        self.scan_lock = threading.Lock()
 
         # State tracking: Keeps Python state in sync with Physical state
         self.state = {
@@ -195,8 +196,11 @@ class Controller:
         Returns:
             Optional[str]: The raw data string from the Arduino, or None on timeout.
         """
+        request_time = time.time()
+
         self.arduino.send(trigger_cmd)
-        data = self.arduino.get_latest_data(data_tag, timeout=timeout)
+        
+        data = self.arduino.get_latest_data(data_tag, min_timestamp=request_time, timeout=timeout)
         if not data:
             self.log.error(f"Timeout waiting for {trigger_cmd}")
         return data
@@ -257,25 +261,31 @@ class Controller:
         Returns:
             Tuple: (env_data, water_level) if blocking=True, else (None, None)
         """
-        # Gather sensor data immediately
-        env_data = self.read_environment() 
-        water_level = self.read_water_level()
+        # Thread Safety: Prevent overlapping scans
+        if not blocking and self.scan_lock.locked():
+            self.log.warning("Skipping Master Task: Previous scan still active (Ghost Thread Prevented).")
+            return None, None
 
-        # Define the worker logic for image capture
-        def _worker(env, water):
-            images = self._run_capture_sequence(settings.CAM_BURST_COUNT)
-            
-            # Log to Master only if everything succeeded
-            if env and water and images:
-                 self.logger.log_master(env[0], env[1], water, images)
+        # Define the worker logic
+        def _worker():
+            with self.scan_lock:
+                # Gather sensor data immediately
+                env = self.read_environment() 
+                water = self.read_water_level()
 
-            return env, water
+                images = self._run_capture_sequence(settings.CAM_BURST_COUNT)
+                
+                # Log to Master only if everything succeeded
+                if env and water and images:
+                     self.logger.log_master(env[0], env[1], water, images)
+
+                return env, water
 
         # Execute
         if blocking:
-            return _worker(env_data, water_level)
+            return _worker()
         else:
-            t = threading.Thread(target=_worker, args=(env_data, water_level), daemon=True)
+            t = threading.Thread(target=_worker, daemon=True)
             t.start()
             return None, None
 
@@ -435,17 +445,15 @@ class Controller:
         if target == "ENVIRONMENT": fw_target = "TEMP"
         if target == "WATER_LEVEL": fw_target = "DIST"
         
-        # Clear old PONG data to prevent reading stale buffer
-        with self.arduino.data_lock:
-            if "PONG" in self.arduino.data_store:
-                del self.arduino.data_store["PONG"]
+        # Capture timestamp before sending ping
+        request_time = time.time()
 
         # Send Command
         if not self.arduino.send(f"PING {fw_target}"):
             return "CONNECTION_ERROR"
 
-        # Wait for specific response
-        response = self.arduino.get_latest_data("PONG", timeout=1.0)
+        # Wait for specific response, ensuring it is fresh
+        response = self.arduino.get_latest_data("PONG", min_timestamp=request_time, timeout=1.0)
         return response if response else "TIMEOUT"
 
     def run_full_diagnostic(self):
