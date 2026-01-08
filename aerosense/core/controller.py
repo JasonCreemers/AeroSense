@@ -39,6 +39,7 @@ class Controller:
 
         self.camera_lock = threading.Lock()
         self.scan_lock = threading.Lock()
+        self._scan_thread: Optional[threading.Thread] = None
 
         # State tracking: Keeps Python state in sync with Physical state
         self.state = {
@@ -262,9 +263,14 @@ class Controller:
             Tuple: (env_data, water_level) if blocking=True, else (None, None)
         """
         # Thread Safety: Prevent overlapping scans
-        if not blocking and self.scan_lock.locked():
-            self.log.warning("Skipping Master Task: Previous scan still active (Ghost Thread Prevented).")
-            return None, None
+        if not blocking:
+            if self._scan_thread and self._scan_thread.is_alive():
+                self.log.warning("Skipping Master Task: Previous background scan still active.")
+                return None, None
+            
+            if self.scan_lock.locked():
+                 self.log.warning("Skipping Master Task: Hardware locked by user command.")
+                 return None, None
 
         # Define the worker logic
         def _worker():
@@ -285,8 +291,8 @@ class Controller:
         if blocking:
             return _worker()
         else:
-            t = threading.Thread(target=_worker, daemon=True)
-            t.start()
+            self._scan_thread = threading.Thread(target=_worker, daemon=True)
+            self._scan_thread.start()
             return None, None
 
     def capture_smart_image(self, count: int = None, blocking: bool = True) -> List[str]:
