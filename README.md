@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: 2.2.0** | **Release: 2026-01-07**
+**Version: 2.3.0** | **Release: 2026-01-07**
 
 AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -16,7 +16,7 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
    * Make README.md more professional
    * Maybe add ROADMAP.md
    * Clean up serial communication and variables
-      * Rewrite firmware.ino to use C-style character arrays char[] and strtak
+      * MAYBE: rewrite firmware.ino to use C-style character arrays char[] and strtak
 * Physical Changes
    * Modify 4000mm dist sensor in settings.py
 * Sensor Changes
@@ -42,6 +42,8 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
 ---
 
 ## Changelog
+* **v2.2.1** | 2026-01-07
+   * Fixed ghost threads bottleneck for real in `cotroller.py`.
 * **v2.2.0** | 2026-01-07
    * Added timestamping when getting latest data to prevent stale data in `arduino.py`.
    * Fixed ghost threads bottleneck in `controller.py`
