@@ -7,11 +7,8 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
 
 ## To Do List
 ### Immediate Tasks
-* New Songs
-   * Scales/Notes demonstration
 * Make README.md more professional
 * Maybe add ROADMAP.md
-* Add names to birthdays
 
 
 ### Upcoming Tasks
@@ -46,6 +43,7 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
 ## Changelog
 * **v2.2.2** | 2026-01-09
    * Modified birthday code.
+   * Added many more audio cues for errors/positive alerts.
 * **v2.2.1** | 2026-01-07
    * Fixed ghost threads bottleneck for real in `cotroller.py`.
 * **v2.2.0** | 2026-01-07

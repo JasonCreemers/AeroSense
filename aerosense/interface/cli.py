@@ -127,6 +127,7 @@ class CLI:
             except Exception as e:
                 # Handle unexpected errors
                 self.log.error(f"Input Error: {e}")
+                self.controller.play_music("DENIED")
 
     def _process_command(self, raw_input: str):
         """
@@ -204,10 +205,12 @@ class CLI:
             # --- UNKNOWN ---
             else:
                 print(f">> Unknown Command: {cmd}")
+                self.controller.play_music("DENIED")
 
         except Exception as e:
             # Catch unknown errors
             self.log.error(f"Command Execution Error: {e}")
+            self.controller.play_music("DENIED")
 
     def _normalize_term(self, term: str) -> str:
         """
@@ -238,6 +241,7 @@ class CLI:
                 return int(args[index])
             except ValueError:
                 print(">> Error: Argument must be an integer.")
+                self.controller.play_music("DENIED")
                 return None
         return default
 
@@ -368,6 +372,7 @@ class CLI:
             
         else:
             print(f">> Unknown Run Target: {target}")
+            self.controller.play_music("DENIED")
 
     def _handle_music(self, args: List[str]):
         """
@@ -437,24 +442,47 @@ class CLI:
         # --- Hardware ---
         if target == "HARDWARE":
             print("\n--- HARDWARE STATUS ---")
-            print(f"Pump:     {self.controller.ping_component('PUMP')}")
-            print(f"Lights:   {self.controller.ping_component('LIGHTS')}")
-            print(f"Music:    {self.controller.ping_component('MUSIC')}")
+            p = self.controller.ping_component('PUMP')
+            l = self.controller.ping_component('LIGHTS')
+            m = self.controller.ping_component('MUSIC')
+            
+            print(f"Pump:     {p}")
+            print(f"Lights:   {l}")
+            print(f"Music:    {m}")
             print("-----------------------")
+            # Only play sound if all are communicating
+            if "TIMEOUT" not in (p + l + m) and "ERROR" not in (p + l + m):
+                 self.controller.play_music("GRANTED")
+            else:
+                 self.controller.play_music("DENIED")
 
         # --- Sensors ---
         elif target == "SENSORS":
             print("\n--- SENSOR STATUS ---")
-            print(f"Env:      {self.controller.ping_component('TEMP')}")
-            print(f"Water:    {self.controller.ping_component('DIST')}")
-            print(f"Camera:   {self.controller.ping_component('CAMERA')}")
+            t = self.controller.ping_component('TEMP')
+            d = self.controller.ping_component('DIST')
+            c = self.controller.ping_component('CAMERA')
+            
+            print(f"Env:      {t}")
+            print(f"Water:    {d}")
+            print(f"Camera:   {c}")
             print("---------------------")
+            
+            if "TIMEOUT" not in (t + d + c) and "ERROR" not in (t + d + c):
+                 self.controller.play_music("GRANTED")
+            else:
+                 self.controller.play_music("DENIED")
 
         # --- Individual Component ---
         else:
             print(f">> Pinging {target}...")
             result = self.controller.ping_component(target)
             print(f">> Response: {result}")
+
+            if "TIMEOUT" in result or "ERROR" in result:
+                self.controller.play_music("DENIED")
+            else:
+                self.controller.play_music("GRANTED")
 
     def _print_status(self):
         """
@@ -485,33 +513,53 @@ class CLI:
         # --- Hardware ---
         print("HARDWARE:")
         
+        # Helper to format status and catch errors
+        def get_hw_status(raw_res, on_key="ON"):
+            if "TIMEOUT" in raw_res or "ERROR" in raw_res:
+                return "[TIMEOUT/ERROR]"
+            return f"[{on_key}]" if on_key in raw_res else "[OFF]"
+
         # Pump
         p_res = self.controller.ping_component("PUMP")
-        p_state = "[ON]" if "ON" in p_res else "[OFF]"
-        print(f"  PUMP:         {p_state}")
+        print(f"  PUMP:         {get_hw_status(p_res, 'ON')}")
 
         # Lights
         l_res = self.controller.ping_component("LIGHTS")
-        l_state = "[ON]" if "ON" in l_res else "[OFF]"
-        print(f"  LIGHTS:       {l_state}")
+        print(f"  LIGHTS:       {get_hw_status(l_res, 'ON')}")
 
         # Audio
         m_res = self.controller.ping_component("MUSIC")
-        m_state = "[ACTIVE]" if "BUSY" in m_res else "[QUIET]"
+        if "TIMEOUT" in m_res or "ERROR" in m_res:
+            m_state = "[TIMEOUT/ERROR]"
+        else:
+            m_state = "[ACTIVE]" if "BUSY" in m_res else "[QUIET]"
         print(f"  AUDIO:        {m_state}")
         print("")
 
-        # Sensors
-        def check_resp(tag):
+        # --- Sensors ---
+        def check_sensor(tag):
             res = self.controller.ping_component(tag)
             is_ok = any(x in res for x in ["OK", "IDLE", "BUSY"])
             return "[RESPONDING]" if is_ok else "[NOT RESPONDING]"
 
-        print(f"  ENVIRONMENT:  {check_resp('TEMP')}")
-        print(f"  WATER_LEVEL:  {check_resp('DIST')}")
-        print(f"  CAMERA:       {check_resp('CAMERA')}")
+        env_stat = check_sensor('TEMP')
+        wat_stat = check_sensor('DIST')
+        cam_stat = check_sensor('CAMERA')
+        
+        print(f"  ENVIRONMENT:  {env_stat}")
+        print(f"  WATER_LEVEL:  {wat_stat}")
+        print(f"  CAMERA:       {cam_stat}")
         
         print("---------------------\n")
+
+        # Check status for alert
+        all_raw = p_res + l_res + m_res
+        all_stats = env_stat + wat_stat + cam_stat
+        
+        if "TIMEOUT" in all_raw or "ERROR" in all_raw or "NOT RESPONDING" in all_stats:
+            self.controller.play_music("DENIED")
+        else:
+            self.controller.play_music("GRANTED")
 
     def _print_help(self):
         """

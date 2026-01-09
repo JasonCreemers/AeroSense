@@ -44,6 +44,7 @@ def main():
         cli.start()
         
         log.info("System Active.")
+        controller.play_music("GRANTED")
 
         # --- Main Automation Loop ---
         while cli.running:
@@ -63,11 +64,13 @@ def main():
     except Exception as e:
         # Catch unexpected runtime errors
         log.critical(f"Fatal Error: {e}", exc_info=True)
+        controller.play_music("DENIED")
         
     finally:
         # Ensure hardware is turned off safely before process exit
         if 'controller' in locals():
             controller.stop_all()
+            controller.play_music("DENIED")
             
         print(">> System Shutdown Complete.")
         sys.exit(0)

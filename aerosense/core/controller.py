@@ -113,9 +113,11 @@ class Controller:
             current_level = self.read_water_level(log_data=False)
             if current_level is None:
                 self.log.error("PUMP ABORT: Could not read water level sensor.")
+                self.play_music("DENIED")
                 return 
             if current_level >= settings.PUMP_SAFETY_THRESHOLD_MM:
                 self.log.warning(f"PUMP ABORT: Water level too low ({current_level}mm).")
+                self.play_music("DENIED")
                 return
 
             # Update state
@@ -160,6 +162,7 @@ class Controller:
         else:
             # Handle errors
             self.log.error("Failed to send LIGHTS command.")
+            self.play_music("DENIED")
 
     def stop_all(self, scheduler=None):
         """
@@ -204,6 +207,7 @@ class Controller:
         data = self.arduino.get_latest_data(data_tag, min_timestamp=request_time, timeout=timeout)
         if not data:
             self.log.error(f"Timeout waiting for {trigger_cmd}")
+            self.play_music("DENIED")
         return data
     
     def read_environment(self) -> Optional[Tuple[float, float]]:
@@ -225,6 +229,7 @@ class Controller:
             except (ValueError, IndexError):
                 # Handle data errors
                 self.log.error(f"Malformed temp data: {data}")
+                self.play_music("DENIED")
         return None
 
     def read_water_level(self, log_data: bool = True) -> Optional[int]:
@@ -249,6 +254,7 @@ class Controller:
             except ValueError:
                 # Handle data errors
                 self.log.error(f"Malformed distance data: {data}")
+                self.play_music("DENIED")
         return None
 
     def run_master_task(self, blocking: bool = True):
@@ -266,10 +272,12 @@ class Controller:
         if not blocking:
             if self._scan_thread and self._scan_thread.is_alive():
                 self.log.warning("Skipping Master Task: Previous background scan still active.")
+                self.play_music("DENIED")
                 return None, None
             
             if self.scan_lock.locked():
                  self.log.warning("Skipping Master Task: Hardware locked by user command.")
+                 self.play_music("DENIED")
                  return None, None
 
         # Define the worker logic
@@ -317,6 +325,7 @@ class Controller:
         # If we are already taking photos skip this request
         if self.camera_lock.locked():
             self.log.warning("Capture skipped: Camera is already busy.")
+            self.play_music("DENIED")
             return []
 
         if blocking:
@@ -354,6 +363,7 @@ class Controller:
                 images = self.camera.capture_sequence(count)
             except Exception as e:
                 self.log.error(f"Camera Thread Error: {e}")
+                self.play_music("DENIED")
                 images = []
 
             # Restore environment (Lights Off)
@@ -407,6 +417,7 @@ class Controller:
         except IOError:
             # Handle data errors
             self.log.error("Could not read Pi thermal zone.")
+            self.play_music("DENIED")
             return 0.0
 
     def play_music(self, song_name: str):
@@ -513,3 +524,5 @@ class Controller:
             self.state["lights"] = False
             
         self.log.info("State Sync Complete.")
+        self.play_music("GRANTED")
+        
