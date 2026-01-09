@@ -14,8 +14,12 @@ from config import settings
 
 # --- Configuration ---
 BIRTHDAYS = [
-    (3, 7), # Jason
-    (3, 22) # REDACTED
+    (1, 1, "MOSS"),
+    (REDACTED),
+    (REDACTED),
+    (REDACTED),
+    (REDACTED),
+    (12, 20, "Gabe")
 ]
 
 class Scheduler:
@@ -184,8 +188,14 @@ class Scheduler:
                     # Play morning music
                     if current_hour == start:
                         # Check for birthdays
-                        if (now.month, now.day) in BIRTHDAYS:
-                            self.log.info("Schedule: Special Date detected. Happy Birthday!")
+                        birthday_name = None
+                        for month, day, name in BIRTHDAYS:
+                            if now.month == month and now.day == day:
+                                birthday_name = name
+                                break # Stop searching if we find a match
+
+                        if birthday_name:
+                            self.log.info(f"Schedule: Special Date detected. Happy Birthday to {birthday_name}!")
                             self.controller.play_music("CURIOSITY")
                         else:
                             self.log.info("Schedule: Routine Start. Good Morning.")
