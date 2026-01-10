@@ -1,33 +1,17 @@
 # AeroSense Garden Controller
 **Version: v3.1.0** | **Release: 2026-01-10**
 
-AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
-
-
-### Upcoming Tasks
-* Sensor Changes
-   * Better filtering on sensors
-   * More Pi commands
-   * Add High/Medium/Low water level check
-* Actuation Changes
-   * More safety features
-* Music Changes
-   * Maybe an octave shifter?
-   * Akron fight song/alma mater
-   * Make random code on the python side, and divide songs into happy, sad, etc.
-
-
-### Long Term Tasks
-* System Changes
-   * Make a local HTML GUI
-   * Make a web-based HTML GUI
-* MOSS Changes
-   * Make a computer vision AI model
-   * Make a YOLO AI model
-      * Allow it to play music
+**AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
 ---
 
+## Documentation
+* **[CHANGELOG.md](CHANGELOG.md):** Version history and release notes.
+* **[HARDWARE.md](HARDWARE.md):** Wiring schematics, pinouts, and power distribution.
+* **[README.md](README.md):** Project overview, installation instructions, and operational manual.
+* **[ROADMAP.md](ROADMAP.md):** Future development plans and task tracking.
+
+---
 ## Directory Structure
 * **`aerosense/`** - Primary Python Package
   * **`core/`** - System Logic Package
@@ -62,14 +46,13 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
      * `water_log.csv`
 
 * **`firmware/`** - Microcontroller Unit (MCU) Package
+  * `firmware.ino`: Main Arduino firmware entry point.
   * `actuators.h`: Control logic for actuator MOSFETs.
   * `config.h`: System configuration and global variables - Arduino.
-  * `firmware.ino`: Main Arduino firmware entry point.
   * `music.h`: Passive buzzer music player.
   * `sensors.h`: Sensor drivers and processors.
 
 * `.gitignore`: Ignore sensitive and irrelevant files.
-* `README.md`: System documentation, hardware setup, and usage.
 * `requirements.txt`: Python dependency manifest.
 
 ---
@@ -77,8 +60,9 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
 ## Getting Started
  
 ### 1. Firmware Initialization
-1. Ensure all hardware is correctly wired according to the pinout above.
-2. Compile and upload `firmware/aerosense_mega.ino` to the Arduino Mega.
+1. Ensure all hardware is correctly wired according to **[HARDWARE.md](HARDWARE.md)**.
+2. Open `firmware/firmware.ino` in the Arduino IDE.
+3. Compile and upload to the **Arduino Mega 2560**.
 
 ### 2. Software Installation
 Install the required Python dependencies:
@@ -101,28 +85,29 @@ python3 -m aerosense.main
 ## How to Use
 
 ### System Operation
-After launching the main module, the user enters a command line interface (CLI). This interface serves as the central control plane, displaying real-time system status and accepting operator commands to control system parameters.
+After launching the main module, the user enters a **Command Line Interface (CLI)**. This interface serves as the central control plane, displaying real-time system status and accepting operator commands.
 
-To view a list of all system commands available, the user may enter the `HELP` command.
+To view a list of all available commands, enter: `HELP`.
 
 ### Control Modes
 The controller supports two different operational modes:
-1. **Manual Activation:** Immediate control over individual hardware components.
-1. **Automated Scheduling:** Enabling of "Cycles" to allow the internal scheduler to manage hardware components.
->**Operational Note:** To ensure hardware safety, all automation cycles initialize in a **DISABLED** state upon system launch.
+1. **Manual Activation:** Immediate control over individual hardware components via CLI.
+1. **Automated Scheduling:** The internal scheduler manages "Cycles" for lights and pumps based on the time of day.
+>**Operational Note:** To ensure safety, all automation cycles initialize in a **DISABLED** state upon system launch.
 
 ### System Capabilities
-The controller manages an array of integrated hardware subsystems, including:
-* **Acutation:**
-   * Water Pump
-   * Grow Lights
-* **Telemetry:**
-   * Environmental Sensing (Temperature/Humidity)
-   * Water Level Sensing (Ultrasonic)
-* **Imaging:**
-   * Camera Module
-* **Feedback:**
-   * Acoustic Alerts (Passive Buzzer)
+The AeroSense controller manages a distributed array of hardware subsystems:
+* **Actuation & Control**
+   * **Water Pump:** 12V High-pressure pump.
+   * **Grow Lights:** 12V Full-spectrum LED array.
+* **Precision Telemetry**
+   * **Environmental:** Real-time Temperature & Humidity sensing.
+   * **Water Level:** Contactless Ultrasonic Water Level sensing.
+* **Computer Vision**
+   * **Imaging:** 12MP Wide-angle Camera Module.
+* **Human Interface**
+   * **Feedback:** Context-aware acoustic alerts.\
+   * **Control:** Command Line Interface (CLI) via Serial/SSH.
 
 ### Data Persistence
 All system events are serialized and stored within the local `data/` directory.
@@ -130,7 +115,9 @@ All system events are serialized and stored within the local `data/` directory.
 * **Imaging:** Captured images are saved to `data/images/`.
 
 ### Safety Interlocks
-The system architecture includes critical fail-safes to prevent hardware damage. This includes logic such as water level verification before pump operation.
+The system architecture includes critical fail-safes to prevent hardware damage:
+* **Dry Run Protection:** The firmware prevents pump operation if the ultrasonic sensor detects a low water level.
+* **Runtime Limits:** Both Python and Firmware enforce maximum runtime limits on the pump to prevent flooding.
 
 ### Shutdown Procedure
-To terminate the session, the user must issue the `EXIT` command. This triggers a shutdown sequence that disables all active cycles and secures hardware connections before terminating the process.
+To terminate the session, the user must issue the `EXIT` command. This triggers a shutdown sequence that disables all active cycles, stops the actuators, and secures the serial connection before terminating.
