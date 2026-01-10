@@ -2,7 +2,9 @@
 All notable changes to the **AeroSense** project will be documented in this file.
 
 ## [v3.1.0] - 2026-01-10
-
+### Added
+- Added `CHANGELOG.md` to track changes.
+- Added `HARDWARE.md` to outline hardware requirnments.
 
 ## [v3.0.0] - 2026-01-10
 ### Changed
