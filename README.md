@@ -3,19 +3,8 @@
 
 AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
----
-
-## To Do List
-### Immediate Tasks
-* Make README.md more professional
-* Maybe add ROADMAP.md
-* Spongebob sad song
-
 
 ### Upcoming Tasks
-* System Changes
-   * Clean up serial communication and variables
-      * MAYBE: rewrite firmware.ino to use C-style character arrays char[] and strtak
 * Sensor Changes
    * Better filtering on sensors
    * More Pi commands
