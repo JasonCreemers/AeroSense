@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v3.0.0** | **Release: 2026-01-10**
+**Version: v3.1.0** | **Release: 2026-01-10**
 
 AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -36,50 +36,6 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
    * Make a computer vision AI model
    * Make a YOLO AI model
       * Allow it to play music
-
----
-
-## Changelog
-* **v3.0.0** | 2026-01-10
-   * Integrated final code with physical system.
-* **v2.2.2** | 2026-01-09
-   * Modified birthday code.
-   * Added many more audio cues for errors/positive alerts.
-* **v2.2.1** | 2026-01-07
-   * Fixed ghost threads bottleneck for real in `cotroller.py`.
-* **v2.2.0** | 2026-01-07
-   * Added timestamping when getting latest data to prevent stale data in `arduino.py`.
-   * Fixed ghost threads bottleneck in `controller.py`
-* **v2.1.2** | 2026-01-07
-   * Fixed `Reset` command and added manual override to status.
-* **v2.1.1** | 2026-01-07
-   * Added a new `Reset` command.
-   * Cleaned up many print statements.
-   * Changed morning tune to only occur at 8AM instead of whenever cycle is enabled.
-   * General code cleanup and optimization.
-* **v2.1.0** | 2026-01-07
-   * Incorporated GitHub.
-   * Fixed issue with camera lights not working outside active window.
-   * Cleaned up code in `main.py`.
-   * Fixed synoynm checking for cycle command.
-* **v2.0.1** | 2026-01-06
-   * Added new commands synonynms.
-   * Cleaned up versioning and release variables.
-   * Added light logs when turned on for camera.
-   * Added result prints to `RUN SENSORS`.
-   * Added lots of new songs, as well as morning and evening music synced with the lights.
-   * Modified `MUSIC PLAY NOTE [NOTE] [SEC]` command.
-   * Modified controller so it can recognize pump is turned off after 30s and not freak out.
-* **v2.0.0** | 2026-01-04
-   * Complete revamp of entire system architecture.
-* **v1.7.0** | 2025-12-30
-* **v1.6.0** | 2025-12-30
-* **v1.5.0** | 2025-12-30
-* **v1.4.0** | 2025-12-30
-* **v1.3.0** | 2025-12-28
-* **v1.2.0** | 2025-12-28
-* **v1.1.0** | 2025-12-19
-* **v1.0.0** | 2025-12-05
 
 ---
 
