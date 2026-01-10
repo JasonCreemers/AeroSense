@@ -3,8 +3,12 @@ All notable changes to the **AeroSense** project will be documented in this file
 
 ## [v3.1.0] - 2026-01-10
 ### Added
-- Added `CHANGELOG.md` to track changes.
-- Added `HARDWARE.md` to outline hardware requirnments.
+- `HARDWARE.md` to document pinouts and wiring schematics.
+- `ROADMAP.md` for strategic project planning and task prioritization.
+- `CHANGELOG.md` to standardize version history tracking.
+
+### Changed
+- Overhauled `README.md` to focus on system architecture and professional presentation.
 
 ## [v3.0.0] - 2026-01-10
 ### Changed
