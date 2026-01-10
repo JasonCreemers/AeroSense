@@ -41,7 +41,7 @@ AeroSense is an advanced aeroponic gardening controller. It utilizes a **Raspber
 
 ## Changelog
 * **v3.0.0** | 2026-01-10
-   * Integrated final code with physical system
+   * Integrated final code with physical system.
 * **v2.2.2** | 2026-01-09
    * Modified birthday code.
    * Added many more audio cues for errors/positive alerts.
