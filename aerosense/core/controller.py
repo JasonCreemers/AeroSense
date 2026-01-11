@@ -62,6 +62,12 @@ class Controller:
         Pump Safety: Ensuring pump does not exceed max runtime.
         Water Level Safety: Ensuring pump does not run dry.
         """
+        # Hardware reboot
+        if self.arduino.reboot_detected:
+            self.log.warning("Handling Hardware Reboot: Syncing State...")
+            self.sync_state()
+            self.arduino.reboot_detected = False
+
         # Pump safety monitor
         if self.state["pump"]:
             now = time.time()
@@ -356,7 +362,7 @@ class Controller:
             if not was_lights_on:
                 self.log.info("Camera Flash: Toggling lights ON.")
                 self.set_lights(True) 
-                time.sleep(1.0)
+                time.sleep(2.0)
 
             # Capture images
             try:
@@ -417,6 +423,11 @@ class Controller:
         except IOError:
             # Handle data errors
             self.log.error("Could not read Pi thermal zone.")
+            self.play_music("DENIED")
+            return 0.0
+        except FileNotFoundError:
+            # Handle errors on windows
+            self.log.warning("Thermal zone not found (Not on Pi?). returning 0.0")
             self.play_music("DENIED")
             return 0.0
 
