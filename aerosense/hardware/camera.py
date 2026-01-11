@@ -77,6 +77,7 @@ class Camera:
                 subprocess.run(
                     cmd, 
                     check=True, 
+                    timeout=10,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.PIPE
                 )
@@ -130,7 +131,8 @@ class Camera:
             cmd.append("--vflip")
 
         try:
-            subprocess.run(cmd, check=True)
+            calc_timeout = None if duration_sec == 0 else (duration_sec + 2)
+            subprocess.run(cmd, check=True, timeout=calc_timeout)
             self.log.info("Live Preview finished.")
             
         except subprocess.CalledProcessError:
