@@ -99,6 +99,20 @@ class Scheduler:
         else:
             self.log.warning(f"Unknown cycle component: {target}")
 
+        # Turn off hardware if cycle disabled
+        if state is False:
+            # Pump
+            if target in ["pump", "hardware", "system"]:
+                if self.controller.state["pump"]:
+                     self.log.info(f"Cycle '{target}' Disabled: Turning Pump OFF immediately.")
+                self.controller.set_pump(False)
+
+            # Lights
+            if target in ["lights", "hardware", "system"]:
+                if self.controller.state["lights"]:
+                     self.log.info(f"Cycle '{target}' Disabled: Turning Lights OFF immediately.")
+                self.controller.set_lights(False)
+
     def stop_all_cycles(self):
         """
         Immediately disable all automation cycles.

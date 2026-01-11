@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.4.2] - 2026-01-11
+### Fixed 
+- Fixed immediate hardware shutdown for pumps and lights when cycles are disabled.
+- Resolved an issue where the GUI displayed outdated versioning.
+
 ## [v3.4.1] - 2026-01-11
 ### Fixed
 - Resolved issue where `GUI` caused the CLI to hang.
