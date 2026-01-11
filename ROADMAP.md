@@ -15,6 +15,7 @@ This document outlines the development trajectory for the AeroSense project. Tas
     - SYSTEM SECTION. Have buttons for STOP, EXIT.
 
 - Add sad Spongebob song.
+- Better way to list songs between `web.py` and also `controller/cli.py`
 
 ---
 
