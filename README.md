@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v3.2.0** | **Release: 2026-01-10**
+**Version: v3.3.0** | **Release: 2026-01-11**
 
 **AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -26,6 +26,7 @@
   * **`interface/`** - User Interface Package
      * `__init__.py`
      * `cli.py`: Command line interface processor.
+     * `web.py`: Flask web server for the graphical user interface.
   * `__init__.py`: Package initialization and versioning.
   * `main.py`: AeroSense application entry point.
 
@@ -51,6 +52,9 @@
   * `config.h`: System configuration and global variables - Arduino.
   * `music.h`: Passive buzzer music player.
   * `sensors.h`: Sensor drivers and processors.
+
+* **templates/** - Web Interface GUI Package
+   * `index.html`: Main web dashboard template for system control.
 
 * `.gitignore`: Ignore sensitive and irrelevant files.
 * `requirements.txt`: Python dependency manifest.

@@ -9,9 +9,11 @@ import logging
 import sys
 import threading
 from typing import List
+import webbrowser
 
 from aerosense.core.controller import Controller
 from aerosense.core.scheduler import Scheduler
+from aerosense.interface.web import WebServer
 
 # --- Configuration ---
 # Multi-Word sanitization
@@ -70,6 +72,9 @@ COMPONENT_ALIASES = {
     "COMMANDS": "HELP",
     "COMMAND": "HELP",
 
+    "WEB": "GUI",
+    "INTERFACE": "GUI",
+
     "EXIT": "QUIT"
 }
 
@@ -85,7 +90,7 @@ class CLI:
         log (logging.Logger): Dedicated logger for interface events.
     """
 
-    def __init__(self, controller: Controller, scheduler: Scheduler):
+    def __init__(self, controller: Controller, scheduler: Scheduler, web_server: WebServer):
         """
         Initialize the CLI.
 
@@ -95,6 +100,7 @@ class CLI:
         """
         self.controller = controller
         self.scheduler = scheduler
+        self.web_interface = web_server
         self.running = True
         self.log = logging.getLogger("AeroSense.Interface.CLI")
 
@@ -165,6 +171,24 @@ class CLI:
 
             elif cmd == "HELP":
                 self._print_help()
+
+            elif cmd == "GUI":
+                # Check if server is running and start if not
+                if not self.web_interface.is_running:
+                    print(">> Initializing Web Server...")
+                    self.web_interface.start()
+                    import time
+                    time.sleep(1.0)
+                
+                url = f"http://127.0.0.1:{self.web_interface.port}"
+                print(f">> Opening Web Interface at {url} ...")
+                
+                # Open the browser
+                try:
+                    webbrowser.open(url)
+                except Exception as e:
+                    # Catch errors
+                    self.log.error(f"Failed to open browser: {e}")
 
             # --- AUTOMATION CYCLES ---
             elif cmd == "CYCLE":

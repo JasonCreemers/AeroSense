@@ -13,8 +13,8 @@ Usage:
 from typing import List
 
 # --- Versioning ---
-__version__: str = "v3.2.0"
-__release__: str = "2026-01-10"
+__version__: str = "v3.3.0"
+__release__: str = "2026-01-11"
 
 # --- Component Exports ---
 from .core.controller import Controller
@@ -23,6 +23,7 @@ from .core.scheduler import Scheduler
 from .hardware.arduino import Arduino
 from .hardware.camera import Camera
 from .interface.cli import CLI
+from .interface.web import WebServer
 
 # --- Public API ---
 __all__: List[str] = [
@@ -32,4 +33,5 @@ __all__: List[str] = [
     "Arduino",
     "Camera",
     "CLI",
+    "WebServer"
 ]

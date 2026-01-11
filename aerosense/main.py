@@ -10,7 +10,7 @@ import sys
 import time
 
 import aerosense
-from aerosense import Controller, Scheduler, CLI
+from aerosense import CLI, Controller, Scheduler, WebServer
 
 
 def main():
@@ -36,9 +36,12 @@ def main():
         
         # The Scheduler manages automation logic
         scheduler = Scheduler(controller)
+
+        # Initialize Web Server
+        web = WebServer(controller, scheduler)
         
         # The CLI manages user input
-        cli = CLI(controller, scheduler)
+        cli = CLI(controller, scheduler, web)
 
         # --- Start Interface ---
         cli.start()
