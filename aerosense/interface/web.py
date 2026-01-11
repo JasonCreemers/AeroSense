@@ -14,6 +14,7 @@ from pathlib import Path
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from typing import Optional, List, Dict, Any
 
+import aerosense
 from aerosense.core.controller import Controller
 from aerosense.core.scheduler import Scheduler
 from config import settings
@@ -171,7 +172,8 @@ class WebServer:
                                img_time=img_time,
                                cache=formatted_cache,
                                cycles=self.scheduler.cycles,
-                               songs=SONG_LIST)
+                               songs=SONG_LIST,
+                               version=aerosense.__version__)
 
     def serve_image(self, filename: str):
         """

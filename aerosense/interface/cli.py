@@ -181,7 +181,6 @@ class CLI:
                     time.sleep(1.0)
                 
                 url = f"http://127.0.0.1:{self.web_interface.port}"
-                print(f">> Opening Web Interface at {url} ...")
                 
                 # Print the URL
                 print(f"\n>> ---------------------------------------------------")
