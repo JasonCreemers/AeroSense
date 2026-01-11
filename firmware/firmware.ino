@@ -7,6 +7,7 @@
 #include "actuators.h" 
 #include "sensors.h"
 #include "music.h"
+#include <avr/wdt.h>
 
 // --- OBJECT INSTANTIATION ---
 WaterPump pump;
@@ -32,12 +33,14 @@ void setup() {
   dist_sensor.Begin();
   env_sensor.Begin();
   music.Begin();
+  wdt_enable(WDTO_2S);
 
   Serial.println(F("SYSTEM:READY"));
 }
 
 void loop() {
   // Background tasks
+  wdt_reset();
   pump.Update();
   lights.Update();
   dist_sensor.Update();
