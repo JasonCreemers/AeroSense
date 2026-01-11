@@ -45,6 +45,7 @@ class Arduino:
         
         self.running: bool = False
         self.listener_thread: Optional[threading.Thread] = None
+        self.reboot_detected = False
         
         # Attempt connection immediately
         if self.connect():
@@ -130,6 +131,11 @@ class Arduino:
                             
                         with self.data_lock:
                             self.data_store["PONG"] = (value, now)
+
+                    # --- System Reboot ---
+                    elif line == "SYSTEM:READY":
+                        self.log.warning("Arduino Reboot Detected! Triggering state sync.")
+                        self.reboot_detected = True
 
             except Exception as e:
                 # Catch unknown errors
