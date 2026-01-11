@@ -3,7 +3,10 @@ All notable changes to the **AeroSense** project will be documented in this file
 
 ## [v3.4.0] - 2026-01-11
 ### Added
-- Caching
+- Implemented caching in `controller.py` to store most recent readings and pings.
+
+### Changed
+- Completely redesigned Flask GUI in `index.html` and `web.py`.
 
 ## [v3.3.0] - 2026-01-11
 ### Added

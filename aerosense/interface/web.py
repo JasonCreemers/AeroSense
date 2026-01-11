@@ -12,11 +12,16 @@ import threading
 import time
 from pathlib import Path
 from flask import Flask, render_template, jsonify, request, send_from_directory
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 from aerosense.core.controller import Controller
 from aerosense.core.scheduler import Scheduler
 from config import settings
+
+SONG_LIST = [
+    "Daisy", "Curiosity", "Ultron", "MV1", "Tars", "Panic", 
+    "Morning", "Sleep", "Fnaf", "Test", "Granted", "Denied"
+]
 
 class WebServer:
     """
@@ -45,7 +50,7 @@ class WebServer:
         
         # Configure Flask paths relative to this module location
         current_dir = Path(__file__).resolve().parent
-        project_root = current_dir.parent.parent  # Go up to 'AeroSense' root
+        project_root = current_dir.parent.parent
         
         template_dir = project_root / "templates"
         data_dir = project_root / "data"
@@ -94,6 +99,7 @@ class WebServer:
                 use_reloader=False
             )
         except Exception as e:
+            # Catch web errors
             self.log.error(f"Web Server crashed: {e}")
             self.is_running = False
 
@@ -101,13 +107,40 @@ class WebServer:
         """
         Bind URL rules to internal handler methods.
         """
+        # View Routes
         self.app.add_url_rule('/', 'index', self.index)
+        self.app.add_url_rule('/images/<path:filename>', 'images', self.serve_image)
+        
+        # API Routes - Automation
         self.app.add_url_rule('/api/cycles', 'get_cycles', self.get_cycles)
         self.app.add_url_rule('/api/toggle_cycle', 'toggle_cycle', self.toggle_cycle, methods=['POST'])
-        self.app.add_url_rule('/api/capture', 'capture', self.run_capture, methods=['POST'])
-        self.app.add_url_rule('/api/live', 'live', self.run_live, methods=['POST'])
-        self.app.add_url_rule('/api/action', 'action', self.run_action, methods=['POST'])
-        self.app.add_url_rule('/images/<path:filename>', 'images', self.serve_image)
+        self.app.add_url_rule('/api/toggle_group', 'toggle_group', self.toggle_cycle_group, methods=['POST'])
+        
+        # API Routes - Hardware & Sensors
+        self.app.add_url_rule('/api/run_manual', 'run_manual', self.run_manual, methods=['POST'])
+        self.app.add_url_rule('/api/run_sensor', 'run_sensor', self.run_sensor, methods=['POST'])
+        
+        # API Routes - Diagnostics & Utilities
+        self.app.add_url_rule('/api/music', 'music', self.control_music, methods=['POST'])
+        self.app.add_url_rule('/api/ping', 'ping', self.ping_component, methods=['POST'])
+        self.app.add_url_rule('/api/system', 'system', self.system_command, methods=['POST'])
+
+    # --- Helpers ---
+    def _fmt_time(self, timestamp: float) -> str:
+        """
+        Format a timestamp into a human-readable 'time ago' string.
+
+        Args:
+            timestamp (float): The epoch timestamp to format.
+
+        Returns:
+            str: e.g., "5s ago", "2m ago", "1h ago", or "Never".
+        """
+        if timestamp == 0: return "Never"
+        diff = time.time() - timestamp
+        if diff < 60: return f"{int(diff)}s ago"
+        if diff < 3600: return f"{int(diff/60)}m ago"
+        return f"{int(diff/3600)}h ago"
 
     # --- View Logic ---
     def index(self):
@@ -115,24 +148,30 @@ class WebServer:
         Render the main dashboard.
 
         Returns:
-            str: Rendered HTML template with current system status.
+            str: Rendered HTML template with current system status and cache data.
         """
-        # Find most recent image for display
-        images = sorted(Path(settings.IMG_DIR).glob('*.jpg'), key=os.path.getmtime, reverse=True)
-        latest_img = images[0].name if images else None
-        
-        img_time = "No images found"
-        if latest_img:
-            timestamp = os.path.getmtime(images[0])
-            mins = int((time.time() - timestamp) / 60)
-            img_time = f"{mins} mins ago"
+        # Find most recent image in cache
+        img_data = self.controller.data_cache.get("latest_photo", {})
+        latest_img = img_data.get("value")
+        img_time = self._fmt_time(img_data.get("timestamp", 0))
 
-        status_lines = self._generate_status_text()
-        
+        # Format the entire controller cache for display
+        formatted_cache = {}
+        for k, v in self.controller.data_cache.items():
+            val = v['value']
+            if isinstance(val, float): val = round(val, 2)
+            
+            formatted_cache[k] = {
+                "value": val if val is not None else "--",
+                "time": self._fmt_time(v['timestamp'])
+            }
+
         return render_template('index.html', 
                                latest_image=latest_img, 
                                img_time=img_time,
-                               status_text=status_lines)
+                               cache=formatted_cache,
+                               cycles=self.scheduler.cycles,
+                               songs=SONG_LIST)
 
     def serve_image(self, filename: str):
         """
@@ -149,42 +188,53 @@ class WebServer:
         API: Retrieve the current state of automation cycles.
         """
         return jsonify(self.scheduler.cycles)
-
+    
     def toggle_cycle(self):
         """
-        API: Enable or disable specific automation cycles.
-        Accepts JSON: {"target": "LIGHTS"} or {"target": "ALL_ON"}
+        API: Toggle a specific automation cycle.
+        Expects JSON: {"target": "lights"}
         """
         data = request.json
         target = data.get('target')
-        
-        if target == "ALL_ON":
-            self.scheduler.set_cycle("system", True)
-        elif target == "ALL_OFF":
-            self.scheduler.set_cycle("system", False)
-        else:
-            current = self.scheduler.cycles.get(target, False)
-            self.scheduler.set_cycle(target, not current)
-            
+        current = self.scheduler.cycles.get(target, False)
+        self.scheduler.set_cycle(target, not current)
         return jsonify(success=True)
 
-    def run_capture(self):
+    def toggle_cycle_group(self):
         """
-        API: Trigger a background camera capture sequence.
+        API: Smart toggle for cycle groups (SYSTEM, HARDWARE, SENSORS).
+        
+        Logic: 
+        If ALL items in the group are ON -> Turn them ALL OFF.
+        If ANY item in the group is OFF -> Turn them ALL ON (Sync/Correct).
+        
+        Expects JSON: {"group": "hardware"}
         """
-        self.controller.capture_smart_image(blocking=False)
-        return jsonify(success=True, message="Capture started")
-
-    def run_live(self):
-        """
-        API: Launch the live camera preview on the host HDMI display.
-        """
-        threading.Thread(target=self.controller.run_live_camera, args=(0,), daemon=True).start()
-        return jsonify(success=True, message="Live feed started on Main Display")
-
+        group_name = request.json.get('group')
+        
+        groups = {
+            "hardware": ["lights", "pump"],
+            "sensors": ["environment", "water_level", "camera", "pi_health"],
+            "system": ["lights", "pump", "environment", "water_level", "camera", "pi_health"]
+        }
+        
+        target_keys = groups.get(group_name, [])
+        
+        # Check if ALL are currently ON
+        all_on = all(self.scheduler.cycles.get(k) for k in target_keys)
+        
+        # Determine new state
+        new_state = False if all_on else True
+        
+        for k in target_keys:
+            self.scheduler.set_cycle(k, new_state)
+            
+        return jsonify(success=True)
+    
     def run_action(self):
         """
-        API: Execute system-level actions (SYNC, RESET).
+        API: Execute general system actions (SYNC, RESET).
+        Expects JSON: {"action": "SYNC"} or {"action": "RESET"}
         """
         action = request.json.get('action')
         
@@ -194,28 +244,103 @@ class WebServer:
             self.scheduler.reset_overrides()
         
         return jsonify(success=True)
+    
+    def run_manual(self):
+        """
+        API: Manually trigger hardware actuators (Lights/Pump).
+        Expects JSON: {"target": "LIGHTS", "state": "ON", "duration": 60}
+        """
+        data = request.json
+        target = data.get('target')
+        state = (data.get('state') == "ON")
+        duration = int(data.get('duration', 0))
 
-    def _generate_status_text(self) -> str:
-        """
-        Generate a text-based system report for the dashboard.
-        
-        Returns:
-            str: Multiline string mimicking the CLI 'STATUS' command.
-        """
-        lines = []
-        lines.append("--- SYSTEM STATUS ---")
-        lines.append(f"Time: {time.strftime('%H:%M:%S')}")
-        lines.append("")
-        
-        lines.append("CYCLES:")
-        for k, v in self.scheduler.cycles.items():
-            lines.append(f"  {k.upper()}: {'[ON]' if v else '[OFF]'}")
+        if target == "LIGHTS":
+            self.controller.set_lights(state, duration)
+        elif target == "PUMP":
+            self.controller.set_pump(state, duration)
             
-        lines.append("")
-        lines.append("HARDWARE STATE (PYTHON):")
-        pump = self.controller.state['pump']
-        lights = self.controller.state['lights']
-        lines.append(f"  PUMP:   {'[ACTIVE]' if pump else '[OFF]'}")
-        lines.append(f"  LIGHTS: {'[ACTIVE]' if lights else '[OFF]'}")
+        return jsonify(success=True)
+    
+    def run_sensor(self):
+        """
+        API: Trigger immediate sensor readings or camera tasks.
+        Expects JSON: {"target": "ENVIRONMENT"}
+        """
+        target = request.json.get('target')
         
-        return "\n".join(lines)
+        if target == "SENSORS":
+            self.controller.run_full_diagnostic()
+        elif target == "ENVIRONMENT":
+            self.controller.read_environment()
+        elif target == "WATER_LEVEL":
+            self.controller.read_water_level()
+        elif target == "PI_HEALTH":
+            self.controller.check_pi_health()
+        elif target == "CAMERA":
+            self.controller.capture_smart_image(blocking=False)
+        elif target == "LIVE_CAMERA":
+            threading.Thread(target=self.controller.run_live_camera, args=(0,), daemon=True).start()
+
+        return jsonify(success=True)
+
+    def control_music(self):
+        """
+        API: Control the music player.
+        Expects JSON: {"action": "PLAY", "song": "Daisy"} 
+                   or {"action": "STOP"}
+        """
+        action = request.json.get('action') 
+        song = request.json.get('song', "")
+        
+        if action == "STOP":
+            self.controller.stop_music()
+        elif action == "RANDOM":
+            self.controller.play_music("RANDOM")
+        elif action == "PLAY":
+            self.controller.play_music(song)
+            
+        return jsonify(success=True)
+
+    def ping_component(self):
+        """
+        API: Ping a specific component or a group of components.
+        Results are updated in the Controller's cache.
+        Expects JSON: {"target": "PUMP"} or {"target": "HARDWARE"}
+        """
+        target = request.json.get('target')
+        
+        # Handle Groups via iteration
+        groups = {
+            "HARDWARE": ["PUMP", "LIGHTS"],
+            "SENSORS": ["ENVIRONMENT", "WATER_LEVEL", "CAMERA"],
+            "SYSTEM": ["SYSTEM"]
+        }
+
+        if target in groups:
+            for t in groups[target]:
+                if t == "SYSTEM": 
+                    self.controller.ping_component("SYSTEM")
+                else:
+                    self.controller.ping_component(t)
+        else:
+            self.controller.ping_component(target)
+            
+        return jsonify(success=True)
+
+    def system_command(self):
+        """
+        API: Execute system-level commands (STOP, EXIT).
+        Expects JSON: {"command": "STOP"}
+        """
+        cmd = request.json.get('command')
+        
+        if cmd == "STOP":
+            self.controller.stop_all(self.scheduler)
+            
+        elif cmd == "EXIT":
+            self.controller.stop_all(self.scheduler)
+            self.log.info("Remote shutdown requested via Web Interface.")
+            os._exit(0)
+            
+        return jsonify(success=True)

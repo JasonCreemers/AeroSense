@@ -1,100 +1,219 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AeroSense GUI</title>
+    <title>AeroSense v3.3.0</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: sans-serif; background: #222; color: #eee; text-align: center; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .section { background: #333; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        h2 { border-bottom: 1px solid #555; padding-bottom: 10px; }
+        :root { --bg: #1a1a1a; --panel: #2d2d2d; --text: #e0e0e0; --accent: #007bff; --green: #28a745; --red: #dc3545; --dim: #6c757d; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         
-        /* Camera */
-        img { width: 100%; border-radius: 5px; border: 2px solid #555; }
-        .time-tag { color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: block; }
+        /* Sections */
+        .panel { background: var(--panel); padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        h2 { margin-top: 0; border-bottom: 2px solid #444; padding-bottom: 10px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+        
+        /* Inputs & Layouts */
+        .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        input[type="text"], input[type="number"] { background: #444; border: 1px solid #555; color: white; padding: 8px; border-radius: 4px; width: 60px; text-align: center;}
         
         /* Buttons */
-        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-green { background: #28a745; color: white; }
-        .btn-blue { background: #007bff; color: white; }
-        .btn-red { background: #dc3545; color: white; }
-        .btn-gray { background: #6c757d; color: white; }
+        button { border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; color: white; width: 100%; }
+        button:hover { opacity: 0.9; }
+        .btn-blue { background: var(--accent); }
+        .btn-green { background: var(--green); }
+        .btn-red { background: var(--red); }
+        .btn-gray { background: var(--dim); }
+        .btn-outline { background: transparent; border: 1px solid #555; color: #aaa; }
         
-        /* Cycles Grid */
-        .cycle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .cycle-btn { padding: 15px; background: #444; color: #888; }
-        .cycle-btn.active { background: #28a745; color: white; box-shadow: 0 0 10px #28a745; }
+        /* Toggles */
+        .toggle-on { background: var(--green); box-shadow: 0 0 8px var(--green); color: white; }
+        .toggle-off { background: #444; color: #888; }
 
-        /* Diagnostics */
-        pre { background: #111; padding: 10px; text-align: left; overflow-x: auto; border-radius: 5px; }
+        /* Data Display */
+        .data-tag { font-family: monospace; font-size: 0.9rem; color: #4dc9f6; }
+        .time-tag { font-size: 0.75rem; color: #888; margin-left: 5px; }
+
+        /* Camera */
+        .cam-feed { width: 100%; border-radius: 5px; border: 2px solid #444; min-height: 200px; background: #000; object-fit: cover; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>AeroSense Controller</h1>
+        
+        <div style="text-align: center;">
+            <h1 style="margin:0;">AEROSENSE <span style="font-size: 0.5em; color: #666;">v3.3.0</span></h1>
+        </div>
 
-        <div class="section">
-            <h2>Live View</h2>
+        <div class="panel">
+            <h2>Live Feed</h2>
             {% if latest_image %}
-                <img src="/images/{{ latest_image }}" alt="Recent Capture">
-                <span class="time-tag">Taken: {{ img_time }}</span>
-            {% else %}
-                <p>No Images Available</p>
-            {% endif %}
-            <br>
-            <button onclick="apiCall('/api/capture', 'POST')" class="btn-blue">📸 Capture Sequence</button>
-            <button onclick="apiCall('/api/live', 'POST')" class="btn-green">👁 Indefinite Live Feed</button>
-        </div>
-
-        <div class="section">
-            <h2>Automation Cycles</h2>
-            <div class="cycle-grid" id="cycleContainer">
+                <img src="/images/{{ latest_image }}" class="cam-feed">
+                <div style="text-align: right; margin-top: 5px;">
+                    <span class="time-tag">Taken: {{ img_time }}</span>
                 </div>
-            <br>
-            <button onclick="toggleCycle('ALL_ON')" class="btn-green">ALL ON</button>
-            <button onclick="toggleCycle('ALL_OFF')" class="btn-red">ALL OFF</button>
+            {% else %}
+                <div class="cam-feed" style="display:flex; align-items:center; justify-content:center; color:#555;">NO IMAGE DATA</div>
+            {% endif %}
+            <div class="row" style="margin-top: 10px;">
+                <button class="btn-blue" onclick="post('/api/run_sensor', {target: 'CAMERA'})">RUN CAM (Burst)</button>
+                <button class="btn-green" onclick="post('/api/run_sensor', {target: 'LIVE_CAMERA'})">RUN LIVE CAM (HDMI)</button>
+            </div>
         </div>
 
-        <div class="section">
-            <h2>Diagnostics</h2>
-            <pre>{{ status_text }}</pre>
-            <span class="time-tag">Refreshed on Page Load</span>
-            <br>
-            <button onclick="window.location.reload()" class="btn-gray">STATUS (Refresh)</button>
-            <button onclick="apiCall('/api/action', 'POST', {action: 'RESET'})" class="btn-blue">RESET</button>
-            <button onclick="apiCall('/api/action', 'POST', {action: 'SYNC'})" class="btn-green">SYNC</button>
+        <div class="panel">
+            <h2>Automation Cycles</h2>
+            <div class="grid-3" style="margin-bottom: 15px;">
+                <button class="btn-gray" onclick="post('/api/toggle_group', {group: 'system'})">SYSTEM</button>
+                <button class="btn-gray" onclick="post('/api/toggle_group', {group: 'hardware'})">HARDWARE</button>
+                <button class="btn-gray" onclick="post('/api/toggle_group', {group: 'sensors'})">SENSORS</button>
+            </div>
+            <div class="grid-2">
+                {% for key in ['pump', 'lights', 'environment', 'water_level', 'camera', 'pi_health'] %}
+                    <button class="{{ 'toggle-on' if cycles[key] else 'toggle-off' }}" 
+                            onclick="post('/api/toggle_cycle', {target: '{{ key }}'})">
+                        {{ key.upper().replace('_', ' ') }}
+                    </button>
+                {% endfor %}
+            </div>
         </div>
+
+        <div class="panel">
+            <h2>Manual Control</h2>
+            
+            <div class="row">
+                <span style="width: 80px; font-weight: bold;">LIGHTS</span>
+                <button class="btn-green" onclick="manualRun('LIGHTS', 'ON')">ON</button>
+                <input type="number" id="dur_lights" placeholder="Sec (0)">
+                <button class="btn-red" onclick="manualRun('LIGHTS', 'OFF')">OFF</button>
+            </div>
+            <div class="row">
+                <span style="width: 80px; font-weight: bold;">PUMP</span>
+                <button class="btn-green" onclick="manualRun('PUMP', 'ON')">ON</button>
+                <input type="number" id="dur_pump" placeholder="Sec (0)">
+                <button class="btn-red" onclick="manualRun('PUMP', 'OFF')">OFF</button>
+            </div>
+            <hr style="border-color:#444;">
+            
+            <button class="btn-blue" style="margin-bottom: 10px;" onclick="post('/api/run_sensor', {target: 'SENSORS'})">RUN FULL SENSOR SWEEP</button>
+            
+            <div class="row">
+                <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENV</button>
+                <div style="text-align: right;">
+                    <span class="data-tag">{{ cache['temp_reading']['value'] }}°F | {{ cache['humidity_reading']['value'] }}%</span>
+                    <span class="time-tag">{{ cache['temp_reading']['time'] }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER</button>
+                <div style="text-align: right;">
+                    <span class="data-tag">{{ cache['water_reading']['value'] }} mm</span>
+                    <span class="time-tag">{{ cache['water_reading']['time'] }}</span>
+                </div>
+            </div>
+            <div class="row">
+                <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
+                <div style="text-align: right;">
+                    <span class="data-tag">{{ cache['pi_health_reading']['value'] }}°C</span>
+                    <span class="time-tag">{{ cache['pi_health_reading']['time'] }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Audio</h2>
+            <div class="row">
+                <button class="btn-blue" onclick="post('/api/music', {action: 'RANDOM'})">PLAY RANDOM</button>
+                <button class="btn-red" onclick="post('/api/music', {action: 'STOP'})">STOP</button>
+            </div>
+            <div class="row">
+                <input type="text" id="custom_song" placeholder="Song Name" style="width: 100%;">
+                <button class="btn-green" style="width: 100px;" onclick="playCustom()">PLAY</button>
+            </div>
+            <div style="margin-top: 10px;">
+                <small style="color: #888;">Playlist: 
+                {% for song in songs %} <span style="color: #aaa; border: 1px solid #444; padding: 2px 5px; border-radius: 4px; display: inline-block; margin: 2px;">{{ song }}</span> {% endfor %}
+                </small>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Diagnostics</h2>
+            
+            <div class="grid-3" style="margin-bottom: 15px;">
+                <button class="btn-gray" onclick="post('/api/ping', {target: 'SYSTEM'})">PING SYS</button>
+                <button class="btn-gray" onclick="post('/api/ping', {target: 'HARDWARE'})">PING HW</button>
+                <button class="btn-gray" onclick="post('/api/ping', {target: 'SENSORS'})">PING SENS</button>
+            </div>
+
+            <div class="grid-2">
+                <div class="row">
+                    <button class="btn-outline" onclick="post('/api/ping', {target: 'SYSTEM'})">SYS</button>
+                    <div><span class="data-tag">{{ cache['ping_system']['value'] }}</span><br><span class="time-tag">{{ cache['ping_system']['time'] }}</span></div>
+                </div>
+                 <div class="row">
+                    <button class="btn-outline" onclick="post('/api/ping', {target: 'PUMP'})">PUMP</button>
+                    <div><span class="data-tag">{{ cache['ping_pump']['value'] }}</span><br><span class="time-tag">{{ cache['ping_pump']['time'] }}</span></div>
+                </div>
+                 <div class="row">
+                    <button class="btn-outline" onclick="post('/api/ping', {target: 'LIGHTS'})">LIGHT</button>
+                    <div><span class="data-tag">{{ cache['ping_lights']['value'] }}</span><br><span class="time-tag">{{ cache['ping_lights']['time'] }}</span></div>
+                </div>
+                 <div class="row">
+                    <button class="btn-outline" onclick="post('/api/ping', {target: 'ENVIRONMENT'})">ENV</button>
+                    <div><span class="data-tag">{{ cache['ping_env']['value'] }}</span><br><span class="time-tag">{{ cache['ping_env']['time'] }}</span></div>
+                </div>
+                 <div class="row">
+                    <button class="btn-outline" onclick="post('/api/ping', {target: 'WATER_LEVEL'})">WATR</button>
+                    <div><span class="data-tag">{{ cache['ping_water']['value'] }}</span><br><span class="time-tag">{{ cache['ping_water']['time'] }}</span></div>
+                </div>
+                <div class="row">
+                    <button class="btn-outline" onclick="post('/api/ping', {target: 'CAMERA'})">CAM</button>
+                    <div><span class="data-tag">{{ cache['ping_cam']['value'] }}</span><br><span class="time-tag">{{ cache['ping_cam']['time'] }}</span></div>
+                </div>
+                 <div class="row">
+                    <button class="btn-outline" onclick="post('/api/ping', {target: 'MUSIC'})">BUZZ</button>
+                    <div><span class="data-tag">{{ cache['ping_buzzer']['value'] }}</span><br><span class="time-tag">{{ cache['ping_buzzer']['time'] }}</span></div>
+                </div>
+            </div>
+
+            <hr style="border-color:#444;">
+            <div class="grid-3">
+                <button class="btn-gray" onclick="window.location.reload()">STATUS</button>
+                <button class="btn-blue" onclick="post('/api/action', {action: 'SYNC'})">SYNC</button>
+                <button class="btn-blue" onclick="post('/api/action', {action: 'RESET'})">RESET</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>System</h2>
+            <div class="grid-2">
+                <button class="btn-red" style="font-size: 1.1em;" onclick="post('/api/system', {command: 'STOP'})">EMERGENCY STOP</button>
+                <button class="btn-gray" onclick="post('/api/system', {command: 'EXIT'})">EXIT SYSTEM</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // Load cycle states on boot
-        fetch('/api/cycles')
-            .then(res => res.json())
-            .then(data => {
-                const container = document.getElementById('cycleContainer');
-                for (const [key, val] of Object.entries(data)) {
-                    const btn = document.createElement('button');
-                    btn.className = `cycle-btn ${val ? 'active' : ''}`;
-                    btn.innerText = key.toUpperCase();
-                    btn.onclick = () => toggleCycle(key);
-                    container.appendChild(btn);
-                }
-            });
-
-        function toggleCycle(target) {
-            fetch('/api/toggle_cycle', {
+        function post(url, data={}) {
+            fetch(url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({target: target})
-            }).then(() => window.location.reload());
+                body: JSON.stringify(data)
+            }).then(() => setTimeout(() => window.location.reload(), 200)); 
         }
 
-        function apiCall(url, method, body={}) {
-            fetch(url, {
-                method: method,
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body)
-            }).then(() => window.location.reload());
+        function manualRun(target, state) {
+            let durInput = document.getElementById(target === 'LIGHTS' ? 'dur_lights' : 'dur_pump');
+            let duration = durInput.value || 0;
+            post('/api/run_manual', {target: target, state: state, duration: duration});
+        }
+
+        function playCustom() {
+            let song = document.getElementById('custom_song').value;
+            post('/api/music', {action: 'PLAY', song: song});
         }
     </script>
 </body>
