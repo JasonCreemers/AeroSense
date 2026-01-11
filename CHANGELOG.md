@@ -5,6 +5,7 @@ All notable changes to the **AeroSense** project will be documented in this file
 ### Added
 - Implemented a hardware Watchdog Timer (WDT) to protect against system lockups or hangs.
 - Added split-brain protection incase Arduino reboots.
+- Timeout length for camera.
 
 ### Changed
 - Refactored `firmware.ino` to use C-style char[] arrays and strtak instead of String objects.

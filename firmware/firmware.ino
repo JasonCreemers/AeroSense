@@ -33,7 +33,7 @@ void setup() {
   dist_sensor.Begin();
   env_sensor.Begin();
   music.Begin();
-  wdt_enable(WDTO_2S);
+  wdt_enable(WDTO_4S);
 
   Serial.println(F("SYSTEM:READY"));
 }
