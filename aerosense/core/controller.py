@@ -51,6 +51,25 @@ class Controller:
             "last_water_check": 0.0
         }
 
+        # Data cache
+        self.data_cache = {
+            # Readings
+            "temp_reading":      {"value": None, "timestamp": 0},
+            "humidity_reading":  {"value": None, "timestamp": 0},
+            "water_reading":     {"value": None, "timestamp": 0},
+            "pi_health_reading": {"value": None, "timestamp": 0},
+            "latest_photo":      {"value": None, "timestamp": 0},
+
+            # Pings (Status)
+            "ping_env":    {"value": "UNKNOWN", "timestamp": 0},
+            "ping_water":  {"value": "UNKNOWN", "timestamp": 0},
+            "ping_lights": {"value": "UNKNOWN", "timestamp": 0},
+            "ping_pump":   {"value": "UNKNOWN", "timestamp": 0},
+            "ping_cam":    {"value": "UNKNOWN", "timestamp": 0},
+            "ping_system": {"value": "UNKNOWN", "timestamp": 0},
+            "ping_buzzer": {"value": "UNKNOWN", "timestamp": 0}
+        }
+
         self.log.info("System Controller Initialized.")
         self.sync_state()
 
@@ -99,6 +118,19 @@ class Controller:
                     self.log.critical(f"EMERGENCY STOP: Water level dropped ({level}mm) during cycle!")
                     self.logger.log_alert("Pump aborted mid-cycle: Low Water.")
                     self.play_music("PANIC")
+
+    def _update_cache(self, key: str, value):
+        """
+        Updates the internal data cache with a new value and the current timestamp.
+        Args:
+            key (str): The specific cache key to update (e.g., 'temp_reading', 'ping_pump').
+            value (Any): The new data or status string to store.
+        """
+        if key in self.data_cache:
+            self.data_cache[key] = {
+                "value": value,
+                "timestamp": time.time()
+            }
 
     # --- Actuator Control ---
     def set_pump(self, state: bool, duration: int = 0) -> None:
@@ -231,6 +263,11 @@ class Controller:
                 parts = data.split(",")
                 vals = (float(parts[0]), float(parts[1]))
                 self.logger.log_environment(*vals)
+
+                # Update Cache
+                self._update_cache("temp_reading", vals[0])
+                self._update_cache("humidity_reading", vals[1])
+
                 return vals
             except (ValueError, IndexError):
                 # Handle data errors
@@ -256,6 +293,10 @@ class Controller:
                 level = int(data)
                 if log_data: 
                     self.logger.log_water(level)
+
+                    # Update Cache
+                    self._update_cache("water_reading", level)
+
                 return level
             except ValueError:
                 # Handle data errors
@@ -380,6 +421,9 @@ class Controller:
             # Log photos
             if images:
                 self.logger.log_camera(images)
+
+                # Update cache
+                self._update_cache("latest_photo", images[-1])
             
             return images
     
@@ -419,6 +463,10 @@ class Controller:
             with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
                 temp_c = float(f.read()) / 1000.0
                 self.logger.log_pi_temp(temp_c)
+
+                # Update Cache
+                self._update_cache("pi_health_reading", temp_c)
+
                 return temp_c
         except IOError:
             # Handle data errors
@@ -464,25 +512,48 @@ class Controller:
         
         # Internal python checks
         if target == "CAMERA":
-            if self.camera_lock.locked():
-                return "BUSY (Capturing)"
-            return "IDLE (Ready)"
-
-        # External arduino checks
+            status = "BUSY (Capturing)" if self.camera_lock.locked() else "IDLE (Ready)"
+            self._update_cache("ping_cam", status)
+            return status
+        
         fw_target = target
-        if target == "ENVIRONMENT": fw_target = "TEMP"
-        if target == "WATER_LEVEL": fw_target = "DIST"
+        cache_key = None
+        
+        if target == "ENVIRONMENT": 
+            fw_target = "TEMP"
+            cache_key = "ping_env"
+        elif target == "WATER_LEVEL": 
+            fw_target = "DIST"
+            cache_key = "ping_water"
+        elif target == "PUMP":
+            cache_key = "ping_pump"
+        elif target == "LIGHTS":
+            cache_key = "ping_lights"
+        elif target == "MUSIC":
+            cache_key = "ping_buzzer"
+        elif target == "SYSTEM":
+            fw_target = "SYSTEM"
+            cache_key = "ping_system"
         
         # Capture timestamp before sending ping
         request_time = time.time()
 
         # Send Command
         if not self.arduino.send(f"PING {fw_target}"):
-            return "CONNECTION_ERROR"
+            res = "CONNECTION_ERROR"
+            if cache_key: self._update_cache(cache_key, res)
+            return res
 
         # Wait for specific response, ensuring it is fresh
         response = self.arduino.get_latest_data("PONG", min_timestamp=request_time, timeout=1.0)
-        return response if response else "TIMEOUT"
+        
+        final_result = response if response else "TIMEOUT"
+
+        # Update cache
+        if cache_key:
+            self._update_cache(cache_key, final_result)
+            
+        return final_result
 
     def run_full_diagnostic(self):
         """
