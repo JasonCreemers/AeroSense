@@ -183,12 +183,12 @@ class CLI:
                 url = f"http://127.0.0.1:{self.web_interface.port}"
                 print(f">> Opening Web Interface at {url} ...")
                 
-                # Open the browser
-                try:
-                    webbrowser.open(url)
-                except Exception as e:
-                    # Catch errors
-                    self.log.error(f"Failed to open browser: {e}")
+                # Print the URL
+                print(f"\n>> ---------------------------------------------------")
+                print(f">> WEB INTERFACE READY")
+                print(f">> Access URL: {url}")
+                print(f">> (Ctrl+Click the link above to open in your browser)")
+                print(f">> ---------------------------------------------------\n")
 
             # --- AUTOMATION CYCLES ---
             elif cmd == "CYCLE":

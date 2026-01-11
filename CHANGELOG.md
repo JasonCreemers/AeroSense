@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.4.1] - 2026-01-11
+### Fixed
+- Resolved issue where `GUI` caused the CLI to hang.
+
 ## [v3.4.0] - 2026-01-11
 ### Added
 - Implemented caching in `controller.py` to store most recent readings and pings.
