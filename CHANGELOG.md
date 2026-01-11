@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.3.0] - 2026-01-11
+### Added
+- Implemented `web.py` to drive a local Flask-based Graphical User Interface (GUI).
+- Added `templates/index.html` to serve as the central dashboard for the GUI.
+
 ## [v3.2.0] - 2026-01-10
 ### Added
 - Implemented a hardware Watchdog Timer (WDT) to protect against system lockups or hangs.

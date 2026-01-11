@@ -1,2 +1,5 @@
 # --- Hardware Interface ---
 pyserial>=3.5
+
+# --- Web Interface ---
+flask>=3.0.0
