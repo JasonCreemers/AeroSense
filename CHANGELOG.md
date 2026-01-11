@@ -2,6 +2,9 @@
 All notable changes to the **AeroSense** project will be documented in this file.
 
 ## [v3.2.0] - 2026-01-10
+### Added
+- Implemented a hardware Watchdog Timer (WDT) to protect against I2C lockups.
+
 ### Changed
 - Revamped `firmware.ino` to use C-style char[] arrays and strtak instead of string objects.
 
