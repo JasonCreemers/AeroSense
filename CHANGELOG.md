@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.2.0] - 2026-01-10
+### Changed
+- Revamped `firmware.ino` to use C-style char[] arrays and strtak instead of string objects.
+
 ## [v3.1.0] - 2026-01-10
 ### Added
 - `HARDWARE.md` to document pinouts and wiring schematics.

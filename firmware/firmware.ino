@@ -15,7 +15,10 @@ DistanceSensor dist_sensor;
 EnvSensor env_sensor;
 MusicPlayer music;
 
-String input_buffer = "";
+// --- STATIC MEMORY ALLOCATION ---
+const int MAX_CMD_LEN = 64;
+char input_buffer[MAX_CMD_LEN + 1];
+int buffer_index = 0;
 
 void setup() {
   Serial.begin(BAUD_RATE);
@@ -40,19 +43,26 @@ void loop() {
   dist_sensor.Update();
   env_sensor.Update();
   music.Update();
+
+  // Safety Monitor
   if (pump.Update()) {
     music.PlaySong("Denied");
   }
 
-  // Command parsing
+  // --- SERIAL READ LOOP ---
   while (Serial.available()) {
     char c = (char)Serial.read();
+
+    // End of command detected (New Line)
     if (c == '\n') {
+      input_buffer[buffer_index] = '\0';
       ProcessCommand(input_buffer);
-      input_buffer = "";
-    } else {
-      if (input_buffer.length() < 64) {
-        input_buffer += c;
+      buffer_index = 0;
+    } 
+    else {
+      // Buffer Overflow Protection
+      if (buffer_index < MAX_CMD_LEN) {
+        input_buffer[buffer_index++] = c;
       }
     }
   }
@@ -61,43 +71,63 @@ void loop() {
 
 // --- COMMAND ROUTER ---
 /**
- * @brief Parses and routes incoming Serial commands to the appropriate subsystem.
+ * @brief Parses and routes incoming Serial commands using C-strings.
+ * @param cmd The raw character array to parse (modified in-place by strtok).
  */
-void ProcessCommand(String cmd) {
-  cmd.trim();
-  cmd.toUpperCase();
-  
+void ProcessCommand(char* cmd) {
+  // Uppercase the entire command buffer for case-insensitive matching
+  for (int i = 0; cmd[i]; i++) {
+    cmd[i] = toupper(cmd[i]);
+  }
+
   // Tokenize
-  int first_space = cmd.indexOf(' ');
-  String action = (first_space == -1) ? cmd : cmd.substring(0, first_space);
-  String args   = (first_space == -1) ? ""  : cmd.substring(first_space + 1);
+  char* action = strtok(cmd, " \r\n");
+
+  // Safety
+  if (action == NULL) return;
 
   // --- ACTUATORS ---
   // Pump control
-  if (action == "PUMP") {
-    if (args.startsWith("ON")) {
-      long dur = 0;
-      int space2 = args.indexOf(' ');
-      if (space2 != -1) dur = args.substring(space2 + 1).toInt();
-      pump.TurnOn(dur);
+  if (strcmp(action, "PUMP") == 0) {
+    char* arg = strtok(NULL, " \r\n");
+    
+    if (arg != NULL) {
+      if (strcmp(arg, "ON") == 0) {
+        long dur = 0;
+        char* dur_str = strtok(NULL, " \r\n");
+        if (dur_str != NULL) {
+          dur = atol(dur_str);
+        }
+        pump.TurnOn(dur);
+      }
+      else if (strcmp(arg, "OFF") == 0) {
+        pump.TurnOff();
+      }
     }
-    else if (args == "OFF") pump.TurnOff();
   } 
   
   // Lights control
-  else if (action == "LIGHTS") {
-    if (args.startsWith("ON")) {
-      long dur = 0;
-      int space2 = args.indexOf(' ');
-      if (space2 != -1) dur = args.substring(space2 + 1).toInt();
-      lights.TurnOn(dur);
-    } 
-    else if (args == "OFF") lights.TurnOff();
+  else if (strcmp(action, "LIGHTS") == 0) {
+    char* arg = strtok(NULL, " \r\n");
+    
+    if (arg != NULL) {
+      if (strcmp(arg, "ON") == 0) {
+        long dur = 0;
+        char* dur_str = strtok(NULL, " \r\n");
+        if (dur_str != NULL) {
+          dur = atol(dur_str);
+        }
+        lights.TurnOn(dur);
+      } 
+      else if (strcmp(arg, "OFF") == 0) {
+        lights.TurnOff();
+      }
+    }
   }
 
   // --- SENSORS ---
   // Environment sensor
-  else if (action == "READ_TEMP") {
+  else if (strcmp(action, "READ_TEMP") == 0) {
     Serial.print(F("DATA_TEMP:"));
     Serial.print(env_sensor.GetAverageTemp(), 2);
     Serial.print(",");
@@ -105,67 +135,72 @@ void ProcessCommand(String cmd) {
   }
 
   // Distance sensor
-  else if (action == "READ_DISTANCE") {
+  else if (strcmp(action, "READ_DISTANCE") == 0) {
     Serial.print(F("DATA_DISTANCE:"));
     Serial.println(dist_sensor.GetAverageDistance());
   }
 
   // --- MUSIC ---
-  else if (action == "MUSIC") {
-    if (args.startsWith("PLAY")) {
-      String param = args.substring(5);
-      
-      // Play note
-      if (param.startsWith("NOTE ")) {
-         String content = param.substring(5);
-         
-         String noteName = content;
-         int duration = 0;
-         
-         // Check for note duration
-         int spaceIndex = content.indexOf(' ');
-         if (spaceIndex != -1) {
-            noteName = content.substring(0, spaceIndex);
-            duration = content.substring(spaceIndex + 1).toInt();
-         }
-         
-         music.PlayNote(noteName, duration);
-      } 
-      else {
-         // Play song
-         music.PlaySong(param);
+  // Format: MUSIC PLAY <SONG> or MUSIC PLAY NOTE <NOTE> <DUR>
+  else if (strcmp(action, "MUSIC") == 0) {
+    char* sub_cmd = strtok(NULL, " \r\n");
+
+    if (sub_cmd != NULL) {
+      if (strcmp(sub_cmd, "PLAY") == 0) {
+        char* target = strtok(NULL, " \r\n");
+        
+        if (target != NULL) {
+          // Check if user wants to play a specific note
+          if (strcmp(target, "NOTE") == 0) {
+             char* noteName = strtok(NULL, " \r\n");
+             char* durStr = strtok(NULL, " \r\n");
+             int duration = 0;
+             if (durStr != NULL) duration = atoi(durStr);
+             
+             if (noteName != NULL) {
+                // Cast to String for library compatibility
+                music.PlayNote(String(noteName), duration); 
+             }
+          } 
+          else {
+             // Play song
+             music.PlaySong(String(target));
+          }
+        }
       }
-    }
-    // Stop music
-    else if (args == "STOP") {
-      music.Stop();
+      // Stop music
+      else if (strcmp(sub_cmd, "STOP") == 0) {
+        music.Stop();
+      }
     }
   }
 
   // --- DIAGNOSTICS ---
-  else if (action == "PING") {
-    if (args == "" || args == "SYSTEM") {
+  else if (strcmp(action, "PING") == 0) {
+    char* arg = strtok(NULL, " \r\n");
+    
+    if (arg == NULL || strcmp(arg, "SYSTEM") == 0) {
       Serial.println(F("PONG"));
     }
-    else if (args == "PUMP") {
+    else if (strcmp(arg, "PUMP") == 0) {
       Serial.println(pump.IsActive() ? F("PONG:PUMP_ON") : F("PONG:PUMP_OFF"));
     }
-    else if (args == "LIGHTS") {
+    else if (strcmp(arg, "LIGHTS") == 0) {
       Serial.println(lights.IsActive() ? F("PONG:LIGHTS_ON") : F("PONG:LIGHTS_OFF"));
     }
-    else if (args == "TEMP") {
+    else if (strcmp(arg, "TEMP") == 0) {
       Serial.println(env_sensor.IsResponding() ? F("PONG:TEMP_OK") : F("PONG:TEMP_FAIL"));
     }
-    else if (args == "DIST") {
+    else if (strcmp(arg, "DIST") == 0) {
       Serial.println(dist_sensor.IsResponding() ? F("PONG:DIST_OK") : F("PONG:DIST_FAIL"));
     }
-    else if (args == "MUSIC") {
+    else if (strcmp(arg, "MUSIC") == 0) {
       Serial.println(music.IsPlaying() ? F("PONG:MUSIC_BUSY") : F("PONG:MUSIC_IDLE"));
     }
   }
   
   // --- SYSTEM ---
-  else if (action == "STOP") {
+  else if (strcmp(action, "STOP") == 0) {
     pump.TurnOff();
     lights.TurnOff();
     music.Stop();
