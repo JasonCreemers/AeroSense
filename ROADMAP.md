@@ -3,15 +3,12 @@
 This document outlines the development trajectory for the AeroSense project. Tasks are prioritized by execution window: **Immediate**, **Upcoming**, and **Long Term**.
 
 ## Immediate Tasks
+- Develop a local HTML GUI for direct control on the Raspberry Pi.
 - Add sad Spongebob song.
 
 ---
 
 ## Upcoming Tasks
-
-### Serial Changes
-- Clean up variable usage in `firmware.ino`.
-- Rewrite firmware string handling to use C-style `char[]` arrays and `strtok` instead of `String` objects to prevent memory fragmentation.
 
 ### Actuation Changes
 - Implement additional redundant safety checks for hardware actuators.
@@ -31,7 +28,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 ## Long Term Tasks
 
 ### User Interface Changes
-- Develop a local HTML GUI for direct control on the Raspberry Pi.
 - Develop a web-based HTML dashboard for remote monitoring and control.
 
 ### MOSS Changes
