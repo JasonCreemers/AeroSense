@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.4.0] - 2026-01-11
+### Added
+- Caching
+
 ## [v3.3.0] - 2026-01-11
 ### Added
 - Implemented `web.py` to drive a local Flask-based Graphical User Interface (GUI).

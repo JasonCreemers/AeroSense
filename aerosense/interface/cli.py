@@ -648,6 +648,7 @@ DIAGNOSTICS
 
                           
 SYSTEM:
+  GUI                          - Open a web based GUI
   STOP                         - Emergency Stop
   EXIT                         - Shutdown
 """)
