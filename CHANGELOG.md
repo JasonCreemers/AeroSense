@@ -2,13 +2,17 @@
 All notable changes to the **AeroSense** project will be documented in this file.
 
 ## [v3.4.3] - 2026-01-12
+### Added
+- Implemented centralized song validaion logic
+
 ### Changed
-- Removed redundant audio feedback cues.
+- Eliminated redundant audio feedback triggers during initialization.
+- Replaced manual text input with interactive buttons for audio control on GUI.
 
 ### Fixed
-- Refactored the live camera to run as non-blocking.
+- Refactored the live camera to a non-blocking background thread.
 - Resolved concurreny issue with Arduino driver in `arduino.py`.
-- Cleaned up versioning print.
+- Corrected formatting logic for version display
 
 ## [v3.4.2] - 2026-01-11
 ### Fixed 

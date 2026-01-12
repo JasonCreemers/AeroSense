@@ -15,14 +15,9 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 from typing import Optional, List, Dict, Any
 
 import aerosense
-from aerosense.core.controller import Controller
+from aerosense.core.controller import Controller, VALID_SONGS
 from aerosense.core.scheduler import Scheduler
 from config import settings
-
-SONG_LIST = [
-    "Daisy", "Curiosity", "Ultron", "MV1", "Tars", "Panic", 
-    "Morning", "Sleep", "Fnaf", "Test", "Granted", "Denied"
-]
 
 class WebServer:
     """
@@ -172,7 +167,7 @@ class WebServer:
                                img_time=img_time,
                                cache=formatted_cache,
                                cycles=self.scheduler.cycles,
-                               songs=SONG_LIST,
+                               songs=VALID_SONGS,
                                version=aerosense.__version__)
 
     def serve_image(self, filename: str):
@@ -294,14 +289,9 @@ class WebServer:
         """
         action = request.json.get('action') 
         song = request.json.get('song', "")
-        
-        if action == "STOP":
-            self.controller.stop_music()
-        elif action == "RANDOM":
-            self.controller.play_music("RANDOM")
-        elif action == "PLAY":
-            self.controller.play_music(song)
-            
+        if action == "STOP": self.controller.stop_music()
+        elif action == "RANDOM": self.controller.play_music("RANDOM")
+        elif action == "PLAY": self.controller.play_music(song)
         return jsonify(success=True)
 
     def ping_component(self):
