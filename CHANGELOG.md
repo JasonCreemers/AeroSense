@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.4.3] - 2026-01-12
+### Added
+- 
+
+### Fixed
+- Refactored the live camera to run as non-blocking.
+- Resolved concurreny issue with Arduino driver in `arduino.py`.
+
 ## [v3.4.2] - 2026-01-11
 ### Fixed 
 - Fixed immediate hardware shutdown for pumps and lights when cycles are disabled.
