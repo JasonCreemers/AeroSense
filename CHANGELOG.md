@@ -8,6 +8,7 @@ All notable changes to the **AeroSense** project will be documented in this file
 ### Fixed
 - Refactored the live camera to run as non-blocking.
 - Resolved concurreny issue with Arduino driver in `arduino.py`.
+- Cleaned up versioning print.
 
 ## [v3.4.2] - 2026-01-11
 ### Fixed 
