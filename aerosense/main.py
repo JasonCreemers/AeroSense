@@ -25,7 +25,7 @@ def main():
     )
     log = logging.getLogger("AeroSense.Main")
     
-    print(f"\n=== AEROSENSE GARDEN CONTROLLER V{aerosense.__version__} | ({aerosense.__release__}) ===")
+    print(f"\n=== AEROSENSE GARDEN CONTROLLER {aerosense.__version__} | ({aerosense.__release__}) ===")
     log.info("System initializing...")
 
     # --- Start and Run Application ---
