@@ -5,8 +5,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 ## Immediate Tasks
 - Add sad Spongebob song.
 - Better way to list songs between `web.py` and also `controller/cli.py`.
-- When loading up, extra V in version print
-- Buzzer goes off twice when loading up
 - Clean up Flask GUI.
     - Songs as buttons.
     - Maybe default runtimes for lights/pumps.
