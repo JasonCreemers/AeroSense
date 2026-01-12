@@ -376,7 +376,6 @@ class CLI:
 
         elif target == "LIVE_CAMERA":
             duration = self._parse_arg(args, 1, default=0)
-
             if duration is None: return
             
             if duration == 0:
@@ -385,8 +384,12 @@ class CLI:
             else:
                 print(f">> Starting Live Camera for {duration}s...")
                 
-            self.controller.run_live_camera(duration)
-            print(">> Live View Closed.")
+            t = threading.Thread(
+                target=self.controller.run_live_camera, 
+                args=(duration,), 
+                daemon=True
+            )
+            t.start()
 
         elif target == "PI_HEALTH":
             print(">> Checking Pi Health...")

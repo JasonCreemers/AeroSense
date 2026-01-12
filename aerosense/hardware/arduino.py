@@ -82,17 +82,32 @@ class Arduino:
         Cleanly close the serial connection and stop the listener.
         """
         self.running = False
+
+        if self.listener_thread and self.listener_thread.is_alive():
+            try:
+                self.listener_thread.join(timeout=1.0)
+            except RuntimeError:
+                pass
+
         if self.ser and self.ser.is_open:
-            self.ser.close()
+            try:
+                self.ser.close()
+            except Exception as e:
+                self.log.error(f"Error closing serial port: {e}")
             self.log.info("Serial connection closed.")
 
     def start_listener(self):
         """
         Spin up the background thread to listen for incoming serial data.
         """
+        if self.listener_thread and self.listener_thread.is_alive():
+            self.log.warning("Listener thread already active. Skipping start.")
+            return
+
         self.running = True
         self.listener_thread = threading.Thread(target=self._listen_loop, daemon=True)
         self.listener_thread.start()
+        self.log.info("Serial listener thread started.")
 
     def _listen_loop(self):
         """
@@ -136,6 +151,9 @@ class Arduino:
                     elif line == "SYSTEM:READY":
                         self.log.warning("Arduino Reboot Detected! Triggering state sync.")
                         self.reboot_detected = True
+                
+                else:
+                    time.sleep(0.01)
 
             except Exception as e:
                 # Catch unknown errors
@@ -157,6 +175,7 @@ class Arduino:
         if not self.ser or not self.ser.is_open:
             # Attempt to reconnect if connection is lost
             self.log.warning("Connection lost. Attempting to reconnect...")
+            self.disconnect()
             
             if not self.connect():
                  # Disconnect from hardware
