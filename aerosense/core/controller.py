@@ -15,6 +15,21 @@ from aerosense.hardware.arduino import Arduino
 from aerosense.hardware.camera import Camera
 from config import settings
 
+# --- Configuration ---
+# Valid songs
+VALID_SONGS = [
+    "DAISY", "CURIOSITY", "ULTRON", "MV1", "TARS", "PANIC", 
+    "MORNING", "SLEEP", "FNAF", "TEST", "GRANTED", "DENIED"
+]
+
+# Valid notes
+VALID_NOTES = []
+_notes = ["C", "CS", "D", "DS", "E", "F", "FS", "G", "GS", "A", "AS", "B"]
+for octave in range(3, 8):
+    for n in _notes:
+        VALID_NOTES.append(f"{n}{octave}")
+VALID_NOTES.append("C8")
+
 class Controller:
     """
     High-level controller for the AeroSense system.

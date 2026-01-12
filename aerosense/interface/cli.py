@@ -413,26 +413,19 @@ class CLI:
 
         if action == "LIST":
             print("\n--- AEROSENSE JUKEBOX ---")
+            
+            # Songs
             print("Available Songs:")
-            print("  * DAISY")
-            print("  * CURIOSITY")
-            print("  * ULTRON")
-            print("  * MV1")
-            print("  * TARS")
-            print("  * PANIC")
-            print("  * MORNING")
-            print("  * SLEEP")
-            print("  * FNAF")
-            print("  * TEST")
-            print("  * GRANTED")
-            print("  * DENIED")
-            print("\nAvailable Notes (Octaves 3-8):")
-            print("  * Octave 3: C3, CS3, D3, DS3, E3, F3, FS3, G3, GS3, A3, AS3, B3")
-            print("  * Octave 4: C4, CS4, D4, DS4, E4, F4, FS4, G4, GS4, A4, AS4, B4")
-            print("  * Octave 5: C5, CS5, D5, DS5, E5, F5, FS5, G5, GS5, A5, AS5, B5")
-            print("  * Octave 6: C6, CS6, D6, DS6, E6, F6, FS6, G6, GS6, A6, AS6, B6")
-            print("  * Octave 7: C7, CS7, D7, DS7, E7, F7, FS7, G7, GS7, A7, AS7, B7")
-            print("  * Octave 8: C8")
+            song_txt = ", ".join(core_ctrl.VALID_SONGS)
+            print(textwrap.fill(song_txt, width=60, initial_indent="  ", subsequent_indent="  "))
+            
+            print("\nAvailable Notes:")
+            all_notes = core_ctrl.VALID_NOTES
+            for oct_idx in range(3, 9):
+                notes_in_octave = [n for n in all_notes if str(oct_idx) in n]
+                if notes_in_octave:
+                    print(f"  * Octave {oct_idx}: {', '.join(notes_in_octave)}")
+
             print("\n  (Note: 'S' = Sharp. Use CS4 for C#4)")
             print("-------------------------\n")
 
@@ -441,11 +434,36 @@ class CLI:
                 print(">> Usage: MUSIC PLAY [SONG] OR MUSIC PLAY NOTE [NOTE] [SEC]")
                 return
             
-            full_arg = " ".join(args[1:]) 
-            command = f"MUSIC PLAY {full_arg}"
-            
-            self.controller.arduino.send(command)
-            print(f">> Sent: {command}")
+            target = args[1].upper()
+
+            # Note command
+            if target == "NOTE":
+                if len(args) < 3:
+                    print(">> Usage: MUSIC PLAY NOTE [NOTE] [SEC]")
+                    return
+                note_name = args[2].upper()
+                
+                if note_name in core_ctrl.VALID_NOTES:
+                    duration = self._parse_arg(args, 3, default=1)
+                    self.controller.arduino.send(f"MUSIC PLAY NOTE {note_name} {duration}")
+                    print(f">> Playing Note: {note_name} ({duration}s)")
+                else:
+                    print(f">> Invalid Note: {note_name}")
+                    self.controller.play_music("DENIED")
+
+            # Random song
+            elif target == "RANDOM":
+                 self.controller.play_music("RANDOM")
+                 print(">> Playing Random Track")
+
+            # Song
+            elif target in core_ctrl.VALID_SONGS:
+                self.controller.play_music(target)
+                print(f">> Playing Song: {target}")
+
+            else:
+                print(f">> Invalid Song: '{target}'. Type 'MUSIC LIST' for options.")
+                self.controller.play_music("DENIED")
 
         elif action == "STOP":
             self.controller.stop_music()
@@ -453,7 +471,6 @@ class CLI:
             
         else:
             print(f">> Unknown Music Action: {action}")
-    
     def _handle_ping(self, args: List[str]):
         """
         Handle PING command with groups.

@@ -26,6 +26,7 @@
         .btn-red { background: var(--red); }
         .btn-gray { background: var(--dim); }
         .btn-outline { background: transparent; border: 1px solid #555; color: #aaa; }
+        .btn-outline:hover { border-color: #888; color: white; }
         
         /* Toggles */
         .toggle-on { background: var(--green); box-shadow: 0 0 8px var(--green); color: white; }
@@ -124,17 +125,15 @@
         <div class="panel">
             <h2>Audio</h2>
             <div class="row">
+                <button class="btn-red" onclick="post('/api/music', {action: 'STOP'})">STOP MUSIC</button>
                 <button class="btn-blue" onclick="post('/api/music', {action: 'RANDOM'})">PLAY RANDOM</button>
-                <button class="btn-red" onclick="post('/api/music', {action: 'STOP'})">STOP</button>
             </div>
-            <div class="row">
-                <input type="text" id="custom_song" placeholder="Song Name" style="width: 100%;">
-                <button class="btn-green" style="width: 100px;" onclick="playCustom()">PLAY</button>
-            </div>
-            <div style="margin-top: 10px;">
-                <small style="color: #888;">Playlist: 
-                {% for song in songs %} <span style="color: #aaa; border: 1px solid #444; padding: 2px 5px; border-radius: 4px; display: inline-block; margin: 2px;">{{ song }}</span> {% endfor %}
-                </small>
+            <div class="grid-3" style="margin-top: 10px;">
+                {% for song in songs %}
+                    <button class="btn-outline" onclick="post('/api/music', {action: 'PLAY', song: '{{ song }}'})">
+                        {{ song }}
+                    </button>
+                {% endfor %}
             </div>
         </div>
 
@@ -209,11 +208,6 @@
             let durInput = document.getElementById(target === 'LIGHTS' ? 'dur_lights' : 'dur_pump');
             let duration = durInput.value || 0;
             post('/api/run_manual', {target: target, state: state, duration: duration});
-        }
-
-        function playCustom() {
-            let song = document.getElementById('custom_song').value;
-            post('/api/music', {action: 'PLAY', song: song});
         }
     </script>
 </body>
