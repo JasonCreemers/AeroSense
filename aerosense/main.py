@@ -47,7 +47,6 @@ def main():
         cli.start()
         
         log.info("System Active.")
-        controller.play_music("GRANTED")
 
         # --- Main Automation Loop ---
         while cli.running:

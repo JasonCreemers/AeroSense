@@ -2,8 +2,8 @@
 All notable changes to the **AeroSense** project will be documented in this file.
 
 ## [v3.4.3] - 2026-01-12
-### Added
-- 
+### Changed
+- Removed redundant audio feedback cues.
 
 ### Fixed
 - Refactored the live camera to run as non-blocking.
