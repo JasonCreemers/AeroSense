@@ -47,7 +47,7 @@ SENSOR_INTERVAL_MINS: int = 30
 # --- Hardware Configuration ---
 # Pump
 PUMP_MAX_DURATION_SEC: int = 30 # Pump safety cutoff
-PUMP_SAFETY_THRESHOLD_MM: int = 75 # Minimum water level (Empty is 150-180mm)
+PUMP_SAFETY_THRESHOLD_MM: int = 100 # Minimum water level (Empty is 150-180mm)
 PUMP_SAFETY_INTERVAL_SEC: float = 2.0 # Interval between pump safety checks
 
 # --- Camera Configuration ---

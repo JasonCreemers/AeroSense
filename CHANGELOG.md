@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.5.1] - 2026-01-13
+### Changed
+- Modified water level distance.
+
 ## [v3.5.0] - 2026-01-13
 ### Changed
 - Finalized physical implementation.
