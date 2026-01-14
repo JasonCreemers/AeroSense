@@ -13,8 +13,8 @@ Usage:
 from typing import List
 
 # --- Versioning ---
-__version__: str = "v3.4.3"
-__release__: str = "2026-01-12"
+__version__: str = "v3.5.1"
+__release__: str = "2026-01-13"
 
 # --- Component Exports ---
 from .core.controller import Controller
