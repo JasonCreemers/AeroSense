@@ -60,10 +60,12 @@ class Camera:
             cmd: List[str] = [
                 "rpicam-still",
                 "-o", str(filepath),
-                "-t", "2000",
+                "-t", "3000",
                 "--width", str(self.resolution[0]),
                 "--height", str(self.resolution[1]),
-                "--nopreview"
+                "--nopreview",
+                '--autofocus-mode', 'continuous',
+                #'--awb', 'fluorescent'
             ]
             
             if self.rotation != 0:
@@ -77,7 +79,7 @@ class Camera:
                 subprocess.run(
                     cmd, 
                     check=True, 
-                    timeout=10,
+                    timeout=4000,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.PIPE
                 )
