@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.5.2] - 2026-01-13
+### Changed
+- Modified camera settings to improve image quality.
+
 ## [v3.5.1] - 2026-01-13
 ### Changed
 - Modified water level distance.
