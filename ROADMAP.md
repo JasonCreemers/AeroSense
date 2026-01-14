@@ -8,6 +8,7 @@ This document outlines the development trajectory for the AeroSense project. Tas
     - Maybe default runtimes for lights/pumps.
     - Photo updating betters
     - Fix up sync button
+- Add warning sound before pump
 
 ---
 
