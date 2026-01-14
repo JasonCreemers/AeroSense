@@ -65,7 +65,8 @@ class Camera:
                 "--height", str(self.resolution[1]),
                 "--nopreview",
                 '--autofocus-mode', 'continuous',
-                #'--awb', 'fluorescent'
+                #'--metering', 'center',
+                #'--awb', '(SOMETHING)',
             ]
             
             if self.rotation != 0:
