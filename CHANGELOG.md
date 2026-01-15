@@ -7,6 +7,7 @@ All notable changes to the **AeroSense** project will be documented in this file
 
 ### Changed
 - Removed `SYNC` button from diagnostics panel in GUI.
+- Moved randomize song logic to Python side
 
 ### Fixed
 - Fixed GUI camera button to handle capture delays.
