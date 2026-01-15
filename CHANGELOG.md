@@ -3,13 +3,13 @@ All notable changes to the **AeroSense** project will be documented in this file
 
 ## [v3.6.0] - 2026-01-14
 ### Added
-- 
+- Added audio safety warning before automated pump cycles.
 
 ### Changed
-- Removed `Sync` button from the GUI.
+- Removed `SYNC` button from diagnostics panel in GUI.
 
 ### Fixed
-- Fixed buffering camera time on GUI.
+- Fixed GUI camera button to handle capture delays.
 
 ## [v3.5.4] - 2026-01-14
 ### Changed
