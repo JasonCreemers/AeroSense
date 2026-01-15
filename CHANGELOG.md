@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.6.0] - 2026-01-14
+### Added
+- 
+
+### Changed
+- Removed `Sync` button from the GUI.
+
+### Fixed
+- Fixed buffering camera time on GUI.
+
 ## [v3.5.4] - 2026-01-14
 ### Changed
 - Modified water level distance.

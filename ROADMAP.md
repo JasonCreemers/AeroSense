@@ -5,7 +5,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 ## Immediate Tasks
 - Add sad Spongebob song.
 - Clean up Flask GUI.
-    - Maybe default runtimes for lights/pumps.
     - Photo updating betters
     - Fix up sync button
 - Add warning sound before pump
