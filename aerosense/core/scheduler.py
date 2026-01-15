@@ -64,6 +64,10 @@ class Scheduler:
         self.last_pump_min = -1
         self.last_sensor_min = -1
 
+        # State tracking
+        self.pump_warning_active = False
+        self.pump_start_deadline = 0
+
         self.log.info("Scheduler Initialized. All cycles standing by.")
 
     def set_cycle(self, component: str, state: bool):
@@ -106,6 +110,7 @@ class Scheduler:
                 if self.controller.state["pump"]:
                      self.log.info(f"Cycle '{target}' Disabled: Turning Pump OFF immediately.")
                 self.controller.set_pump(False)
+                self.pump_warning_active = False
 
             # Lights
             if target in ["lights", "hardware", "system"]:
@@ -120,6 +125,7 @@ class Scheduler:
         """
         for key in self.cycles:
             self.cycles[key] = False
+        self.pump_warning_active = False
         self.log.warning("Scheduler: All cycles DISABLED.")
 
     def register_manual_light_change(self, state: bool):
@@ -225,15 +231,30 @@ class Scheduler:
 
         # --- Pump Schedule ---
         if self.cycles["pump"]:
-            # Check if current minute matches the interval
+            
+            # Trigger the sequence
             if (current_minute % settings.PUMP_INTERVAL_MINS == 0) and (current_minute != self.last_pump_min):
                 
-                # Avoid double-triggering if already running
-                if not self.controller.state["pump"]:
-                    # Turn on pump
-                    self.log.info(f"Schedule: Triggering Pump Cycle (Minute : {current_minute:02d}).")
-                    self.controller.set_pump(True, settings.PUMP_DURATION_SEC)
+                if not self.controller.state["pump"] and not self.pump_warning_active:
+                    self.log.info(f"Schedule: Pump Cycle Pending. Playing Warning.")
+                    
+                    self.controller.play_music("PANIC")
+                    
+                    # Set flag and deadline
+                    self.pump_warning_active = True
+                    self.pump_start_deadline = time.time() + 8.0
+                    
                     self.last_pump_min = current_minute
+
+            # Execute the action
+            if self.pump_warning_active:
+                if time.time() >= self.pump_start_deadline:
+                    self.log.info("Schedule: Warning complete. Activating Pump.")
+                    
+                    self.controller.set_pump(True, settings.PUMP_DURATION_SEC)
+                    
+                    # Reset flag
+                    self.pump_warning_active = False
 
         # --- Sensor Logging ---
         if (current_minute % settings.SENSOR_INTERVAL_MINS == 0) and (current_minute != self.last_sensor_min):
