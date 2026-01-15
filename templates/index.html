@@ -58,7 +58,7 @@
                 <div class="cam-feed" style="display:flex; align-items:center; justify-content:center; color:#555;">NO IMAGE DATA</div>
             {% endif %}
             <div class="row" style="margin-top: 10px;">
-                <button class="btn-blue" onclick="post('/api/run_sensor', {target: 'CAMERA'})">RUN CAM (Burst)</button>
+                <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM (Burst)</button>
                 <button class="btn-green" onclick="post('/api/run_sensor', {target: 'LIVE_CAMERA'})">RUN LIVE CAM (HDMI)</button>
             </div>
         </div>
@@ -178,9 +178,8 @@
             </div>
 
             <hr style="border-color:#444;">
-            <div class="grid-3">
+            <div class="row">
                 <button class="btn-gray" onclick="window.location.reload()">STATUS</button>
-                <button class="btn-blue" onclick="post('/api/action', {action: 'SYNC'})">SYNC</button>
                 <button class="btn-blue" onclick="post('/api/action', {action: 'RESET'})">RESET</button>
             </div>
         </div>
@@ -208,6 +207,22 @@
             let durInput = document.getElementById(target === 'LIGHTS' ? 'dur_lights' : 'dur_pump');
             let duration = durInput.value || 0;
             post('/api/run_manual', {target: target, state: state, duration: duration});
+        }
+
+        function runCamera() {
+            let btn = document.getElementById("btn-cam");
+            btn.innerHTML = "CAPTURING...";
+            btn.style.opacity = "0.7";
+            
+            fetch('/api/run_sensor', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target: 'CAMERA'})
+            });
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
         }
     </script>
 </body>
