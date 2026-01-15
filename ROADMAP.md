@@ -5,6 +5,7 @@ This document outlines the development trajectory for the AeroSense project. Tas
 ## Immediate Tasks
 - Add sad Spongebob song.
 - Clean up Flask GUI.
+- Sort the songs into categories based on emotions (different lists?), then have the randomizer choose a random emotion from that category minus system sounds.
 
 ---
 
@@ -21,7 +22,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 ### Audio Changes
 - Implement an **Octave Shifter** in `music.h` to expand note range.
 - Add University of Akron "Fight Song" and "Alma Mater".
-- Move randomization logic to Python (`controller.py`) and categorize songs into "Happy", "Sad", "Angry", etc. playlists.
 
 ---
 

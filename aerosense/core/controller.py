@@ -6,6 +6,7 @@ It orchestrates hardware interactions, safety logic, and coordinates data loggin
 """
 
 import logging
+import random
 import time
 import threading
 from typing import Dict, Optional, Tuple, List
@@ -502,6 +503,11 @@ class Controller:
             song_name (str): Name of song (DAISY, ULTRON) or Note (C4, A5).
         """
         clean_name = song_name.strip().upper()
+
+        if clean_name == "RANDOM":
+            clean_name = random.choice(VALID_SONGS)
+            self.log.info(f"Randomly selected song: {clean_name}")
+
         self.log.info(f"Music Request: {clean_name}")
         
         if self.arduino.send(f"MUSIC PLAY {clean_name}"):
