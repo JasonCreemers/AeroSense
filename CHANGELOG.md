@@ -2,6 +2,9 @@
 All notable changes to the **AeroSense** project will be documented in this file.
 
 ## [v3.7.0] - 2026-01-18
+### Added
+- Expanded system health monitoring to `PI HEALTH` command.
+
 ### Changed
 - Modified water pump cycle.
 - Organized music library into categories and updated shuffle logic.

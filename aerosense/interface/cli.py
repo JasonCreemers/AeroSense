@@ -7,9 +7,9 @@ It processes input from the console, routes commands to the appropriate system l
 
 import logging
 import sys
+import textwrap
 import threading
 from typing import List
-import webbrowser
 
 from aerosense.core.controller import Controller
 from aerosense.core.scheduler import Scheduler
@@ -343,13 +343,20 @@ class CLI:
             data = self.controller.run_full_diagnostic()
             env_str = f"{data['env'][0]}°F | {data['env'][1]}% RH" if data['env'] else "[TIMEOUT]"
             water_str = f"{data['water']}mm" if data['water'] is not None else "[TIMEOUT]"
+            if isinstance(data['pi'], dict):
+                 pi_str = (f"Temp: {data['pi']['temp']}°C | "
+                           f"RAM: {data['pi']['ram']}% | "
+                           f"Disk: {data['pi']['disk']}GB | "
+                           f"Up: {data['pi']['uptime']}hr")
+            else:
+                 pi_str = "[ERROR]"
 
             print(f"\n--- DIAGNOSTIC SWEEP ---")
             print(f">> Environment: {env_str}")
             print(f">> Water Level: {water_str}")
-            print(f">> Pi Health:   {data['pi']}°C")
+            print(f">> Pi Health:   {pi_str}")
             print("------------------------")
-            
+
         elif target == "ENVIRONMENT":
             print(">> Reading Environment...")
             data = self.controller.read_environment()
@@ -361,11 +368,9 @@ class CLI:
             print(f">> Water Level: {level}mm" if level is not None else ">> Error: Sensor timeout.")
 
         elif target == "CAMERA":
-            # Parse count
             count = self._parse_arg(args, 1, default=-1)
             if count is None: return
             
-            # If count is None, controller will use settings default
             final_count = None if count == -1 else count
             
             count_str = f"{final_count}" if final_count else "Default"
@@ -393,8 +398,12 @@ class CLI:
 
         elif target == "PI_HEALTH":
             print(">> Checking Pi Health...")
-            temp = self.controller.check_pi_health()
-            print(f">> CPU Temp: {temp}C")
+            data = self.controller.check_pi_health()
+            
+            print(f"   CPU Temp:   {data['temp']}°C")
+            print(f"   RAM Usage:  {data['ram']}%")
+            print(f"   Disk Free:  {data['disk']} GB")
+            print(f"   Uptime:     {data['uptime']} Hours")
             
         else:
             print(f">> Unknown Run Target: {target}")

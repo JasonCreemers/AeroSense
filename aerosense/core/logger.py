@@ -63,7 +63,7 @@ class Logger:
             "master": ["Timestamp", "Temp_F", "Humidity_RH", "Water_Level_mm", "Image_Paths"],
             "camera": ["Timestamp", "Image_Paths"],
             "music": ["Timestamp", "Song_Title"],
-            "pi": ["Timestamp", "CPU_Temp_C"]
+            "pi": ["Timestamp", "CPU_Temp_C", "RAM_Usage_Pct", "Disk_Free_GB", "Uptime_Hours"]
         }
 
         # Check and create each CSV
@@ -194,11 +194,14 @@ class Logger:
         """
         self._write_row("music", [song_name])
 
-    def log_pi_temp(self, cpu_temp: float) -> None:
+    def log_pi_stats(self, temp: float, ram: float, disk: float, uptime: float) -> None:
         """
-        Log the Raspberry Pi CPU temperature.
+        Log comprehensive system health stats.
 
         Args:
-            cpu_temp (float): CPU Temperature in Celsius.
+            temp (float): CPU Temperature in Celsius.
+            ram (float): RAM Usage percentage.
+            disk (float): Free Disk Space in GB.
+            uptime (float): System Uptime in Hours.
         """
-        self._write_row("pi", [round(cpu_temp, 2)])
+        self._write_row("pi", [temp, ram, disk, uptime])

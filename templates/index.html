@@ -113,10 +113,13 @@
                     <span class="time-tag">{{ cache['water_reading']['time'] }}</span>
                 </div>
             </div>
-            <div class="row">
-                <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
-                <div style="text-align: right;">
-                    <span class="data-tag">{{ cache['pi_health_reading']['value'] }}°C</span>
+            <div class="row" style="align-items: flex-start;">
+                <button class="btn-outline" style="margin-top: 5px;" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
+                <div style="text-align: right; font-size: 0.85rem;">
+                    <div class="data-tag" style="margin-bottom: 2px;">CPU: {{ cache['pi_health_reading']['value']['temp'] }}°C</div>
+                    <div class="data-tag" style="margin-bottom: 2px;">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</div>
+                    <div class="data-tag" style="margin-bottom: 2px;">DSK: {{ cache['pi_health_reading']['value']['disk'] }}GB</div>
+                    <div class="data-tag">UPT: {{ cache['pi_health_reading']['value']['uptime'] }}hr</div>
                     <span class="time-tag">{{ cache['pi_health_reading']['time'] }}</span>
                 </div>
             </div>

@@ -15,7 +15,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 
 - Implement better noise filtering for sensor data (moving averages/outlier rejection).
 - Implement discrete logic for **High**, **Medium**, and **Low** water level alerts (currently binary).
-- MAYBE: Add more direct Raspberry Pi control commands.
 
 - Add University of Akron "Fight Song" and "Alma Mater".
 
