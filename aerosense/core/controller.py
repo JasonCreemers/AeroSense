@@ -7,6 +7,7 @@ It orchestrates hardware interactions, safety logic, and coordinates data loggin
 
 import logging
 import random
+import shutil
 import time
 import threading
 from typing import Dict, Optional, Tuple, List
@@ -79,7 +80,10 @@ class Controller:
             "temp_reading":      {"value": None, "timestamp": 0},
             "humidity_reading":  {"value": None, "timestamp": 0},
             "water_reading":     {"value": None, "timestamp": 0},
-            "pi_health_reading": {"value": None, "timestamp": 0},
+            "pi_health_reading": {
+                "value": {"temp": 0, "ram": 0, "disk": 0, "uptime": 0}, 
+                "timestamp": 0
+            },
             "latest_photo":      {"value": None, "timestamp": 0},
 
             # Pings (Status)
@@ -473,33 +477,65 @@ class Controller:
             self.set_lights(False)
             self.log.info("Live Camera: Restoring lights to OFF.")
 
-    def check_pi_health(self) -> float:
+    def check_pi_health(self) -> Dict[str, float]:
         """
-        Read and log the Raspberry Pi CPU temperature.
+        Perform a comprehensive system health check.
 
         Returns:
-            float: CPU temperature in Celsius.
+            Dict[str, float]: A dictionary containing 'temp', 'ram', 'disk', and 'uptime'.
         """
+        stats = {
+            "temp": 0.0,
+            "ram": 0.0,
+            "disk": 0.0,
+            "uptime": 0.0
+        }
+
+        # CPU temperature
         try:
-            # Read data
             with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
-                temp_c = float(f.read()) / 1000.0
-                self.logger.log_pi_temp(temp_c)
+                stats["temp"] = round(float(f.read()) / 1000.0, 1)
+        except Exception:
+            self.log.error("Failed to read CPU Temp")
 
-                # Update Cache
-                self._update_cache("pi_health_reading", temp_c)
+        # RAM usage
+        try:
+            with open("/proc/meminfo", "r") as f:
+                mem = {}
+                for line in f:
+                    parts = line.split()
+                    mem[parts[0].strip(":")] = int(parts[1])
+            
+            total = mem.get("MemTotal", 1)
+            avail = mem.get("MemAvailable", 0)
+            stats["ram"] = round(100 * (1 - (avail / total)), 1)
+        except Exception:
+            self.log.error("Failed to read RAM Usage")
 
-                return temp_c
-        except IOError:
-            # Handle data errors
-            self.log.error("Could not read Pi thermal zone.")
-            self.play_music("DENIED")
-            return 0.0
-        except FileNotFoundError:
-            # Handle errors on windows
-            self.log.warning("Thermal zone not found (Not on Pi?). returning 0.0")
-            self.play_music("DENIED")
-            return 0.0
+        # Disk usage
+        try:
+            _, _, free = shutil.disk_usage(settings.DATA_DIR)
+            stats["disk"] = round(free / (2**30), 2)
+            
+            if stats["disk"] < 1.0:
+                 self.log.critical("LOW DISK SPACE WARNING")
+                 self.play_music("PANIC")
+        except Exception:
+            self.log.error("Failed to read Disk Usage")
+
+        # Uptime
+        try:
+            with open("/proc/uptime", "r") as f:
+                seconds = float(f.read().split()[0])
+                stats["uptime"] = round(seconds / 3600, 1)
+        except Exception:
+            self.log.error("Failed to read Uptime")
+
+        # Log and Cache
+        self.logger.log_pi_stats(stats["temp"], stats["ram"], stats["disk"], stats["uptime"])
+        self._update_cache("pi_health_reading", stats)
+        
+        return stats
 
     def play_music(self, song_name: str):
         """
