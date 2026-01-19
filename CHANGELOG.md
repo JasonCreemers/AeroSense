@@ -4,6 +4,7 @@ All notable changes to the **AeroSense** project will be documented in this file
 ## [v3.7.0] - 2026-01-18
 ### Changed
 - Modified water pump cycle.
+- Organized music library into categories and updated shuffle logic.
 
 ## [v3.6.0] - 2026-01-14
 ### Added

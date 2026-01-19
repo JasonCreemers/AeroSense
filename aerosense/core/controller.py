@@ -18,10 +18,16 @@ from config import settings
 
 # --- Configuration ---
 # Valid songs
-VALID_SONGS = [
-    "DAISY", "CURIOSITY", "ULTRON", "MV1", "TARS", "PANIC", 
-    "MORNING", "SLEEP", "FNAF", "TEST", "GRANTED", "DENIED"
-]
+HAPPY_SONGS = ["DAISY", "MV1"]
+SAD_SONGS = []
+ANGRY_SONGS = ["ULTRON", "FNAF"]
+OTHER_SONGS = ["MORNING", "SLEEP", "CURIOSITY", "TARS"]
+
+SYSTEM_SOUNDS = ["PANIC", "TEST", "GRANTED", "DENIED"]
+
+VALID_SONGS = HAPPY_SONGS + SAD_SONGS + ANGRY_SONGS + OTHER_SONGS + SYSTEM_SOUNDS
+
+SHUFFLE_POOL = HAPPY_SONGS + SAD_SONGS + ANGRY_SONGS + OTHER_SONGS
 
 # Valid notes
 VALID_NOTES = []
@@ -505,7 +511,10 @@ class Controller:
         clean_name = song_name.strip().upper()
 
         if clean_name == "RANDOM":
-            clean_name = random.choice(VALID_SONGS)
+            if not SHUFFLE_POOL:
+                self.log.warning("Random shuffle requested, but SHUFFLE_POOL is empty!")
+                return
+            clean_name = random.choice(SHUFFLE_POOL)
             self.log.info(f"Randomly selected song: {clean_name}")
 
         self.log.info(f"Music Request: {clean_name}")

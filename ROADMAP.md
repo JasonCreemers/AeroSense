@@ -18,7 +18,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - MAYBE: Add more direct Raspberry Pi control commands.
 
 - Add University of Akron "Fight Song" and "Alma Mater".
-- Sort the songs into categories and remove system sounds from randomizer.
 
 ---
 
