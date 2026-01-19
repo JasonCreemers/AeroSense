@@ -34,12 +34,12 @@ IMG_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Hardware Automation Schedules ---
 # Pump Logic
-PUMP_INTERVAL_MINS: int = 5
-PUMP_DURATION_SEC: int = 10
+PUMP_INTERVAL_MINS: int = 30
+PUMP_DURATION_SEC: int = 20
 
 # Lighting Logic
-LIGHTS_START_HOUR: int = 8
-LIGHTS_END_HOUR: int = 20
+LIGHTS_START_HOUR: int = 10
+LIGHTS_END_HOUR: int = 16
 
 # Sensor Logic
 SENSOR_INTERVAL_MINS: int = 30 
