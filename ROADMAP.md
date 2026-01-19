@@ -5,7 +5,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 ## Immediate Tasks
 - Add sad Spongebob song.
 - Clean up Flask GUI.
-- Sort the songs into categories based on emotions (different lists?), then have the randomizer choose a random emotion from that category minus system sounds.
 
 ---
 
@@ -14,14 +13,12 @@ This document outlines the development trajectory for the AeroSense project. Tas
 ### Actuation Changes
 - Implement additional redundant safety checks for hardware actuators.
 
-### Sensor Changes
 - Implement better noise filtering for sensor data (moving averages/outlier rejection).
 - Implement discrete logic for **High**, **Medium**, and **Low** water level alerts (currently binary).
-- Add more direct Raspberry Pi control commands.
+- MAYBE: Add more direct Raspberry Pi control commands.
 
-### Audio Changes
-- Implement an **Octave Shifter** in `music.h` to expand note range.
 - Add University of Akron "Fight Song" and "Alma Mater".
+- Sort the songs into categories and remove system sounds from randomizer.
 
 ---
 
@@ -32,6 +29,5 @@ This document outlines the development trajectory for the AeroSense project. Tas
 
 ### MOSS Changes
 - Train a **RoboFlow** Computer Vision model for plant health.
-- Implement **YOLO** architecture for object/growth detection.
 - Train AI model to make system changes based on readings and feedback.
 - Link AI detection results to the audio system.
