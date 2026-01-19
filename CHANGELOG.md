@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.7.0] - 2026-01-18
+### Changed
+- Modified water pump cycle.
+
 ## [v3.6.0] - 2026-01-14
 ### Added
 - Added audio safety warning before automated pump cycles.
