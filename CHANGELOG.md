@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.7.0] - 2026-01-21
+### Changed
+- Modified water pump cycle.
+
+### Fixed
+- Brought back `SYNC` button from diagnostics panel in GUI and removed `STATUS`.
+
 ## [v3.7.0] - 2026-01-18
 ### Added
 - Expanded system health monitoring to `PI HEALTH` command.

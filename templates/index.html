@@ -182,9 +182,9 @@
 
             <hr style="border-color:#444;">
             <div class="row">
-                <button class="btn-gray" onclick="window.location.reload()">STATUS</button>
+                <button class="btn-blue" onclick="post('/api/action', {action: 'SYNC'})">SYNC STATE</button>
                 <button class="btn-blue" onclick="post('/api/action', {action: 'RESET'})">RESET</button>
-            </div>
+                </div>
         </div>
 
         <div class="panel">
