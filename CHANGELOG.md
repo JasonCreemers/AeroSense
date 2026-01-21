@@ -1,11 +1,15 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
-## [v3.7.1] - 2026-01-21
+## [v3.8.2] - 2026-01-21
+### Fixed
+- Resolved versioning conflicts.
+
+## [v3.8.1] - 2026-01-21
 ### Fixed
 - Resolved scheduling collision between morning music inside active hours.
 
-## [v3.7.0] - 2026-01-21
+## [v3.8.0] - 2026-01-21
 ### Added
 - Implemented smart warning tones for pump cycles.
 
