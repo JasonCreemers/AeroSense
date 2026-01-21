@@ -183,6 +183,8 @@ class Scheduler:
         current_hour = now.hour
         current_minute = now.minute
 
+        music_played_this_cycle = False
+
         # --- Lights Schedule ---
         if self.cycles["lights"]:
             start = settings.LIGHTS_START_HOUR
@@ -205,21 +207,17 @@ class Scheduler:
                     self.log.info(f"Schedule: Window active. Turning Lights ON.")
                     self.controller.set_lights(True)
 
-                    # Play morning music
-                    if current_hour == start:
-                        # Check for birthdays
-                        birthday_name = None
-                        for month, day, name in BIRTHDAYS:
-                            if now.month == month and now.day == day:
-                                birthday_name = name
-                                break # Stop searching if we find a match
-
-                        if birthday_name:
-                            self.log.info(f"Schedule: Special Date detected. Happy Birthday to {birthday_name}!")
-                            self.controller.play_music("CURIOSITY")
-                        else:
-                            self.log.info("Schedule: Routine Start. Good Morning.")
-                            self.controller.play_music("MORNING")
+                    # Determine Song
+                    song_to_play = "MORNING"
+                    # Check for birthdays
+                    for month, day, name in BIRTHDAYS:
+                        if now.month == month and now.day == day:
+                            self.log.info(f"Schedule: Special Date detected. Happy Birthday to {name}!")
+                            song_to_play = "CURIOSITY"
+                            break
+                    
+                    self.controller.play_music(song_to_play)
+                    music_played_this_cycle = True
             
             else:
                 # Turn off lights
@@ -228,6 +226,7 @@ class Scheduler:
                         self.log.info(f"Schedule: Window ended. Turning Lights OFF.")
                         self.controller.set_lights(False)
                         self.controller.play_music("SLEEP")
+                        music_played_this_cycle = True
 
         # --- Pump Schedule ---
         if self.cycles["pump"]:
@@ -236,13 +235,20 @@ class Scheduler:
             if (current_minute % settings.PUMP_INTERVAL_MINS == 0) and (current_minute != self.last_pump_min):
                 
                 if not self.controller.state["pump"] and not self.pump_warning_active:
-                    self.log.info(f"Schedule: Pump Cycle Pending. Playing Warning.")
                     
-                    self.controller.play_music("PANIC")
+                    wait_duration = 8.0
+                    
+                    # If music already played this tick use that as the warning
+                    if music_played_this_cycle:
+                         self.log.info("Schedule: Music Syncup detected. Using Lights music as Pump Warning (15s).")
+                         wait_duration = 15.0
+                    else:
+                         self.log.info(f"Schedule: Pump Cycle Pending. Playing Warning (8s).")
+                         self.controller.play_music("WARNING")
                     
                     # Set flag and deadline
                     self.pump_warning_active = True
-                    self.pump_start_deadline = time.time() + 8.0
+                    self.pump_start_deadline = time.time() + wait_duration
                     
                     self.last_pump_min = current_minute
 
