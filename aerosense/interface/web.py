@@ -120,6 +120,7 @@ class WebServer:
         self.app.add_url_rule('/api/music', 'music', self.control_music, methods=['POST'])
         self.app.add_url_rule('/api/ping', 'ping', self.ping_component, methods=['POST'])
         self.app.add_url_rule('/api/system', 'system', self.system_command, methods=['POST'])
+        self.app.add_url_rule('/api/action', 'run_action', self.run_action, methods=['POST'])
 
     # --- Helpers ---
     def _fmt_time(self, timestamp: float) -> str:
