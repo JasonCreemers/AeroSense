@@ -16,7 +16,9 @@ This document outlines the development trajectory for the AeroSense project. Tas
 
 - Implement better noise filtering for sensor data (moving averages, outlier rejection, etc.).
 
-- Implement discrete logic for High, Medium, and Low water level alerts. Have this displayed somewhere somehow to warn use (CLI and GUI).
+- Implement discrete logic for High, Medium, and Low water level alerts. Have this displayed somewhere somehow to warn use (CLI and GUI). Also include a general checkup for users.
+
+- Implement logic for scheduler to interpret minutes as well as hours.
 
 ---
 
