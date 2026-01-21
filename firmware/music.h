@@ -243,6 +243,11 @@ const Note kDenied[] PROGMEM = {
     {NOTE_B3, 0.25}, {NOTE_F3, 0.5} 
 };
 
+// Pump Warning (Warning)
+const Note kWarning[] PROGMEM = {
+    {NOTE_A4, 1}, {REST, 1}, {NOTE_A4, 1}, {REST, 1}, {NOTE_A4, 1}
+};
+
 // --- SONG REGISTRY ---
 #define COUNT(x) (sizeof(x) / sizeof(x[0]))
 Song kSongList[] = {
@@ -257,7 +262,8 @@ Song kSongList[] = {
   {"Fnaf", kFnaf, COUNT(kFnaf), 108},
   {"Test", kTest, COUNT(kTest), 160},
   {"Granted", kGranted, COUNT(kGranted), 240},
-  {"Denied", kDenied, COUNT(kDenied), 240}
+  {"Denied", kDenied, COUNT(kDenied), 240},
+  {"Warning", kWarning, COUNT(kWarning), 120}
 };
 const int kSongCount = COUNT(kSongList);
 

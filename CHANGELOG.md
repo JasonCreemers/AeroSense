@@ -2,11 +2,16 @@
 All notable changes to the **AeroSense** project will be documented in this file.
 
 ## [v3.7.0] - 2026-01-21
+### Added
+- Implemented smart warning tones for pump cycles.
+
 ### Changed
 - Modified water pump cycle.
+- Replaced `STATUS` button with `SYNC` in GUI diagnostics.
+- Adjusted pump delay logic to accommodate longer warning songs.
 
 ### Fixed
-- Brought back `SYNC` button from diagnostics panel in GUI and removed `STATUS`.
+- Resolved scheduling collision between morning/night music and pump warnings.
 
 ## [v3.7.0] - 2026-01-18
 ### Added
