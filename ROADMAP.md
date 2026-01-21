@@ -6,7 +6,13 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add sad Spongebob song.
 - Add UA Fight Song
 - Add UA Alma Mater
+
+- Fix pre-pump song
+
+- Fix good morning and good night song because pre-pump song
+
 - Clean up Flask GUI.
+- Add back the SYNC button and actually get rid of the STATUS button
 
 ---
 
