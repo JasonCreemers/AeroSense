@@ -238,7 +238,7 @@ class Scheduler:
                 
                 if not self.controller.state["pump"] and not self.pump_warning_active:
                     
-                    wait_duration = 8.0
+                    wait_duration = 4.0
                     
                     # If music already played this tick use that as the warning
                     if music_played_this_cycle:
