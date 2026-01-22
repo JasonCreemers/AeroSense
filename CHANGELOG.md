@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.8.3] - 2026-01-21
+### Changed
+- Removed test code.
+- Modified pump warning timing.
+
 ## [v3.8.2] - 2026-01-21
 ### Fixed
 - Resolved versioning conflicts.
