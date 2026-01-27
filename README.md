@@ -78,7 +78,7 @@ pip3 install -r requirements.txt
 Navigate to the project root and execute the main module.
 ```bash
 # Navigate to project root
-cd ~/AeroSense/AeroSense
+cd ~/jct
 
 # Launch main module
 python3 -m aerosense.main
