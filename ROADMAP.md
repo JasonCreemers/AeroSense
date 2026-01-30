@@ -11,6 +11,8 @@ This document outlines the development trajectory for the AeroSense project. Tas
 
 - Implement armageddon countdown at initialization/good morning.
 
+- source .venv/bin/activate
+
 ---
 
 ## Upcoming Tasks
