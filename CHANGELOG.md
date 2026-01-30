@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.8.7] - 2026-01-29
+### Fixed
+- Fixed GitHub repository.
+
+## [v3.8.6] - 2026-01-29
+### Fixed
+- Fixed GitHub repository.
+
 ## [v3.8.5] - 2026-01-29
 ### Fixed
 - Fixed GitHub repository.
