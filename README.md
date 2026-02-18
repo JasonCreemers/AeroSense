@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v3.8.7** | **Release: 2026-01-29**
+**Version: v3.9.0** | **Release: 2026-02-18**
 
 **AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -62,26 +62,45 @@
 ---
 
 ## Getting Started
- 
-### 1. Firmware Initialization
+
+### 1. Navigate to Project Root
+Open up a terminal session and navigate to the project root.
+```bash
+# Navigate to project root
+cd /home/aerosense/aerosense_prod
+```
+
+### 2. Firmware Initialization
 1. Ensure all hardware is correctly wired according to **[HARDWARE.md](HARDWARE.md)**.
 2. Open `firmware/firmware.ino` in the Arduino IDE.
 3. Compile and upload to the **Arduino Mega 2560**.
 
-### 2. Software Installation
+### 3. Initalize Environment
+Initialize the virtual environment.
+```bash
+# Initialize environment
+source .venv/bin/activate
+```
+
+### 4. Software Installation
 Install the required Python dependencies:
 ```bash
+# Install packages
 pip3 install -r requirements.txt
 ```
 
-### 3. Launching the System
-Navigate to the project root and execute the main module.
+### 5. Launching the System
+Execute the main module.
 ```bash
-# Navigate to project root
-cd ~/AeroSense/AeroSense
-
 # Launch main module
 python3 -m aerosense.main
+```
+
+## Quick Start
+**Note:** If the firmware is already initialized (Step 2) and the software is already installed (Step 4), then Steps 1, 3, and 5 can be combined into a single command.
+```bash
+# Navigate to project root, initialize environment, and launch main module
+cd /home/aerosense/aerosense_prod && source .venv/bin/activate && python3 -m aerosense.main
 ```
 
 ---
