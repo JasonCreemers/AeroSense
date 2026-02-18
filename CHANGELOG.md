@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.9.1] - 2026-02-18
+### Changed
+- Modified `README.md`.
+
 ## [v3.9.0] - 2026-02-18
 ### Changed
 - Modified system initialization and `README.md`.
