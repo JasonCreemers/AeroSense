@@ -220,6 +220,11 @@ class Scheduler:
                         
                         self.controller.play_music(song_to_play)
                         music_played_this_cycle = True
+
+                        # Countdown
+                        msg = self.controller.get_countdown_message()
+                        self.log.info(f"Good morning! {msg}")
+                        print(f">> Good morning! {msg}")
             
             else:
                 # Turn off lights

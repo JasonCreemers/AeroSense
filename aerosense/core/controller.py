@@ -10,6 +10,7 @@ import random
 import shutil
 import time
 import threading
+from datetime import date
 from typing import Dict, Optional, Tuple, List
 
 from aerosense.core.logger import Logger
@@ -694,6 +695,17 @@ class Controller:
             "water": water,
             "pi": pi_temp
         }
+
+    def get_countdown_message(self) -> str:
+        """Returns the appropriate countdown message based on today's date."""
+        today = date.today()
+        delta = (settings.COUNTDOWN_TARGET_DATE - today).days
+        if delta > 0:
+            return settings.COUNTDOWN_MSG_BEFORE.format(days=delta)
+        elif delta == 0:
+            return settings.COUNTDOWN_MSG_TODAY
+        else:
+            return settings.COUNTDOWN_MSG_AFTER
 
     def sync_state(self):
         """

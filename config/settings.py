@@ -11,6 +11,7 @@ Usage:
 """
 
 import os
+from datetime import date
 from pathlib import Path
 from typing import Tuple
 
@@ -59,3 +60,9 @@ CAM_BURST_COUNT: int = 1
 CAM_RESOLUTION: Tuple[int, int] = (1920, 1080)
 CAM_ROTATION: int = 0
 CAM_VFLIP: bool = False
+
+# --- Countdown Configuration ---
+COUNTDOWN_TARGET_DATE: date = date(2026, 4, 16)
+COUNTDOWN_MSG_BEFORE: str = "{days} days remain until Senior Design Day is here. Godspeed."
+COUNTDOWN_MSG_TODAY: str = "Today's the day, carpe diem people."
+COUNTDOWN_MSG_AFTER: str = "You may rest now."

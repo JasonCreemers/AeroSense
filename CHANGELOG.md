@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.10.2] - 2026-03-20
+### Added
+- Added armageddon countdown.
+
 ## [v3.10.1] - 2026-03-20
 ### Added
 - Added Lights safety cutoff.

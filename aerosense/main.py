@@ -34,6 +34,9 @@ def main():
         # The Controller manages hardware state
         controller = Controller()
         
+        # Countdown
+        print(f">> {controller.get_countdown_message()}")
+
         # The Scheduler manages automation logic
         scheduler = Scheduler(controller)
 
