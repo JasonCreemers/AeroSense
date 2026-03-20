@@ -469,6 +469,7 @@ class Controller:
         """
         Internal Logic: Executes camera sequence with thread locking.
         Ensures lights are ON during capture and restores them afterwards.
+        Pauses any active live stream and resumes it after capture.
 
         Args:
             count (int): The exact number of images to capture.
@@ -477,13 +478,20 @@ class Controller:
             List[str]: A list of the generated filenames.
         """
         with self.camera_lock:
+            # Pause live stream if active (only one process can use camera at a time)
+            was_streaming = self.camera.is_streaming
+            if was_streaming:
+                self.log.info("Pausing live stream for capture.")
+                self.camera.stop_stream()
+                time.sleep(0.5)
+
             # Check previous state
             was_lights_on = self.state["lights"]
 
             # Turn Lights ON (if they were off)
             if not was_lights_on:
                 self.log.info("Camera Flash: Toggling lights ON.")
-                self.set_lights(True) 
+                self.set_lights(True)
                 time.sleep(2.0)
 
             # Capture images
@@ -505,7 +513,12 @@ class Controller:
 
                 # Update cache
                 self._update_cache("latest_photo", images[-1])
-            
+
+            # Resume live stream if it was active before capture
+            if was_streaming:
+                self.log.info("Resuming live stream after capture.")
+                self.camera.start_stream()
+
             return images
     
     def run_live_camera(self, duration: int) -> None:
@@ -531,6 +544,22 @@ class Controller:
         if should_toggle_lights and not was_lights_on:
             self.set_lights(False)
             self.log.info("Live Camera: Restoring lights to OFF.")
+
+    def start_live_stream(self) -> bool:
+        """
+        Start the MJPEG live stream for the web interface.
+
+        Returns:
+            bool: True if stream started, False if camera is busy.
+        """
+        if self.camera_lock.locked():
+            self.log.warning("Cannot start stream: Camera is busy with a capture.")
+            return False
+        return self.camera.start_stream()
+
+    def stop_live_stream(self):
+        """Stop the MJPEG live stream."""
+        self.camera.stop_stream()
 
     def check_pi_health(self) -> Dict[str, float]:
         """

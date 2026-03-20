@@ -7,17 +7,17 @@
         :root { --bg: #1a1a1a; --panel: #2d2d2d; --text: #e0e0e0; --accent: #007bff; --green: #28a745; --red: #dc3545; --dim: #6c757d; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-        
+
         /* Sections */
         .panel { background: var(--panel); padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         h2 { margin-top: 0; border-bottom: 2px solid #444; padding-bottom: 10px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: #888; }
-        
+
         /* Inputs & Layouts */
         .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="text"], input[type="number"] { background: #444; border: 1px solid #555; color: white; padding: 8px; border-radius: 4px; width: 60px; text-align: center;}
-        
+
         /* Buttons */
         button { border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; color: white; width: 100%; }
         button:hover { opacity: 0.9; }
@@ -27,7 +27,7 @@
         .btn-gray { background: var(--dim); }
         .btn-outline { background: transparent; border: 1px solid #555; color: #aaa; }
         .btn-outline:hover { border-color: #888; color: white; }
-        
+
         /* Toggles */
         .toggle-on { background: var(--green); box-shadow: 0 0 8px var(--green); color: white; }
         .toggle-off { background: #444; color: #888; }
@@ -38,17 +38,50 @@
 
         /* Camera */
         .cam-feed { width: 100%; border-radius: 5px; border: 2px solid #444; min-height: 200px; background: #000; object-fit: cover; }
+
+        /* Terminal */
+        #terminal-output {
+            background: #111;
+            color: #4dc9f6;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #terminal-input {
+            background: #222;
+            border: 1px solid #555;
+            color: #4dc9f6;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            flex: 1;
+            width: auto;
+            text-align: left;
+        }
+        #terminal-input::placeholder { color: #555; }
+
+        /* Stream status indicator */
+        .stream-status { font-size: 0.8rem; text-align: center; margin-top: 5px; }
+        .stream-live { color: var(--green); }
+        .stream-off { color: #555; }
     </style>
 </head>
 <body>
     <div class="container">
-        
+
         <div style="text-align: center;">
             <h1 style="margin:0;">AEROSENSE <span style="font-size: 0.5em; color: #666;">{{ version }}</span></h1>
         </div>
 
         <div class="panel">
-            <h2>Live Feed</h2>
+            <h2>Camera Feed</h2>
             {% if latest_image %}
                 <img src="/images/{{ latest_image }}" class="cam-feed">
                 <div style="text-align: right; margin-top: 5px;">
@@ -57,9 +90,25 @@
             {% else %}
                 <div class="cam-feed" style="display:flex; align-items:center; justify-content:center; color:#555;">NO IMAGE DATA</div>
             {% endif %}
-            <div class="row" style="margin-top: 10px;">
+            <div style="margin-top: 10px;">
                 <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM (Burst)</button>
-                <button class="btn-green" onclick="post('/api/run_sensor', {target: 'LIVE_CAMERA'})">RUN LIVE CAM (HDMI)</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Live Feed</h2>
+            <img id="live-stream" class="cam-feed" src="/api/stream" style="display: {{ 'block' if is_streaming else 'none' }};">
+            <div id="live-placeholder" class="cam-feed" style="display: {{ 'none' if is_streaming else 'flex' }}; align-items:center; justify-content:center; color:#555;">
+                STREAM OFFLINE
+            </div>
+            <div class="stream-status">
+                <span id="stream-indicator" class="{{ 'stream-live' if is_streaming else 'stream-off' }}">
+                    {{ 'LIVE' if is_streaming else 'OFFLINE' }}
+                </span>
+            </div>
+            <div class="grid-2" style="margin-top: 10px;">
+                <button id="btn-stream-start" class="btn-green" onclick="startStream()">START STREAM</button>
+                <button id="btn-stream-stop" class="btn-red" onclick="stopStream()">STOP STREAM</button>
             </div>
         </div>
 
@@ -72,7 +121,7 @@
             </div>
             <div class="grid-2">
                 {% for key in ['pump', 'lights', 'environment', 'water_level', 'camera', 'pi_health'] %}
-                    <button class="{{ 'toggle-on' if cycles[key] else 'toggle-off' }}" 
+                    <button class="{{ 'toggle-on' if cycles[key] else 'toggle-off' }}"
                             onclick="post('/api/toggle_cycle', {target: '{{ key }}'})">
                         {{ key.upper().replace('_', ' ') }}
                     </button>
@@ -82,7 +131,7 @@
 
         <div class="panel">
             <h2>Manual Control</h2>
-            
+
             <div class="row">
                 <span style="width: 80px; font-weight: bold;">LIGHTS</span>
                 <button class="btn-green" onclick="manualRun('LIGHTS', 'ON')">ON</button>
@@ -96,9 +145,9 @@
                 <button class="btn-red" onclick="manualRun('PUMP', 'OFF')">OFF</button>
             </div>
             <hr style="border-color:#444;">
-            
+
             <button class="btn-blue" style="margin-bottom: 10px;" onclick="post('/api/run_sensor', {target: 'SENSORS'})">RUN FULL SENSOR SWEEP</button>
-            
+
             <div class="row">
                 <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENV</button>
                 <div style="text-align: right;">
@@ -142,7 +191,7 @@
 
         <div class="panel">
             <h2>Diagnostics</h2>
-            
+
             <div class="grid-3" style="margin-bottom: 15px;">
                 <button class="btn-gray" onclick="post('/api/ping', {target: 'SYSTEM'})">PING SYS</button>
                 <button class="btn-gray" onclick="post('/api/ping', {target: 'HARDWARE'})">PING HW</button>
@@ -188,6 +237,16 @@
         </div>
 
         <div class="panel">
+            <h2>Terminal</h2>
+            <div id="terminal-output"></div>
+            <div class="row" style="margin-top: 10px;">
+                <input type="text" id="terminal-input" placeholder="Enter command..."
+                       onkeydown="if(event.key==='Enter') sendCommand()">
+                <button class="btn-blue" style="width: auto; padding: 10px 20px;" onclick="sendCommand()">SEND</button>
+            </div>
+        </div>
+
+        <div class="panel">
             <h2>System</h2>
             <div class="grid-2">
                 <button class="btn-red" style="font-size: 1.1em;" onclick="post('/api/system', {command: 'STOP'})">EMERGENCY STOP</button>
@@ -197,13 +256,17 @@
 
     </div>
 
+    <!-- Socket.IO Client (loaded from CDN by the browser, not the Pi) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+
     <script>
+        // --- Existing API Helpers ---
         function post(url, data={}) {
             fetch(url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
-            }).then(() => setTimeout(() => window.location.reload(), 200)); 
+            }).then(() => setTimeout(() => window.location.reload(), 200));
         }
 
         function manualRun(target, state) {
@@ -216,7 +279,7 @@
             let btn = document.getElementById("btn-cam");
             btn.innerHTML = "CAPTURING...";
             btn.style.opacity = "0.7";
-            
+
             fetch('/api/run_sensor', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -226,6 +289,83 @@
             setTimeout(() => {
                 window.location.reload();
             }, 5000);
+        }
+
+        // --- Live Stream Controls ---
+        function startStream() {
+            fetch('/api/stream/start', { method: 'POST' }).then(() => {
+                // Give the stream a moment to initialize
+                setTimeout(() => {
+                    let stream = document.getElementById('live-stream');
+                    let placeholder = document.getElementById('live-placeholder');
+                    let indicator = document.getElementById('stream-indicator');
+
+                    // Force reload of the stream src to start receiving frames
+                    stream.src = '/api/stream?' + Date.now();
+                    stream.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    indicator.textContent = 'LIVE';
+                    indicator.className = 'stream-live';
+                }, 500);
+            });
+        }
+
+        function stopStream() {
+            fetch('/api/stream/stop', { method: 'POST' }).then(() => {
+                let stream = document.getElementById('live-stream');
+                let placeholder = document.getElementById('live-placeholder');
+                let indicator = document.getElementById('stream-indicator');
+
+                stream.src = '';
+                stream.style.display = 'none';
+                placeholder.style.display = 'flex';
+                indicator.textContent = 'OFFLINE';
+                indicator.className = 'stream-off';
+            });
+        }
+
+        // --- WebSocket Terminal ---
+        let socket = null;
+        const terminal = document.getElementById('terminal-output');
+        const MAX_TERMINAL_LINES = 500;
+
+        if (typeof io !== 'undefined') {
+            socket = io();
+
+            socket.on('terminal_output', function(data) {
+                terminal.textContent += data.data;
+
+                // Trim if too long to prevent memory growth
+                let lines = terminal.textContent.split('\n');
+                if (lines.length > MAX_TERMINAL_LINES) {
+                    terminal.textContent = lines.slice(-MAX_TERMINAL_LINES).join('\n');
+                }
+
+                // Auto-scroll to bottom
+                terminal.scrollTop = terminal.scrollHeight;
+            });
+
+            socket.on('connect', function() {
+                // Connection message is handled by the server
+            });
+
+            socket.on('disconnect', function() {
+                terminal.textContent += '>> Disconnected from terminal.\n';
+                terminal.scrollTop = terminal.scrollHeight;
+            });
+        } else {
+            terminal.textContent = '>> Terminal unavailable (socket.io library not loaded).\n';
+        }
+
+        function sendCommand() {
+            let input = document.getElementById('terminal-input');
+            let cmd = input.value.trim();
+            if (cmd && socket) {
+                terminal.textContent += '> ' + cmd + '\n';
+                terminal.scrollTop = terminal.scrollHeight;
+                socket.emit('command', { command: cmd });
+                input.value = '';
+            }
         }
     </script>
 </body>

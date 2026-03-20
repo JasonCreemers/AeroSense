@@ -46,6 +46,10 @@ def main():
         # The CLI manages user input
         cli = CLI(controller, scheduler, web)
 
+        # Wire CLI into WebServer for remote terminal commands
+        web.set_cli(cli)
+        web.setup_terminal_capture()
+
         # --- Start Interface ---
         cli.start()
         

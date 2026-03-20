@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.11.0] - 2026-03-20
+### Added
+- Added MJPEG live camera streaming to Flask GUI.
+- Added real-time terminal to GUI via WebSockets.
+
+### Changed
+- Major overhaul of GUI to support WebSockets.
+- Modified camera logic to pause live stream during captures and resume after.
+
 ## [v3.10.2] - 2026-03-20
 ### Added
 - Added armageddon countdown.

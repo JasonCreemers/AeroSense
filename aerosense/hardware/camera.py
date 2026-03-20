@@ -2,14 +2,16 @@
 AeroSense Camera Driver.
 
 This module provides a hardware driver for the Raspberry Pi Camera Module (IMX708).
-It interfaces with the `rpicam-apps` (libcamera) suite to manage image capturing and live previews via the HDMI interface.
+It interfaces with the `rpicam-apps` (libcamera) suite to manage image capturing,
+live HDMI previews, and MJPEG streaming for the web interface.
 """
 
 import logging
 import subprocess
+import threading
 from pathlib import Path
 import time
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from config import settings
 
@@ -23,6 +25,7 @@ class Camera:
         rotation (int): Image rotation in degrees (0, 90, 180, 270).
         vflip (bool): Vertical flip state.
         log (logging.Logger): Dedicated logger for camera operations.
+        is_streaming (bool): Whether the MJPEG stream is currently active.
     """
 
     def __init__(self):
@@ -33,8 +36,16 @@ class Camera:
         self.resolution: Tuple[int, int] = settings.CAM_RESOLUTION
         self.rotation: int = settings.CAM_ROTATION
         self.vflip: bool = settings.CAM_VFLIP
-        
+
         self.log = logging.getLogger("AeroSense.Hardware.Camera")
+
+        # MJPEG stream state
+        self._stream_process: Optional[subprocess.Popen] = None
+        self._stream_thread: Optional[threading.Thread] = None
+        self._stream_lock = threading.Lock()
+        self._frame_lock = threading.Lock()
+        self._latest_frame: Optional[bytes] = None
+        self.is_streaming: bool = False
 
     def capture_sequence(self, count: int) -> List[str]:
         """
@@ -149,3 +160,115 @@ class Camera:
         except FileNotFoundError:
             # Handle missing system dependency
             self.log.critical("Command 'rpicam-still' not found. Ensure the camera library is installed.")
+
+    # --- MJPEG Streaming ---
+    def start_stream(self) -> bool:
+        """
+        Start an MJPEG stream from the camera via rpicam-vid.
+        Frames are read in a background thread and stored for retrieval.
+
+        Returns:
+            bool: True if stream started successfully, False otherwise.
+        """
+        with self._stream_lock:
+            if self.is_streaming:
+                self.log.warning("Stream already active.")
+                return True
+
+            cmd = [
+                "rpicam-vid",
+                "--codec", "mjpeg",
+                "--inline",
+                "-t", "0",
+                "--width", str(self.resolution[0]),
+                "--height", str(self.resolution[1]),
+                "--nopreview",
+                "--framerate", "15",
+                "-o", "-",
+            ]
+
+            if self.rotation != 0:
+                cmd.extend(["--rotation", str(self.rotation)])
+            if self.vflip:
+                cmd.append("--vflip")
+
+            try:
+                self._stream_process = subprocess.Popen(
+                    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+            except FileNotFoundError:
+                self.log.critical("Command 'rpicam-vid' not found. Cannot start stream.")
+                return False
+            except Exception as e:
+                self.log.error(f"Failed to start stream: {e}")
+                return False
+
+            self.is_streaming = True
+            self._stream_thread = threading.Thread(target=self._read_frames, daemon=True)
+            self._stream_thread.start()
+            self.log.info("MJPEG stream started.")
+            return True
+
+    def stop_stream(self):
+        """Stop the MJPEG stream and clean up the subprocess."""
+        with self._stream_lock:
+            if not self.is_streaming:
+                return
+
+            self.is_streaming = False
+
+            if self._stream_process:
+                try:
+                    self._stream_process.terminate()
+                    self._stream_process.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    self._stream_process.kill()
+                    self._stream_process.wait(timeout=2)
+                except Exception as e:
+                    self.log.error(f"Error stopping stream process: {e}")
+                self._stream_process = None
+
+            with self._frame_lock:
+                self._latest_frame = None
+
+            self.log.info("MJPEG stream stopped.")
+
+    def get_frame(self) -> Optional[bytes]:
+        """
+        Retrieve the most recent JPEG frame from the live stream.
+
+        Returns:
+            Optional[bytes]: Raw JPEG data, or None if no frame available.
+        """
+        with self._frame_lock:
+            return self._latest_frame
+
+    def _read_frames(self):
+        """Background thread: reads MJPEG frames from rpicam-vid stdout."""
+        buf = b''
+        try:
+            while self.is_streaming and self._stream_process:
+                chunk = self._stream_process.stdout.read(4096)
+                if not chunk:
+                    break
+                buf += chunk
+
+                # Extract complete JPEG frames (SOI: FFD8, EOI: FFD9)
+                while True:
+                    start = buf.find(b'\xff\xd8')
+                    end = buf.find(b'\xff\xd9')
+                    if start != -1 and end != -1 and end > start:
+                        frame = buf[start:end + 2]
+                        with self._frame_lock:
+                            self._latest_frame = frame
+                        buf = buf[end + 2:]
+                    else:
+                        break
+
+        except Exception as e:
+            self.log.error(f"Stream reader error: {e}")
+
+        # Clean up if the process exited unexpectedly
+        if self.is_streaming:
+            self.log.warning("Stream process ended unexpectedly.")
+            self.is_streaming = False

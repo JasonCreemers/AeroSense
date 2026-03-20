@@ -2,22 +2,72 @@
 AeroSense Web Interface.
 
 This module hosts a local Flask server to provide a Graphical User Interface (GUI) for the system.
-It exposes API endpoints that allow a web browser to interact with the Controller and Scheduler 
+It exposes API endpoints that allow a web browser to interact with the Controller and Scheduler
 in real-time, mirroring the capabilities of the CLI.
+
+It also provides:
+- MJPEG live camera streaming via a dedicated endpoint.
+- A real-time terminal via WebSockets (flask-socketio) for remote log viewing and command input.
 """
 
 import logging
 import os
+import sys
 import threading
 import time
 from pathlib import Path
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request, send_from_directory, Response
+from flask_socketio import SocketIO, emit
 from typing import Optional, List, Dict, Any
 
 import aerosense
 from aerosense.core.controller import Controller, VALID_SONGS
 from aerosense.core.scheduler import Scheduler
 from config import settings
+
+
+# --- Terminal Capture Utilities ---
+class OutputCapture:
+    """
+    Wraps a standard stream (stdout/stderr) to also emit lines via SocketIO.
+    Ensures the Pi terminal still works normally while also forwarding to the browser.
+    """
+
+    def __init__(self, original, socketio: SocketIO):
+        self._original = original
+        self._socketio = socketio
+
+    def write(self, text):
+        self._original.write(text)
+        if text.strip():
+            try:
+                self._socketio.emit('terminal_output', {'data': text}, namespace='/')
+            except Exception:
+                pass
+
+    def flush(self):
+        self._original.flush()
+
+    def __getattr__(self, name):
+        return getattr(self._original, name)
+
+
+class SocketIOLogHandler(logging.Handler):
+    """
+    Custom logging handler that forwards formatted log records to connected WebSocket clients.
+    """
+
+    def __init__(self, socketio: SocketIO):
+        super().__init__()
+        self._socketio = socketio
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            self._socketio.emit('terminal_output', {'data': msg + '\n'}, namespace='/')
+        except Exception:
+            pass
+
 
 class WebServer:
     """
@@ -27,6 +77,8 @@ class WebServer:
         controller (Controller): Reference to the main system controller.
         scheduler (Scheduler): Reference to the automation scheduler.
         app (Flask): The underlying Flask application instance.
+        socketio (SocketIO): The Socket.IO instance for real-time communication.
+        cli: Reference to the CLI instance (set after construction via set_cli).
         port (int): The network port to bind to (default: 5000).
         is_running (bool): Flag indicating if the server thread is active.
         log (logging.Logger): Dedicated logger for web interface events.
@@ -42,27 +94,56 @@ class WebServer:
         """
         self.controller = controller
         self.scheduler = scheduler
+        self.cli = None
         self.log = logging.getLogger("AeroSense.Interface.Web")
-        
+
         # Configure Flask paths relative to this module location
         current_dir = Path(__file__).resolve().parent
         project_root = current_dir.parent.parent
-        
+
         template_dir = project_root / "templates"
         data_dir = project_root / "data"
 
         self.app = Flask(
-            __name__, 
-            template_folder=str(template_dir), 
+            __name__,
+            template_folder=str(template_dir),
             static_folder=str(data_dir)
         )
-        
+
+        self.socketio = SocketIO(self.app, async_mode='threading', cors_allowed_origins='*')
+
         self.port = 5000
         self.is_running = False
         self._thread: Optional[threading.Thread] = None
-        
+
         # Route registration
         self._register_routes()
+        self._register_socket_events()
+
+    def set_cli(self, cli):
+        """
+        Provide a reference to the CLI so WebSocket commands can be processed.
+
+        Args:
+            cli: The active CLI instance.
+        """
+        self.cli = cli
+
+    def setup_terminal_capture(self):
+        """
+        Install stdout/stderr wrappers and a logging handler to forward
+        all system output to connected WebSocket clients.
+        """
+        # Wrap stdout so print() calls are forwarded
+        sys.stdout = OutputCapture(sys.stdout, self.socketio)
+
+        # Add a logging handler so log.info/warning/error are forwarded
+        handler = SocketIOLogHandler(self.socketio)
+        handler.setFormatter(logging.Formatter(
+            '[%(asctime)s] %(name)s - %(levelname)s: %(message)s',
+            datefmt='%H:%M:%S'
+        ))
+        logging.getLogger().addHandler(handler)
 
     def start(self):
         """
@@ -74,7 +155,7 @@ class WebServer:
 
         self.log.info(f"Starting Web Interface on port {self.port}...")
         self.is_running = True
-        
+
         self._thread = threading.Thread(target=self._run_server, daemon=True)
         self._thread.start()
 
@@ -86,13 +167,19 @@ class WebServer:
         # Suppress Flask CLI output
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
-        
+
+        # Suppress engineio/socketio polling noise
+        logging.getLogger('engineio.server').setLevel(logging.ERROR)
+        logging.getLogger('socketio.server').setLevel(logging.ERROR)
+
         try:
-            self.app.run(
-                host='0.0.0.0', 
-                port=self.port, 
-                debug=False, 
-                use_reloader=False
+            self.socketio.run(
+                self.app,
+                host='0.0.0.0',
+                port=self.port,
+                debug=False,
+                use_reloader=False,
+                allow_unsafe_werkzeug=True
             )
         except Exception as e:
             # Catch web errors
@@ -106,21 +193,44 @@ class WebServer:
         # View Routes
         self.app.add_url_rule('/', 'index', self.index)
         self.app.add_url_rule('/images/<path:filename>', 'images', self.serve_image)
-        
+
         # API Routes - Automation
         self.app.add_url_rule('/api/cycles', 'get_cycles', self.get_cycles)
         self.app.add_url_rule('/api/toggle_cycle', 'toggle_cycle', self.toggle_cycle, methods=['POST'])
         self.app.add_url_rule('/api/toggle_group', 'toggle_group', self.toggle_cycle_group, methods=['POST'])
-        
+
         # API Routes - Hardware & Sensors
         self.app.add_url_rule('/api/run_manual', 'run_manual', self.run_manual, methods=['POST'])
         self.app.add_url_rule('/api/run_sensor', 'run_sensor', self.run_sensor, methods=['POST'])
-        
+
         # API Routes - Diagnostics & Utilities
         self.app.add_url_rule('/api/music', 'music', self.control_music, methods=['POST'])
         self.app.add_url_rule('/api/ping', 'ping', self.ping_component, methods=['POST'])
         self.app.add_url_rule('/api/system', 'system', self.system_command, methods=['POST'])
         self.app.add_url_rule('/api/action', 'run_action', self.run_action, methods=['POST'])
+
+        # API Routes - Live Stream
+        self.app.add_url_rule('/api/stream', 'stream', self.video_stream)
+        self.app.add_url_rule('/api/stream/start', 'stream_start', self.start_stream, methods=['POST'])
+        self.app.add_url_rule('/api/stream/stop', 'stream_stop', self.stop_stream, methods=['POST'])
+
+    def _register_socket_events(self):
+        """
+        Register WebSocket event handlers for the real-time terminal.
+        """
+        @self.socketio.on('connect')
+        def handle_connect():
+            emit('terminal_output', {'data': '>> Connected to AeroSense Terminal.\n'})
+
+        @self.socketio.on('command')
+        def handle_command(data):
+            cmd = data.get('command', '').strip()
+            if not cmd:
+                return
+            if self.cli:
+                self.cli._process_command(cmd)
+            else:
+                emit('terminal_output', {'data': '>> Terminal not ready. CLI not connected.\n'})
 
     # --- Helpers ---
     def _fmt_time(self, timestamp: float) -> str:
@@ -157,19 +267,20 @@ class WebServer:
         for k, v in self.controller.data_cache.items():
             val = v['value']
             if isinstance(val, float): val = round(val, 2)
-            
+
             formatted_cache[k] = {
                 "value": val if val is not None else "--",
                 "time": self._fmt_time(v['timestamp'])
             }
 
-        return render_template('index.html', 
-                               latest_image=latest_img, 
+        return render_template('index.html',
+                               latest_image=latest_img,
                                img_time=img_time,
                                cache=formatted_cache,
                                cycles=self.scheduler.cycles,
                                songs=VALID_SONGS,
-                               version=aerosense.__version__)
+                               version=aerosense.__version__,
+                               is_streaming=self.controller.camera.is_streaming)
 
     def serve_image(self, filename: str):
         """
@@ -186,7 +297,7 @@ class WebServer:
         API: Retrieve the current state of automation cycles.
         """
         return jsonify(self.scheduler.cycles)
-    
+
     def toggle_cycle(self):
         """
         API: Toggle a specific automation cycle.
@@ -201,48 +312,48 @@ class WebServer:
     def toggle_cycle_group(self):
         """
         API: Smart toggle for cycle groups (SYSTEM, HARDWARE, SENSORS).
-        
-        Logic: 
+
+        Logic:
         If ALL items in the group are ON -> Turn them ALL OFF.
         If ANY item in the group is OFF -> Turn them ALL ON (Sync/Correct).
-        
+
         Expects JSON: {"group": "hardware"}
         """
         group_name = request.json.get('group')
-        
+
         groups = {
             "hardware": ["lights", "pump"],
             "sensors": ["environment", "water_level", "camera", "pi_health"],
             "system": ["lights", "pump", "environment", "water_level", "camera", "pi_health"]
         }
-        
+
         target_keys = groups.get(group_name, [])
-        
+
         # Check if ALL are currently ON
         all_on = all(self.scheduler.cycles.get(k) for k in target_keys)
-        
+
         # Determine new state
         new_state = False if all_on else True
-        
+
         for k in target_keys:
             self.scheduler.set_cycle(k, new_state)
-            
+
         return jsonify(success=True)
-    
+
     def run_action(self):
         """
         API: Execute general system actions (SYNC, RESET).
         Expects JSON: {"action": "SYNC"} or {"action": "RESET"}
         """
         action = request.json.get('action')
-        
+
         if action == "SYNC":
             self.controller.sync_state()
         elif action == "RESET":
             self.scheduler.reset_overrides()
-        
+
         return jsonify(success=True)
-    
+
     def run_manual(self):
         """
         API: Manually trigger hardware actuators (Lights/Pump).
@@ -257,16 +368,16 @@ class WebServer:
             self.controller.set_lights(state, duration)
         elif target == "PUMP":
             self.controller.set_pump(state, duration)
-            
+
         return jsonify(success=True)
-    
+
     def run_sensor(self):
         """
         API: Trigger immediate sensor readings or camera tasks.
         Expects JSON: {"target": "ENVIRONMENT"}
         """
         target = request.json.get('target')
-        
+
         if target == "SENSORS":
             self.controller.run_full_diagnostic()
         elif target == "ENVIRONMENT":
@@ -285,10 +396,10 @@ class WebServer:
     def control_music(self):
         """
         API: Control the music player.
-        Expects JSON: {"action": "PLAY", "song": "Daisy"} 
+        Expects JSON: {"action": "PLAY", "song": "Daisy"}
                    or {"action": "STOP"}
         """
-        action = request.json.get('action') 
+        action = request.json.get('action')
         song = request.json.get('song', "")
         if action == "STOP": self.controller.stop_music()
         elif action == "RANDOM": self.controller.play_music("RANDOM")
@@ -302,7 +413,7 @@ class WebServer:
         Expects JSON: {"target": "PUMP"} or {"target": "HARDWARE"}
         """
         target = request.json.get('target')
-        
+
         # Handle Groups via iteration
         groups = {
             "HARDWARE": ["PUMP", "LIGHTS"],
@@ -312,13 +423,13 @@ class WebServer:
 
         if target in groups:
             for t in groups[target]:
-                if t == "SYSTEM": 
+                if t == "SYSTEM":
                     self.controller.ping_component("SYSTEM")
                 else:
                     self.controller.ping_component(t)
         else:
             self.controller.ping_component(target)
-            
+
         return jsonify(success=True)
 
     def system_command(self):
@@ -327,13 +438,45 @@ class WebServer:
         Expects JSON: {"command": "STOP"}
         """
         cmd = request.json.get('command')
-        
+
         if cmd == "STOP":
             self.controller.stop_all(self.scheduler)
-            
+
         elif cmd == "EXIT":
             self.controller.stop_all(self.scheduler)
             self.log.info("Remote shutdown requested via Web Interface.")
             os._exit(0)
-            
+
+        return jsonify(success=True)
+
+    # --- Live Stream Handlers ---
+    def video_stream(self):
+        """
+        API: Serve an MJPEG stream as a multipart HTTP response.
+        The browser renders this natively in an <img> tag.
+        """
+        def generate():
+            while self.controller.camera.is_streaming:
+                frame = self.controller.camera.get_frame()
+                if frame:
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                time.sleep(0.066)  # ~15 FPS cap to match camera framerate
+            # Send a final empty boundary to close cleanly
+            yield b'--frame--\r\n'
+
+        return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+    def start_stream(self):
+        """
+        API: Start the MJPEG live stream.
+        """
+        success = self.controller.start_live_stream()
+        return jsonify(success=success)
+
+    def stop_stream(self):
+        """
+        API: Stop the MJPEG live stream.
+        """
+        self.controller.stop_live_stream()
         return jsonify(success=True)
