@@ -11,8 +11,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Check all loops to make sure there are ending conditions for all of them.
 - Implement better noise filtering for sensor data (moving averages, outlier rejection, etc.).
 
-- Add live camera feed and terminal output into Flask GUI.
-
 - Implement the RoboFlow Computer vision model
 - Implement the XGBRegressor health modifier.
 - Implement MOSS.

@@ -366,6 +366,7 @@ class WebServer:
 
         if target == "LIGHTS":
             self.controller.set_lights(state, duration)
+            self.scheduler.register_manual_light_change(state)
         elif target == "PUMP":
             self.controller.set_pump(state, duration)
 

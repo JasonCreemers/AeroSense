@@ -229,7 +229,10 @@ class Scheduler:
             else:
                 # Turn off lights
                 if is_currently_on and not self.manual_override_on:
-                    if not self.controller.camera_lock.locked():
+                    # Don't interfere with active timed commands
+                    if self.controller.state["lights_expected_duration"] > 0:
+                        pass
+                    elif not self.controller.camera_lock.locked():
                         self.log.info(f"Schedule: Window ended. Turning Lights OFF.")
                         self.controller.set_lights(False)
                         self.controller.play_music("SLEEP")

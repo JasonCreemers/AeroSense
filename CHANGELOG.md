@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.11.1] - 2026-03-20
+### Fixed
+- Fixed lighting issue outside of active hours.
+
 ## [v3.11.0] - 2026-03-20
 ### Added
 - Added MJPEG live camera streaming to Flask GUI.
