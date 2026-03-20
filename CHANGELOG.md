@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.10.0] - 2026-03-20
+### Fixed
+- Fixed undefined `core_ctrl` reference in `cli.py` that would crash `MUSIC LIST`, `MUSIC PLAY NOTE`, and song playback commands.
+- Fixed camera subprocess timeout in `camera.py` from 4000s to 10s.
+- Added `TimeoutExpired` exception handling for camera capture sequence.
+
 ## [v3.9.1] - 2026-02-18
 ### Changed
 - Modified `README.md`.

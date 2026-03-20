@@ -78,20 +78,25 @@ class Camera:
             try:
                 # Execute command
                 subprocess.run(
-                    cmd, 
-                    check=True, 
-                    timeout=4000,
+                    cmd,
+                    check=True,
+                    timeout=10,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.PIPE
                 )
                 generated_files.append(filename)
-                
+
             except subprocess.CalledProcessError as e:
                 # Handle execution errors
                 error_msg = e.stderr.decode().strip() if e.stderr else "Unknown Error"
                 self.log.error(f"Camera error on image {i}: {error_msg}")
                 break
-                
+
+            except subprocess.TimeoutExpired:
+                # Handle hung camera process
+                self.log.error(f"Camera timed out on image {i}. Aborting sequence.")
+                break
+
             except FileNotFoundError:
                 # Handle missing system dependency
                 self.log.critical("Command 'rpicam-still' not found. Ensure the camera library is installed.")

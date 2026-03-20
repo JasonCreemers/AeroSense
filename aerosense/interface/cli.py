@@ -11,7 +11,7 @@ import textwrap
 import threading
 from typing import List
 
-from aerosense.core.controller import Controller
+from aerosense.core.controller import Controller, VALID_SONGS, VALID_NOTES
 from aerosense.core.scheduler import Scheduler
 from aerosense.interface.web import WebServer
 
@@ -425,11 +425,11 @@ class CLI:
             
             # Songs
             print("Available Songs:")
-            song_txt = ", ".join(core_ctrl.VALID_SONGS)
+            song_txt = ", ".join(VALID_SONGS)
             print(textwrap.fill(song_txt, width=60, initial_indent="  ", subsequent_indent="  "))
             
             print("\nAvailable Notes:")
-            all_notes = core_ctrl.VALID_NOTES
+            all_notes = VALID_NOTES
             for oct_idx in range(3, 9):
                 notes_in_octave = [n for n in all_notes if str(oct_idx) in n]
                 if notes_in_octave:
@@ -452,7 +452,7 @@ class CLI:
                     return
                 note_name = args[2].upper()
                 
-                if note_name in core_ctrl.VALID_NOTES:
+                if note_name in VALID_NOTES:
                     duration = self._parse_arg(args, 3, default=1)
                     self.controller.arduino.send(f"MUSIC PLAY NOTE {note_name} {duration}")
                     print(f">> Playing Note: {note_name} ({duration}s)")
@@ -466,7 +466,7 @@ class CLI:
                  print(">> Playing Random Track")
 
             # Song
-            elif target in core_ctrl.VALID_SONGS:
+            elif target in VALID_SONGS:
                 self.controller.play_music(target)
                 print(f">> Playing Song: {target}")
 
