@@ -130,6 +130,10 @@ class Arduino:
                     # --- Command Ackowledgments ---
                     elif line.startswith("ACK"):
                         self.log.info(f"ARDUINO: {line}")
+                        if ":" in line:
+                            _, value = line.split(":", 1)
+                            with self.data_lock:
+                                self.data_store["ACK"] = (value, now)
                         
                     # --- Sensor Data ---
                     elif line.startswith("DATA"):

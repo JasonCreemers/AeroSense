@@ -67,6 +67,8 @@ class Controller:
         # State tracking: Keeps Python state in sync with Physical state
         self.state = {
             "lights": False,
+            "lights_start_time": 0.0,
+            "lights_expected_duration": 0.0,
             "pump": False,
             "pump_start_time": 0.0,
             "pump_expected_duration": 0.0,
@@ -95,6 +97,10 @@ class Controller:
             "ping_system": {"value": "UNKNOWN", "timestamp": 0},
             "ping_buzzer": {"value": "UNKNOWN", "timestamp": 0}
         }
+
+        # Startup safety: Clear any lingering hardware state from a prior session
+        self.arduino.send("STOP")
+        self.log.info("Startup Safety: Sent preemptive STOP to hardware.")
 
         self.log.info("System Controller Initialized.")
         self.sync_state()
@@ -137,13 +143,32 @@ class Controller:
             if now - self.state["last_water_check"] > settings.PUMP_SAFETY_INTERVAL_SEC:
                 level = self.read_water_level(log_data=False)
                 self.state["last_water_check"] = now
-                
+
                 # If sensor reads 'Empty', kill pump immediately
                 if level and level >= settings.PUMP_SAFETY_THRESHOLD_MM:
                     self.set_pump(False)
                     self.log.critical(f"EMERGENCY STOP: Water level dropped ({level}mm) during cycle!")
                     self.logger.log_alert("Pump aborted mid-cycle: Low Water.")
                     self.play_music("PANIC")
+
+        # Lights safety monitor
+        if self.state["lights"] and self.state["lights_start_time"] > 0:
+            now = time.time()
+            elapsed = now - self.state["lights_start_time"]
+
+            # Timed command completion
+            expected = self.state["lights_expected_duration"]
+            if expected > 0 and elapsed > (expected + 1.0):
+                self.log.info(f"Lights timed cycle finished ({int(elapsed)}s).")
+                self.set_lights(False)
+                return
+
+            # Max duration hard cap (24h failsafe)
+            if elapsed > settings.LIGHTS_MAX_DURATION_SEC:
+                self.set_lights(False)
+                self.log.warning("Lights exceeded Max Safety Limit. Forcing OFF.")
+                self.play_music("DENIED")
+                return
 
     def _update_cache(self, key: str, value):
         """
@@ -191,8 +216,15 @@ class Controller:
             
             # Execute command
             self.log.info(f"Starting Pump for {safe_duration}s")
+            request_time = time.time()
             self.arduino.send(f"PUMP ON {safe_duration * 1000}")
             self.logger.log_pump("ON", safe_duration)
+
+            # Verify command was received by hardware
+            ack = self.arduino.get_latest_data("ACK", min_timestamp=request_time, timeout=1.5)
+            if ack is None or "PUMP_ON" not in ack:
+                self.log.warning(f"Pump ACK not received (got: {ack}). Retrying command.")
+                self.arduino.send(f"PUMP ON {safe_duration * 1000}")
 
         else:
             # Turn OFF
@@ -202,31 +234,51 @@ class Controller:
 
     def set_lights(self, state: bool, duration: int = 0) -> None:
         """
-        Toggle the grow lights.
+        Toggle the grow lights with safety tracking.
 
         Args:
             state (bool): True for ON, False for OFF.
             duration (int): Duration in seconds (0 for indefinite).
         """
-        # Update State
-        self.state["lights"] = state
-        
-        
-        # Build command
-        cmd_str = "ON" if state else "OFF"
-        command = f"LIGHTS {cmd_str}"
+        if state:
+            # Enforce max duration safety cap on timed commands
+            safe_duration = min(duration, settings.LIGHTS_MAX_DURATION_SEC) if duration > 0 else 0
 
-        # Hardware logic
-        if state and duration > 0:
-            command += f" {duration * 1000}"
-            
-        # Execute command
-        if self.arduino.send(command):
-            self.logger.log_lights(cmd_str, duration)
+            # Update state
+            self.state["lights"] = True
+            self.state["lights_start_time"] = time.time()
+            self.state["lights_expected_duration"] = float(safe_duration)
+
+            # Build command
+            command = "LIGHTS ON"
+            if safe_duration > 0:
+                command += f" {safe_duration * 1000}"
+
+            # Execute command
+            request_time = time.time()
+            if self.arduino.send(command):
+                self.logger.log_lights("ON", safe_duration)
+
+                # Verify command was received by hardware
+                ack = self.arduino.get_latest_data("ACK", min_timestamp=request_time, timeout=1.5)
+                if ack is None or "LIGHTS_ON" not in ack:
+                    self.log.warning(f"Lights ACK not received (got: {ack}). Retrying command.")
+                    self.arduino.send(command)
+            else:
+                self.log.error("Failed to send LIGHTS command.")
+                self.play_music("DENIED")
         else:
-            # Handle errors
-            self.log.error("Failed to send LIGHTS command.")
-            self.play_music("DENIED")
+            # Update state
+            self.state["lights"] = False
+            self.state["lights_start_time"] = 0.0
+            self.state["lights_expected_duration"] = 0.0
+
+            # Execute command
+            if self.arduino.send("LIGHTS OFF"):
+                self.logger.log_lights("OFF", 0)
+            else:
+                self.log.error("Failed to send LIGHTS command.")
+                self.play_music("DENIED")
 
     def stop_all(self, scheduler=None):
         """
@@ -239,6 +291,8 @@ class Controller:
         
         # Kill physical hardware
         self.state["lights"] = False
+        self.state["lights_start_time"] = 0.0
+        self.state["lights_expected_duration"] = 0.0
         self.state["pump"] = False
 
         self.arduino.send("STOP")
@@ -665,11 +719,15 @@ class Controller:
 
         # Sync lights
         lights_res = self.ping_component("LIGHTS")
-        
+
         if "ON" in lights_res:
             self.state["lights"] = True
+            if self.state["lights_start_time"] == 0:
+                self.state["lights_start_time"] = time.time()
         elif "OFF" in lights_res:
             self.state["lights"] = False
+            self.state["lights_start_time"] = 0.0
+            self.state["lights_expected_duration"] = 0.0
             
         self.log.info("State Sync Complete.")
         self.play_music("GRANTED")

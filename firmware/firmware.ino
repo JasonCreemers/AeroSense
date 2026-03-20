@@ -107,12 +107,12 @@ void ProcessCommand(char* cmd) {
         pump.TurnOff();
       }
     }
-  } 
-  
+  }
+
   // Lights control
   else if (strcmp(action, "LIGHTS") == 0) {
     char* arg = strtok(NULL, " \r\n");
-    
+
     if (arg != NULL) {
       if (strcmp(arg, "ON") == 0) {
         long dur = 0;
@@ -121,7 +121,7 @@ void ProcessCommand(char* cmd) {
           dur = atol(dur_str);
         }
         lights.TurnOn(dur);
-      } 
+      }
       else if (strcmp(arg, "OFF") == 0) {
         lights.TurnOff();
       }
