@@ -36,14 +36,18 @@ class OutputCapture:
     def __init__(self, original, socketio: SocketIO):
         self._original = original
         self._socketio = socketio
+        self._emitting = False
 
     def write(self, text):
         self._original.write(text)
-        if text.strip():
+        if text.strip() and not self._emitting:
             try:
+                self._emitting = True
                 self._socketio.emit('terminal_output', {'data': text}, namespace='/')
             except Exception:
                 pass
+            finally:
+                self._emitting = False
 
     def flush(self):
         self._original.flush()

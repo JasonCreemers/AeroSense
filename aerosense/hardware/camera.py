@@ -246,12 +246,19 @@ class Camera:
     def _read_frames(self):
         """Background thread: reads MJPEG frames from rpicam-vid stdout."""
         buf = b''
+        MAX_BUF = 1024 * 1024  # 1MB safety cap
         try:
             while self.is_streaming and self._stream_process:
                 chunk = self._stream_process.stdout.read(4096)
                 if not chunk:
                     break
                 buf += chunk
+
+                # Safety: discard buffer if it grows too large (corrupted stream)
+                if len(buf) > MAX_BUF:
+                    self.log.warning("Stream buffer overflow. Discarding corrupted data.")
+                    buf = b''
+                    continue
 
                 # Extract complete JPEG frames (SOI: FFD8, EOI: FFD9)
                 while True:

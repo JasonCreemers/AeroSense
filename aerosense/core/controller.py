@@ -326,7 +326,6 @@ class Controller:
         data = self.arduino.get_latest_data(data_tag, min_timestamp=request_time, timeout=timeout)
         if not data:
             self.log.error(f"Timeout waiting for {trigger_cmd}")
-            self.play_music("DENIED")
         return data
     
     def read_environment(self) -> Optional[Tuple[float, float]]:

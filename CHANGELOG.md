@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.12.0] - 2026-03-20
+### Fixed
+- Fixed duplicate pump safety monitor call in firmware.
+- Fixed duplicate error sounds on sensor timeouts.
+- Added stream buffer overflow protection for camera.
+- Added reentry guard for WebSocket output capture.
+
 ## [v3.11.2] - 2026-03-20
 ### Fixed
 - Fixed scheduling conflict for timed lights outside of active hours.

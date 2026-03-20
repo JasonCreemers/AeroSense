@@ -41,13 +41,12 @@ void setup() {
 void loop() {
   // Background tasks
   wdt_reset();
-  pump.Update();
   lights.Update();
   dist_sensor.Update();
   env_sensor.Update();
   music.Update();
 
-  // Safety Monitor
+  // Pump Safety Monitor
   if (pump.Update()) {
     music.PlaySong("Denied");
   }
