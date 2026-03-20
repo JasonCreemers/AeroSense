@@ -128,24 +128,25 @@ class Scheduler:
         self.pump_warning_active = False
         self.log.warning("Scheduler: All cycles DISABLED.")
 
-    def register_manual_light_change(self, state: bool):
+    def register_manual_light_change(self, state: bool, duration: int = 0):
         """
         Registers a manual intervention to temporarily override the automation schedule.
 
         Args:
             state (bool): The new state set by the user (True=ON, False=OFF).
+            duration (int): Duration in seconds. Timed commands (>0) don't need overrides.
         """
         now = datetime.now()
         start = settings.LIGHTS_START_HOUR
         end = settings.LIGHTS_END_HOUR
-        
+
         # Check if within the active window
         is_active_window = start <= now.hour < end
 
         if state is True:
             # User turned ON
             self.manual_override_off = False
-            if not is_active_window:
+            if not is_active_window and duration == 0:
                 self.manual_override_on = True
                 self.log.info("Manual Override: Keeping lights ON until morning.")
 

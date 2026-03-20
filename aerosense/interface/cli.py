@@ -324,7 +324,7 @@ class CLI:
         # Enable/Disable lights
         if duration is not None:
             self.controller.set_lights(state, duration)
-            self.scheduler.register_manual_light_change(state)
+            self.scheduler.register_manual_light_change(state, duration)
             suffix = f" for {duration}s" if duration > 0 else ""
             print(f">> Lights set to {'ON' if state else 'OFF'}{suffix}")
 
