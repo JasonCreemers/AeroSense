@@ -8,8 +8,15 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add UA Alma Mater.
 - Add Succession theme.
 
-- Implement the RoboFlow Computer vision model
+- 2-way Watchdog.
+
+- Every time a button is pressed on GUI it like refreshes?
+
+
+- Implement the RoboFlow Computer vision model.
+
 - Implement the XGBRegressor health modifier.
+
 - Implement MOSS.
 
 ---

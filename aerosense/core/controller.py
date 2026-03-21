@@ -99,6 +99,10 @@ class Controller:
             "ping_buzzer": {"value": "UNKNOWN", "timestamp": 0}
         }
 
+        # Heartbeat tracking
+        self._last_heartbeat_time: float = 0.0
+        self._heartbeat_fail_count: int = 0
+
         # Startup safety: Clear any lingering hardware state from a prior session
         self.arduino.send("STOP")
         self.log.info("Startup Safety: Sent preemptive STOP to hardware.")
@@ -170,6 +174,33 @@ class Controller:
                 self.log.warning("Lights exceeded Max Safety Limit. Forcing OFF.")
                 self.play_music("DENIED")
                 return
+
+        # Arduino heartbeat (every 15 seconds)
+        now = time.time()
+        if now - self._last_heartbeat_time >= 15.0:
+            self._last_heartbeat_time = now
+
+            request_time = time.time()
+            if self.arduino.send("HEARTBEAT"):
+                response = self.arduino.get_latest_data("HEARTBEAT", min_timestamp=request_time, timeout=0.5)
+                if response:
+                    self._heartbeat_fail_count = 0
+                else:
+                    self._heartbeat_fail_count += 1
+                    self.log.warning(f"Arduino heartbeat missed ({self._heartbeat_fail_count}/3)")
+            else:
+                self._heartbeat_fail_count += 1
+                self.log.warning(f"Arduino heartbeat send failed ({self._heartbeat_fail_count}/3)")
+
+            if self._heartbeat_fail_count >= 3:
+                self.log.critical("Arduino unresponsive after 3 heartbeats. Attempting reconnection.")
+                self.arduino.disconnect()
+                if self.arduino.connect():
+                    self.arduino.start_listener()
+                    self._heartbeat_fail_count = 0
+                    self.sync_state()
+                else:
+                    self.log.critical("Arduino reconnection failed.")
 
     def _update_cache(self, key: str, value):
         """

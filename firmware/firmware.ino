@@ -21,6 +21,11 @@ const int MAX_CMD_LEN = 64;
 char input_buffer[MAX_CMD_LEN + 1];
 int buffer_index = 0;
 
+// --- PI HEARTBEAT WATCHDOG ---
+unsigned long last_pi_contact = 0;
+bool pi_connected = false;
+bool pi_timeout_triggered = false;
+
 void setup() {
   Serial.begin(BAUD_RATE);
 
@@ -51,6 +56,17 @@ void loop() {
     music.PlaySong("Denied");
   }
 
+  // Pi Heartbeat Watchdog: Safe shutdown if Pi goes silent
+  if (pi_connected && !pi_timeout_triggered) {
+    if (millis() - last_pi_contact >= PI_HEARTBEAT_TIMEOUT_MS) {
+      pump.TurnOff();
+      lights.TurnOff();
+      music.Stop();
+      Serial.println(F("ALERT:PI_TIMEOUT"));
+      pi_timeout_triggered = true;
+    }
+  }
+
   // --- SERIAL READ LOOP ---
   while (Serial.available()) {
     char c = (char)Serial.read();
@@ -77,6 +93,11 @@ void loop() {
  * @param cmd The raw character array to parse (modified in-place by strtok).
  */
 void ProcessCommand(char* cmd) {
+  // Reset Pi heartbeat on any valid command
+  last_pi_contact = millis();
+  pi_connected = true;
+  pi_timeout_triggered = false;
+
   // Uppercase the entire command buffer for case-insensitive matching
   for (int i = 0; cmd[i]; i++) {
     cmd[i] = toupper(cmd[i]);
@@ -205,6 +226,11 @@ void ProcessCommand(char* cmd) {
     }
   }
   
+  // --- HEARTBEAT ---
+  else if (strcmp(action, "HEARTBEAT") == 0) {
+    Serial.println(F("HEARTBEAT:OK"));
+  }
+
   // --- SYSTEM ---
   else if (strcmp(action, "STOP") == 0) {
     pump.TurnOff();

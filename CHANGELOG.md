@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.14.0] - 2026-03-20
+### Added
+- Implemented two-way watchdog between Pi and Arduino.
+- Added Pi heartbeat monitoring to firmware.
+- Added automatic Arduino health check from Python.
+- Added firmware safety cutoff for lights.
+
 ## [v3.13.0] - 2026-03-20
 ### Changed
 - Upgraded environment and distance sensor filtering.

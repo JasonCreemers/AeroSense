@@ -143,6 +143,21 @@ class GrowLights : public Component {
       Serial.println(F("ACK:LIGHTS_ON"));
     }
   }
+
+  /**
+   * @brief Checks lights timer and redundant safety cutoff (24h max).
+   */
+  bool Update() override {
+    if (is_active_) {
+      if (millis() - start_time_ >= LIGHTS_MAX_RUNTIME_MS) {
+        TurnOff();
+        Serial.println(F("ALERT:LIGHTS_SAFETY_CUTOFF"));
+        return true;
+      }
+      return Component::Update();
+    }
+    return false;
+  }
 };
 
 #endif  // AEROSENSE_ACTUATORS_H_

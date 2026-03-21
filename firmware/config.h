@@ -43,5 +43,9 @@
 
 // --- SAFETY LIMITS ---
 #define PUMP_MAX_RUNTIME_MS 30000UL
+#define LIGHTS_MAX_RUNTIME_MS 86400000UL  // 24 hours
+
+// --- PI HEARTBEAT WATCHDOG ---
+#define PI_HEARTBEAT_TIMEOUT_MS 60000UL   // 60s without Pi contact = safe shutdown
 
 #endif  // AEROSENSE_CONFIG_H_

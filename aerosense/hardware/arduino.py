@@ -151,6 +151,11 @@ class Arduino:
                         with self.data_lock:
                             self.data_store["PONG"] = (value, now)
 
+                    # --- Heartbeat Response ---
+                    elif line.startswith("HEARTBEAT"):
+                        with self.data_lock:
+                            self.data_store["HEARTBEAT"] = ("OK", now)
+
                     # --- System Reboot ---
                     elif line == "SYSTEM:READY":
                         self.log.warning("Arduino Reboot Detected! Triggering state sync.")
