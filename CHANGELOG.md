@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.15.2] - 2026-03-21
+### Fixed
+- Fixed broken songs.
+
 ## [v3.15.1] - 2026-03-21
 ### Added
 - Modified Interstellar theme.

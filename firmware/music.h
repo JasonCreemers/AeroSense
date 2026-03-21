@@ -274,7 +274,7 @@ Song kSongList[] = {
   {"Curiosity", kCuriosity, COUNT(kCuriosity), 120},
   {"Ultron", kUltron, COUNT(kUltron), 120},
   {"MV1", kMax, COUNT(kMax), 128},
-  {"Tars", kInterstellar, COUNT(kInterstellar), 93},
+  {"Tars", kInterstellar, COUNT(kInterstellar), 60},
   {"Panic", kAlarm, COUNT(kAlarm), 120},
   {"Morning", kMorning, COUNT(kMorning), 100},
   {"Sleep", kLullaby, COUNT(kLullaby), 100},
