@@ -82,14 +82,15 @@
 
         <div class="panel">
             <h2>Camera Feed</h2>
-            {% if latest_image %}
-                <img src="/images/{{ latest_image }}" class="cam-feed">
-                <div style="text-align: right; margin-top: 5px;">
-                    <span class="time-tag">Taken: {{ img_time }}</span>
-                </div>
-            {% else %}
-                <div class="cam-feed" style="display:flex; align-items:center; justify-content:center; color:#555;">NO IMAGE DATA</div>
-            {% endif %}
+            <img id="camera-image" src="{% if latest_image %}/images/{{ latest_image }}{% endif %}"
+                 class="cam-feed" style="display: {{ 'block' if latest_image else 'none' }};">
+            <div id="camera-placeholder" class="cam-feed"
+                 style="display: {{ 'none' if latest_image else 'flex' }}; align-items:center; justify-content:center; color:#555;">
+                NO IMAGE DATA
+            </div>
+            <div style="text-align: right; margin-top: 5px;">
+                <span class="time-tag" id="camera-time">Taken: {{ img_time }}</span>
+            </div>
             <div style="margin-top: 10px;">
                 <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM (Burst)</button>
             </div>
@@ -121,7 +122,8 @@
             </div>
             <div class="grid-2">
                 {% for key in ['pump', 'lights', 'environment', 'water_level', 'camera', 'pi_health'] %}
-                    <button class="{{ 'toggle-on' if cycles[key] else 'toggle-off' }}"
+                    <button id="cycle-{{ key }}"
+                            class="{{ 'toggle-on' if cycles[key] else 'toggle-off' }}"
                             onclick="post('/api/toggle_cycle', {target: '{{ key }}'})">
                         {{ key.upper().replace('_', ' ') }}
                     </button>
@@ -151,25 +153,25 @@
             <div class="row">
                 <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENV</button>
                 <div style="text-align: right;">
-                    <span class="data-tag">{{ cache['temp_reading']['value'] }}°F | {{ cache['humidity_reading']['value'] }}%</span>
-                    <span class="time-tag">{{ cache['temp_reading']['time'] }}</span>
+                    <span class="data-tag" id="env-value">{{ cache['temp_reading']['value'] }}°F | {{ cache['humidity_reading']['value'] }}%</span>
+                    <span class="time-tag" id="env-time">{{ cache['temp_reading']['time'] }}</span>
                 </div>
             </div>
             <div class="row">
                 <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER</button>
                 <div style="text-align: right;">
-                    <span class="data-tag">{{ cache['water_reading']['value'] }} mm</span>
-                    <span class="time-tag">{{ cache['water_reading']['time'] }}</span>
+                    <span class="data-tag" id="water-value">{{ cache['water_reading']['value'] }} mm</span>
+                    <span class="time-tag" id="water-time">{{ cache['water_reading']['time'] }}</span>
                 </div>
             </div>
             <div class="row" style="align-items: flex-start;">
                 <button class="btn-outline" style="margin-top: 5px;" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
                 <div style="text-align: right; font-size: 0.85rem;">
-                    <div class="data-tag" style="margin-bottom: 2px;">CPU: {{ cache['pi_health_reading']['value']['temp'] }}°C</div>
-                    <div class="data-tag" style="margin-bottom: 2px;">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</div>
-                    <div class="data-tag" style="margin-bottom: 2px;">DSK: {{ cache['pi_health_reading']['value']['disk'] }}GB</div>
-                    <div class="data-tag">UPT: {{ cache['pi_health_reading']['value']['uptime'] }}hr</div>
-                    <span class="time-tag">{{ cache['pi_health_reading']['time'] }}</span>
+                    <div class="data-tag" id="pi-temp" style="margin-bottom: 2px;">CPU: {{ cache['pi_health_reading']['value']['temp'] }}°C</div>
+                    <div class="data-tag" id="pi-ram" style="margin-bottom: 2px;">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</div>
+                    <div class="data-tag" id="pi-disk" style="margin-bottom: 2px;">DSK: {{ cache['pi_health_reading']['value']['disk'] }}GB</div>
+                    <div class="data-tag" id="pi-uptime">UPT: {{ cache['pi_health_reading']['value']['uptime'] }}hr</div>
+                    <span class="time-tag" id="pi-time">{{ cache['pi_health_reading']['time'] }}</span>
                 </div>
             </div>
         </div>
@@ -201,31 +203,31 @@
             <div class="grid-2">
                 <div class="row">
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'SYSTEM'})">SYS</button>
-                    <div><span class="data-tag">{{ cache['ping_system']['value'] }}</span><br><span class="time-tag">{{ cache['ping_system']['time'] }}</span></div>
+                    <div><span class="data-tag" id="ping-system-value">{{ cache['ping_system']['value'] }}</span><br><span class="time-tag" id="ping-system-time">{{ cache['ping_system']['time'] }}</span></div>
                 </div>
                  <div class="row">
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'PUMP'})">PUMP</button>
-                    <div><span class="data-tag">{{ cache['ping_pump']['value'] }}</span><br><span class="time-tag">{{ cache['ping_pump']['time'] }}</span></div>
+                    <div><span class="data-tag" id="ping-pump-value">{{ cache['ping_pump']['value'] }}</span><br><span class="time-tag" id="ping-pump-time">{{ cache['ping_pump']['time'] }}</span></div>
                 </div>
                  <div class="row">
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'LIGHTS'})">LIGHT</button>
-                    <div><span class="data-tag">{{ cache['ping_lights']['value'] }}</span><br><span class="time-tag">{{ cache['ping_lights']['time'] }}</span></div>
+                    <div><span class="data-tag" id="ping-lights-value">{{ cache['ping_lights']['value'] }}</span><br><span class="time-tag" id="ping-lights-time">{{ cache['ping_lights']['time'] }}</span></div>
                 </div>
                  <div class="row">
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'ENVIRONMENT'})">ENV</button>
-                    <div><span class="data-tag">{{ cache['ping_env']['value'] }}</span><br><span class="time-tag">{{ cache['ping_env']['time'] }}</span></div>
+                    <div><span class="data-tag" id="ping-env-value">{{ cache['ping_env']['value'] }}</span><br><span class="time-tag" id="ping-env-time">{{ cache['ping_env']['time'] }}</span></div>
                 </div>
                  <div class="row">
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'WATER_LEVEL'})">WATR</button>
-                    <div><span class="data-tag">{{ cache['ping_water']['value'] }}</span><br><span class="time-tag">{{ cache['ping_water']['time'] }}</span></div>
+                    <div><span class="data-tag" id="ping-water-value">{{ cache['ping_water']['value'] }}</span><br><span class="time-tag" id="ping-water-time">{{ cache['ping_water']['time'] }}</span></div>
                 </div>
                 <div class="row">
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'CAMERA'})">CAM</button>
-                    <div><span class="data-tag">{{ cache['ping_cam']['value'] }}</span><br><span class="time-tag">{{ cache['ping_cam']['time'] }}</span></div>
+                    <div><span class="data-tag" id="ping-cam-value">{{ cache['ping_cam']['value'] }}</span><br><span class="time-tag" id="ping-cam-time">{{ cache['ping_cam']['time'] }}</span></div>
                 </div>
                  <div class="row">
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'MUSIC'})">BUZZ</button>
-                    <div><span class="data-tag">{{ cache['ping_buzzer']['value'] }}</span><br><span class="time-tag">{{ cache['ping_buzzer']['time'] }}</span></div>
+                    <div><span class="data-tag" id="ping-buzzer-value">{{ cache['ping_buzzer']['value'] }}</span><br><span class="time-tag" id="ping-buzzer-time">{{ cache['ping_buzzer']['time'] }}</span></div>
                 </div>
             </div>
 
@@ -260,13 +262,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
 
     <script>
-        // --- Existing API Helpers ---
+        // --- API Helpers ---
         function post(url, data={}) {
             fetch(url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
-            }).then(() => setTimeout(() => window.location.reload(), 200));
+            }).then(() => setTimeout(refreshUI, 300));
         }
 
         function manualRun(target, state) {
@@ -286,21 +288,27 @@
                 body: JSON.stringify({target: 'CAMERA'})
             });
 
-            setTimeout(() => {
-                window.location.reload();
-            }, 5000);
+            // Poll more frequently for 10s to pick up the new image
+            let polls = 0;
+            let camPoll = setInterval(() => {
+                refreshUI();
+                polls++;
+                if (polls >= 10) {
+                    clearInterval(camPoll);
+                    btn.innerHTML = "RUN CAM (Burst)";
+                    btn.style.opacity = "1";
+                }
+            }, 1000);
         }
 
         // --- Live Stream Controls ---
         function startStream() {
             fetch('/api/stream/start', { method: 'POST' }).then(() => {
-                // Give the stream a moment to initialize
                 setTimeout(() => {
                     let stream = document.getElementById('live-stream');
                     let placeholder = document.getElementById('live-placeholder');
                     let indicator = document.getElementById('stream-indicator');
 
-                    // Force reload of the stream src to start receiving frames
                     stream.src = '/api/stream?' + Date.now();
                     stream.style.display = 'block';
                     placeholder.style.display = 'none';
@@ -323,6 +331,102 @@
                 indicator.className = 'stream-off';
             });
         }
+
+        // --- Live Status Polling ---
+        let _lastImage = '{{ latest_image or "" }}';
+
+        function refreshUI() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(data => {
+                    let c = data.cache;
+
+                    // Sensor Values
+                    document.getElementById('env-value').textContent =
+                        c.temp_reading.value + '\u00B0F | ' + c.humidity_reading.value + '%';
+                    document.getElementById('env-time').textContent = c.temp_reading.time;
+
+                    document.getElementById('water-value').textContent =
+                        c.water_reading.value + ' mm';
+                    document.getElementById('water-time').textContent = c.water_reading.time;
+
+                    // Pi Health
+                    let pi = c.pi_health_reading.value;
+                    if (typeof pi === 'object') {
+                        document.getElementById('pi-temp').textContent = 'CPU: ' + pi.temp + '\u00B0C';
+                        document.getElementById('pi-ram').textContent  = 'RAM: ' + pi.ram + '%';
+                        document.getElementById('pi-disk').textContent = 'DSK: ' + pi.disk + 'GB';
+                        document.getElementById('pi-uptime').textContent = 'UPT: ' + pi.uptime + 'hr';
+                    }
+                    document.getElementById('pi-time').textContent = c.pi_health_reading.time;
+
+                    // Camera Image
+                    let newImg = c.latest_photo.value;
+                    if (newImg && newImg !== '--' && newImg !== _lastImage) {
+                        _lastImage = newImg;
+                        let imgEl = document.getElementById('camera-image');
+                        let placeholder = document.getElementById('camera-placeholder');
+                        imgEl.src = '/images/' + newImg;
+                        imgEl.style.display = 'block';
+                        placeholder.style.display = 'none';
+
+                        let btn = document.getElementById('btn-cam');
+                        btn.innerHTML = 'RUN CAM (Burst)';
+                        btn.style.opacity = '1';
+                    }
+                    document.getElementById('camera-time').textContent =
+                        'Taken: ' + c.latest_photo.time;
+
+                    // Cycle Toggles
+                    ['pump','lights','environment','water_level','camera','pi_health'].forEach(key => {
+                        let btn = document.getElementById('cycle-' + key);
+                        if (btn) {
+                            btn.className = data.cycles[key] ? 'toggle-on' : 'toggle-off';
+                        }
+                    });
+
+                    // Ping Statuses
+                    let pingMap = {
+                        'ping_system': 'system', 'ping_pump': 'pump',
+                        'ping_lights': 'lights', 'ping_env': 'env',
+                        'ping_water': 'water', 'ping_cam': 'cam',
+                        'ping_buzzer': 'buzzer'
+                    };
+                    Object.keys(pingMap).forEach(cacheKey => {
+                        let id = pingMap[cacheKey];
+                        let valEl = document.getElementById('ping-' + id + '-value');
+                        let timeEl = document.getElementById('ping-' + id + '-time');
+                        if (valEl) valEl.textContent = c[cacheKey].value;
+                        if (timeEl) timeEl.textContent = c[cacheKey].time;
+                    });
+
+                    // Stream Status
+                    let streamEl = document.getElementById('live-stream');
+                    let placeholderEl = document.getElementById('live-placeholder');
+                    let indicatorEl = document.getElementById('stream-indicator');
+                    if (data.is_streaming) {
+                        if (streamEl.style.display === 'none') {
+                            streamEl.src = '/api/stream?' + Date.now();
+                            streamEl.style.display = 'block';
+                            placeholderEl.style.display = 'none';
+                        }
+                        indicatorEl.textContent = 'LIVE';
+                        indicatorEl.className = 'stream-live';
+                    } else {
+                        if (streamEl.style.display !== 'none') {
+                            streamEl.src = '';
+                            streamEl.style.display = 'none';
+                            placeholderEl.style.display = 'flex';
+                        }
+                        indicatorEl.textContent = 'OFFLINE';
+                        indicatorEl.className = 'stream-off';
+                    }
+                })
+                .catch(() => {});
+        }
+
+        // Poll every 2 seconds for live updates
+        setInterval(refreshUI, 2000);
 
         // --- WebSocket Terminal ---
         let socket = null;

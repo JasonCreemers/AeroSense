@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.15.0] - 2026-03-20
+### Fixed
+- Fixed GUI page refresh on button press clearing terminal messages.
+- Made sensor readings, timestamps, and ping statuses update live.
+- Made camera image update automatically.
+- Made cycle toggle buttons reflect state.
+
 ## [v3.14.0] - 2026-03-20
 ### Added
 - Implemented two-way watchdog between Pi and Arduino.

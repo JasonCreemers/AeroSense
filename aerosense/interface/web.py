@@ -213,6 +213,9 @@ class WebServer:
         self.app.add_url_rule('/api/system', 'system', self.system_command, methods=['POST'])
         self.app.add_url_rule('/api/action', 'run_action', self.run_action, methods=['POST'])
 
+        # API Routes - Status (Live Polling)
+        self.app.add_url_rule('/api/status', 'status', self.get_status)
+
         # API Routes - Live Stream
         self.app.add_url_rule('/api/stream', 'stream', self.video_stream)
         self.app.add_url_rule('/api/stream/start', 'stream_start', self.start_stream, methods=['POST'])
@@ -301,6 +304,36 @@ class WebServer:
         API: Retrieve the current state of automation cycles.
         """
         return jsonify(self.scheduler.cycles)
+
+    def get_status(self):
+        """
+        API: Return full system status as JSON for live UI polling.
+        """
+        formatted_cache = {}
+        for k, v in self.controller.data_cache.items():
+            val = v['value']
+            if isinstance(val, float):
+                val = round(val, 2)
+            formatted_cache[k] = {
+                "value": val if val is not None else "--",
+                "time": self._fmt_time(v['timestamp'])
+            }
+
+        actuators = {
+            "lights": self.controller.state["lights"],
+            "lights_start_time": self.controller.state["lights_start_time"],
+            "lights_expected_duration": self.controller.state["lights_expected_duration"],
+            "pump": self.controller.state["pump"],
+            "pump_start_time": self.controller.state["pump_start_time"],
+            "pump_expected_duration": self.controller.state["pump_expected_duration"],
+        }
+
+        return jsonify(
+            cache=formatted_cache,
+            cycles=self.scheduler.cycles,
+            actuators=actuators,
+            is_streaming=self.controller.camera.is_streaming,
+        )
 
     def toggle_cycle(self):
         """
