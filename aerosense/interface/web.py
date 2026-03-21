@@ -21,7 +21,10 @@ from flask_socketio import SocketIO, emit
 from typing import Optional, List, Dict, Any
 
 import aerosense
-from aerosense.core.controller import Controller, VALID_SONGS
+from aerosense.core.controller import (
+    Controller, HAPPY_SONGS, ANGRY_SONGS, SAD_SONGS,
+    SERIOUS_SONGS, OTHER_SONGS, SYSTEM_SOUNDS
+)
 from aerosense.core.scheduler import Scheduler
 from config import settings
 
@@ -285,7 +288,14 @@ class WebServer:
                                img_time=img_time,
                                cache=formatted_cache,
                                cycles=self.scheduler.cycles,
-                               songs=VALID_SONGS,
+                               song_categories={
+                                   "Happy": HAPPY_SONGS,
+                                   "Angry": ANGRY_SONGS,
+                                   "Sad": SAD_SONGS,
+                                   "Serious": SERIOUS_SONGS,
+                                   "Other": OTHER_SONGS,
+                                   "System": SYSTEM_SOUNDS,
+                               },
                                version=aerosense.__version__,
                                is_streaming=self.controller.camera.is_streaming)
 

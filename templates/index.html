@@ -150,27 +150,27 @@
 
             <button class="btn-blue" style="margin-bottom: 10px;" onclick="post('/api/run_sensor', {target: 'SENSORS'})">RUN FULL SENSOR SWEEP</button>
 
-            <div class="row">
+            <div style="margin-bottom: 10px;">
                 <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENV</button>
-                <div style="text-align: right;">
+                <div style="margin-top: 5px;">
                     <span class="data-tag" id="env-value">{{ cache['temp_reading']['value'] }}°F | {{ cache['humidity_reading']['value'] }}%</span>
                     <span class="time-tag" id="env-time">{{ cache['temp_reading']['time'] }}</span>
                 </div>
             </div>
-            <div class="row">
+            <div style="margin-bottom: 10px;">
                 <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER</button>
-                <div style="text-align: right;">
+                <div style="margin-top: 5px;">
                     <span class="data-tag" id="water-value">{{ cache['water_reading']['value'] }} mm</span>
                     <span class="time-tag" id="water-time">{{ cache['water_reading']['time'] }}</span>
                 </div>
             </div>
-            <div class="row" style="align-items: flex-start;">
-                <button class="btn-outline" style="margin-top: 5px;" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
-                <div style="text-align: right; font-size: 0.85rem;">
-                    <div class="data-tag" id="pi-temp" style="margin-bottom: 2px;">CPU: {{ cache['pi_health_reading']['value']['temp'] }}°C</div>
-                    <div class="data-tag" id="pi-ram" style="margin-bottom: 2px;">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</div>
-                    <div class="data-tag" id="pi-disk" style="margin-bottom: 2px;">DSK: {{ cache['pi_health_reading']['value']['disk'] }}GB</div>
-                    <div class="data-tag" id="pi-uptime">UPT: {{ cache['pi_health_reading']['value']['uptime'] }}hr</div>
+            <div style="margin-bottom: 10px;">
+                <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
+                <div style="margin-top: 5px; font-size: 0.85rem;">
+                    <span class="data-tag" id="pi-temp">CPU: {{ cache['pi_health_reading']['value']['temp'] }}°C</span> |
+                    <span class="data-tag" id="pi-ram">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</span> |
+                    <span class="data-tag" id="pi-disk">DSK: {{ cache['pi_health_reading']['value']['disk'] }}GB</span> |
+                    <span class="data-tag" id="pi-uptime">UPT: {{ cache['pi_health_reading']['value']['uptime'] }}hr</span>
                     <span class="time-tag" id="pi-time">{{ cache['pi_health_reading']['time'] }}</span>
                 </div>
             </div>
@@ -182,18 +182,24 @@
                 <button class="btn-red" onclick="post('/api/music', {action: 'STOP'})">STOP MUSIC</button>
                 <button class="btn-blue" onclick="post('/api/music', {action: 'RANDOM'})">PLAY RANDOM</button>
             </div>
-            <div class="grid-3" style="margin-top: 10px;">
-                {% for song in songs %}
-                    <button class="btn-outline" onclick="post('/api/music', {action: 'PLAY', song: '{{ song }}'})">
-                        {{ song }}
-                    </button>
-                {% endfor %}
-            </div>
+            {% for category, songs in song_categories.items() %}
+                <div style="margin-top: 10px;">
+                    <span style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">{{ category }}</span>
+                    <div class="grid-3" style="margin-top: 5px;">
+                        {% for song in songs %}
+                            <button class="btn-outline" onclick="post('/api/music', {action: 'PLAY', song: '{{ song }}'})">
+                                {{ song }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
         </div>
 
         <div class="panel">
             <h2>Diagnostics</h2>
 
+            <button class="btn-blue" style="margin-bottom: 10px;" onclick="post('/api/ping', {target: 'SYSTEM'}); post('/api/ping', {target: 'HARDWARE'}); post('/api/ping', {target: 'SENSORS'})">PING ALL</button>
             <div class="grid-3" style="margin-bottom: 15px;">
                 <button class="btn-gray" onclick="post('/api/ping', {target: 'SYSTEM'})">PING SYS</button>
                 <button class="btn-gray" onclick="post('/api/ping', {target: 'HARDWARE'})">PING HW</button>
@@ -201,33 +207,33 @@
             </div>
 
             <div class="grid-2">
-                <div class="row">
+                <div>
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'SYSTEM'})">SYS</button>
-                    <div><span class="data-tag" id="ping-system-value">{{ cache['ping_system']['value'] }}</span><br><span class="time-tag" id="ping-system-time">{{ cache['ping_system']['time'] }}</span></div>
+                    <div style="margin-top: 5px;"><span class="data-tag" id="ping-system-value">{{ cache['ping_system']['value'] }}</span> <span class="time-tag" id="ping-system-time">{{ cache['ping_system']['time'] }}</span></div>
                 </div>
-                 <div class="row">
+                <div>
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'PUMP'})">PUMP</button>
-                    <div><span class="data-tag" id="ping-pump-value">{{ cache['ping_pump']['value'] }}</span><br><span class="time-tag" id="ping-pump-time">{{ cache['ping_pump']['time'] }}</span></div>
+                    <div style="margin-top: 5px;"><span class="data-tag" id="ping-pump-value">{{ cache['ping_pump']['value'] }}</span> <span class="time-tag" id="ping-pump-time">{{ cache['ping_pump']['time'] }}</span></div>
                 </div>
-                 <div class="row">
+                <div>
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'LIGHTS'})">LIGHT</button>
-                    <div><span class="data-tag" id="ping-lights-value">{{ cache['ping_lights']['value'] }}</span><br><span class="time-tag" id="ping-lights-time">{{ cache['ping_lights']['time'] }}</span></div>
+                    <div style="margin-top: 5px;"><span class="data-tag" id="ping-lights-value">{{ cache['ping_lights']['value'] }}</span> <span class="time-tag" id="ping-lights-time">{{ cache['ping_lights']['time'] }}</span></div>
                 </div>
-                 <div class="row">
+                <div>
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'ENVIRONMENT'})">ENV</button>
-                    <div><span class="data-tag" id="ping-env-value">{{ cache['ping_env']['value'] }}</span><br><span class="time-tag" id="ping-env-time">{{ cache['ping_env']['time'] }}</span></div>
+                    <div style="margin-top: 5px;"><span class="data-tag" id="ping-env-value">{{ cache['ping_env']['value'] }}</span> <span class="time-tag" id="ping-env-time">{{ cache['ping_env']['time'] }}</span></div>
                 </div>
-                 <div class="row">
-                    <button class="btn-outline" onclick="post('/api/ping', {target: 'WATER_LEVEL'})">WATR</button>
-                    <div><span class="data-tag" id="ping-water-value">{{ cache['ping_water']['value'] }}</span><br><span class="time-tag" id="ping-water-time">{{ cache['ping_water']['time'] }}</span></div>
+                <div>
+                    <button class="btn-outline" onclick="post('/api/ping', {target: 'WATER_LEVEL'})">WATER</button>
+                    <div style="margin-top: 5px;"><span class="data-tag" id="ping-water-value">{{ cache['ping_water']['value'] }}</span> <span class="time-tag" id="ping-water-time">{{ cache['ping_water']['time'] }}</span></div>
                 </div>
-                <div class="row">
+                <div>
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'CAMERA'})">CAM</button>
-                    <div><span class="data-tag" id="ping-cam-value">{{ cache['ping_cam']['value'] }}</span><br><span class="time-tag" id="ping-cam-time">{{ cache['ping_cam']['time'] }}</span></div>
+                    <div style="margin-top: 5px;"><span class="data-tag" id="ping-cam-value">{{ cache['ping_cam']['value'] }}</span> <span class="time-tag" id="ping-cam-time">{{ cache['ping_cam']['time'] }}</span></div>
                 </div>
-                 <div class="row">
+                <div>
                     <button class="btn-outline" onclick="post('/api/ping', {target: 'MUSIC'})">BUZZ</button>
-                    <div><span class="data-tag" id="ping-buzzer-value">{{ cache['ping_buzzer']['value'] }}</span><br><span class="time-tag" id="ping-buzzer-time">{{ cache['ping_buzzer']['time'] }}</span></div>
+                    <div style="margin-top: 5px;"><span class="data-tag" id="ping-buzzer-value">{{ cache['ping_buzzer']['value'] }}</span> <span class="time-tag" id="ping-buzzer-time">{{ cache['ping_buzzer']['time'] }}</span></div>
                 </div>
             </div>
 
