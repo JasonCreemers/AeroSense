@@ -128,18 +128,22 @@ void ProcessCommand(char* cmd) {
   }
 
   // --- SENSORS ---
-  // Environment sensor
+  // Environment sensor (gated behind staleness check)
   else if (strcmp(action, "READ_TEMP") == 0) {
-    Serial.print(F("DATA_TEMP:"));
-    Serial.print(env_sensor.GetAverageTemp(), 2);
-    Serial.print(",");
-    Serial.println(env_sensor.GetAverageHum(), 2);
+    if (env_sensor.IsResponding()) {
+      Serial.print(F("DATA_TEMP:"));
+      Serial.print(env_sensor.GetFilteredTemp(), 2);
+      Serial.print(",");
+      Serial.println(env_sensor.GetFilteredHum(), 2);
+    }
   }
 
-  // Distance sensor
+  // Distance sensor (gated behind staleness check)
   else if (strcmp(action, "READ_DISTANCE") == 0) {
-    Serial.print(F("DATA_DISTANCE:"));
-    Serial.println(dist_sensor.GetAverageDistance());
+    if (dist_sensor.IsResponding()) {
+      Serial.print(F("DATA_DISTANCE:"));
+      Serial.println(dist_sensor.GetFilteredDistance());
+    }
   }
 
   // --- MUSIC ---

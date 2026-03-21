@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.13.0] - 2026-03-20
+### Changed
+- Upgraded environment and distance sensor filtering.
+- Increased distance sensor buffer from 10 to 15 samples.
+- Added validation for environment sensor.
+- Added range validation for both sensors.
+- Added staleness detection.
+
 ## [v3.12.0] - 2026-03-20
 ### Fixed
 - Fixed duplicate pump safety monitor call in firmware.

@@ -8,8 +8,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add UA Alma Mater.
 - Add Succession theme.
 
-- Implement better noise filtering for sensor data (moving averages, outlier rejection, etc.).
-
 - Implement the RoboFlow Computer vision model
 - Implement the XGBRegressor health modifier.
 - Implement MOSS.
