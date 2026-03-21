@@ -153,13 +153,13 @@ const Note kMax[] PROGMEM = {
 
 // Interstellar Theme (Tars)
 const Note kInterstellar[] PROGMEM = {
-    {NOTE_A4, 3}, {NOTE_B4, 5},
-    {NOTE_A4, 1}, {NOTE_B4, 1}, {NOTE_C5, 1}, {NOTE_B4, 1}, {NOTE_A4, 1}, {NOTE_B4, 1},
-    {NOTE_C5, 3}, {NOTE_B4, 5},
-    {NOTE_A4, 2}, {NOTE_E5, 1}, 
-    {NOTE_C5, 3}, {NOTE_B4, 5},
-    {NOTE_A4, 1}, {NOTE_E5, 1}, {NOTE_C5, 1}, {NOTE_B4, 1}, {NOTE_A4, 1}, {NOTE_B4, 1},
-    {NOTE_C5, 3}, {NOTE_B4, 5},
+    {NOTE_A3, 0.25}, {NOTE_B3, 0.25}, {NOTE_C4, 0.25}, {NOTE_B3, 0.25}, {NOTE_A3, 0.25}, {NOTE_C4, 0.25},
+    {NOTE_B3, 0.25}, {NOTE_A3, 0.25}, {NOTE_G3, 0.25}, {NOTE_A3, 0.25}, {NOTE_B3, 0.25}, {NOTE_A3, 0.25},
+    {NOTE_B3, 0.25}, {NOTE_A3, 0.25}, {NOTE_G3, 0.25}, {NOTE_A3, 0.25}, {NOTE_B3, 0.25}, {NOTE_A3, 0.25},
+    {NOTE_A3, 1}, {NOTE_B3, 1}, {NOTE_C4, 1}, {NOTE_B3, 1}, {NOTE_A3, 1}, {NOTE_B3, 1},
+    {NOTE_C4, 0.25}, {NOTE_C4, 0.25}, {NOTE_A3, 0.25}, {NOTE_C4, 0.25}, {NOTE_B3, 0.25}, {NOTE_A3, 0.25},
+    {NOTE_B3, 0.25}, {NOTE_A3, 0.25}, {NOTE_G3, 0.25}, {NOTE_A3, 0.25}, {NOTE_B3, 0.25}, {NOTE_A3, 0.25},
+    {NOTE_B3, 0.25}, {NOTE_A3, 0.25}, {NOTE_G3, 0.25}, {NOTE_A3, 0.25}, {NOTE_B3, 0.25}, {NOTE_A3, 0.25},
 };
 
 // Panic Alarm (Panic)
@@ -194,6 +194,25 @@ const Note kFnaf[] PROGMEM = {
     {NOTE_A3, 0.75}, {NOTE_G3, 0.25}, {NOTE_A3, 0.75}, {NOTE_AS3, 0.25}, {NOTE_A3, 1.5}, {REST, 0.5},
     {NOTE_AS3, 1}, {NOTE_G3, 0.75}, {NOTE_C4, 0.25}, {NOTE_A3, 2},
     {NOTE_F3, 1}, {NOTE_D3, 0.75}, {NOTE_G3, 0.25}, {NOTE_CS3, 2}
+};
+
+// SpongeBob Sad Theme (Sponge)
+const Note kSponge[] PROGMEM = {
+    {NOTE_G3, 1}, {NOTE_G4, 3}, {NOTE_G4, 0.5}, {NOTE_FS4, 0.5}, {NOTE_F4, 3}, {NOTE_D4, 1}, {NOTE_A4, 2}, {NOTE_G4, 4},
+    {NOTE_E4, 1}, {NOTE_E5, 1.33}, {NOTE_C5, 0.66}, {NOTE_G4, 1}, {NOTE_FS4, 0.5}, {NOTE_A4, 0.5}, {NOTE_G4, 1.33}, {NOTE_G4, 0.66}, {NOTE_A3, 1}, {NOTE_AS3, 1}, {NOTE_B3, 5}
+};
+
+// Succession Theme (Succession)
+const Note kSuccession[] PROGMEM = {
+    {NOTE_C3, 0.5}, {NOTE_B4, 0.1}, {NOTE_C5, 0.4}, {REST, 0.75}, {NOTE_B4, 0.125}, {NOTE_C5, 0.125},
+    {NOTE_D5, 0.25}, {NOTE_C5, 0.25}, {NOTE_AS4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_FS4, 0.25}, {NOTE_G4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_G4, 0.25},
+    {REST, 0.25}, {NOTE_G5, 0.25}, {NOTE_F5, 0.25}, {NOTE_DS5, 0.25}, {NOTE_CS5, 0.25}, {NOTE_D5, 0.25}, {NOTE_DS5, 0.25}, {NOTE_D5, 0.25},
+    {NOTE_D5, 0.25}, {NOTE_C5, 0.25}, {NOTE_B4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_G4, 0.25}, {NOTE_F4, 0.25}, {NOTE_DS4, 0.25}, {NOTE_D4, 0.25},
+    {NOTE_C3, 0.5}, {NOTE_B4, 0.1}, {NOTE_C5, 0.4}, {REST, 0.75}, {NOTE_B4, 0.125}, {NOTE_C5, 0.125},
+    {NOTE_D5, 0.25}, {NOTE_C5, 0.25}, {NOTE_AS4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_FS4, 0.25}, {NOTE_G4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_G4, 0.25},
+    {REST, 0.25}, {NOTE_G5, 0.25}, {NOTE_F5, 0.25}, {NOTE_DS5, 0.25}, {NOTE_CS5, 0.25}, {NOTE_D5, 0.25}, {NOTE_DS5, 0.25}, {NOTE_D5, 0.25},
+    {NOTE_D5, 0.25}, {NOTE_C5, 0.25}, {NOTE_B4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_G4, 0.25}, {NOTE_F4, 0.25}, {NOTE_DS4, 0.25}, {NOTE_D4, 0.25},
+    {NOTE_C3, 0.5}
 };
 
 // Test Note Sweep (Test)
@@ -260,6 +279,8 @@ Song kSongList[] = {
   {"Morning", kMorning, COUNT(kMorning), 100},
   {"Sleep", kLullaby, COUNT(kLullaby), 100},
   {"Fnaf", kFnaf, COUNT(kFnaf), 108},
+  {"Sponge", kSponge, COUNT(kSponge), 108},
+  {"Succession", kSuccession, COUNT(kSuccession), 70},
   {"Test", kTest, COUNT(kTest), 160},
   {"Granted", kGranted, COUNT(kGranted), 240},
   {"Denied", kDenied, COUNT(kDenied), 240},
