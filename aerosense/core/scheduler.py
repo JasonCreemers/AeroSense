@@ -12,16 +12,6 @@ import time
 from aerosense.core.controller import Controller
 from config import settings
 
-# --- Configuration ---
-BIRTHDAYS = [
-    (1, 1, "MOSS"),
-    (REDACTED),
-    (REDACTED),
-    (REDACTED),
-    (REDACTED),
-    (12, 20, "Gabe")
-]
-
 class Scheduler:
     """
     Manages automation cycles for lights, pumps, and sensors.
@@ -212,12 +202,17 @@ class Scheduler:
                     if current_hour == start:
                         # Determine Song
                         song_to_play = "MORNING"
-                        # Check for birthdays
-                        for month, day, name in BIRTHDAYS:
-                            if now.month == month and now.day == day:
-                                self.log.info(f"Schedule: Special Date detected. Happy Birthday to {name}!")
-                                song_to_play = "CURIOSITY"
-                                break
+                        # Check for countdown target date
+                        if now.date() == settings.COUNTDOWN_TARGET_DATE:
+                            self.log.info("Schedule: Special Date detected. It's Senior Design Day!")
+                            song_to_play = "SUCCESSION"
+                        else:
+                            # Check for birthdays
+                            for month, day, name in settings.BIRTHDAYS:
+                                if now.month == month and now.day == day:
+                                    self.log.info(f"Schedule: Special Date detected. Happy Birthday to {name}!")
+                                    song_to_play = "CURIOSITY"
+                                    break
                         
                         self.controller.play_music(song_to_play)
                         music_played_this_cycle = True

@@ -6,9 +6,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add UA Fight Song
 - Add UA Alma Mater.
 
-- Implement new Machine Learning commands section. Have a button to take the most recent image and split it into 6 sections, storing it in a new folder and possible csv.
-
-
 
 - Implement the RoboFlow Computer vision model.
     - Split the images into 6 or so segments once per day. Have these stores under a new name in a new folder for training purposes. Train on 50 or so images initially, and use augmentation to increase the image count.
@@ -20,9 +17,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
     - Implement a XGBClassifier using XGBoost. Have it take in several inputs from the csv and make a determination of the overal plant health. Train this on synthetic data initially.
     - Inputs: Chlorosis Ratio, Decay Ratio, Wilting Ratio, Pest Density, Growth Velocity, Instant Temp, Delta Temp, Temp Slope, Instant Humidity, Instant VPD, VPD Shock, Water Volume, Light Interval, Time of Day X, Time of Day Y
     - Classes: Homeostasis, Hydric Stress, Hypoxia, Heat Stress, Nutrient Burn, Pathogen/Pest
-
-- Tracking/Logging all inputs
-    - Make new workflows and CSV files to track both machine learning models for both inputs and classes.
 
 - Implement MOSS.
     - Utilize Ollama as the framework and maybe Gemma as the model. Give it access to several tools to control the overall system. Have it be able to talk through the CLI or through the GUI. Give it personality. Give it LEDS to control its thinking

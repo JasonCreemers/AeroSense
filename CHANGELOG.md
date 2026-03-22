@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.16.1] - 2026-03-22
+### Changed
+- General cleaning of the GUI UI.
+
 ## [v3.16.0] - 2026-03-21
 ### Added
 - Implemented new splitting command to tile images for training data.

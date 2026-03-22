@@ -211,8 +211,7 @@ const Note kSuccession[] PROGMEM = {
     {NOTE_C3, 0.5}, {NOTE_B4, 0.1}, {NOTE_C5, 0.4}, {REST, 0.75}, {NOTE_B4, 0.125}, {NOTE_C5, 0.125},
     {NOTE_D5, 0.25}, {NOTE_C5, 0.25}, {NOTE_AS4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_FS4, 0.25}, {NOTE_G4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_G4, 0.25},
     {REST, 0.25}, {NOTE_G5, 0.25}, {NOTE_F5, 0.25}, {NOTE_DS5, 0.25}, {NOTE_CS5, 0.25}, {NOTE_D5, 0.25}, {NOTE_DS5, 0.25}, {NOTE_D5, 0.25},
-    {NOTE_D5, 0.25}, {NOTE_C5, 0.25}, {NOTE_B4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_G4, 0.25}, {NOTE_F4, 0.25}, {NOTE_DS4, 0.25}, {NOTE_D4, 0.25},
-    {NOTE_C3, 0.5}
+    {NOTE_D5, 0.25}, {NOTE_C5, 0.25}, {NOTE_B4, 0.25}, {NOTE_GS4, 0.25}, {NOTE_G4, 0.25}, {NOTE_F4, 0.25}, {NOTE_DS4, 0.25}, {NOTE_D4, 0.25}
 };
 
 // Test Note Sweep (Test)

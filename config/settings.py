@@ -63,6 +63,16 @@ CAM_RESOLUTION: Tuple[int, int] = (1920, 1080)
 CAM_ROTATION: int = 0
 CAM_VFLIP: bool = False
 
+# --- Birthdays ---
+BIRTHDAYS = [
+    (1, 1, "MOSS"),
+    (REDACTED),
+    (REDACTED),
+    (REDACTED),
+    (REDACTED),
+    (REDACTED)
+]
+
 # --- Countdown Configuration ---
 COUNTDOWN_TARGET_DATE: date = date(2026, 4, 16)
 COUNTDOWN_MSG_BEFORE: str = "{days} days remain until Senior Design Day is here. Godspeed."
