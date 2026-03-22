@@ -202,6 +202,12 @@ const Note kSponge[] PROGMEM = {
     {NOTE_E4, 1}, {NOTE_E5, 1.33}, {NOTE_C5, 0.66}, {NOTE_G4, 1}, {NOTE_FS4, 0.5}, {NOTE_A4, 0.5}, {NOTE_G4, 1.33}, {NOTE_G4, 0.66}, {NOTE_A3, 1}, {NOTE_AS3, 1}, {NOTE_B3, 5}
 };
 
+// Sad Violin (Violin)
+const Note kViolin[] PROGMEM = {
+    {NOTE_F5, 2}, {NOTE_B4, 2}, {NOTE_G5, 1.5}, {NOTE_F5, 0.5}, {NOTE_E5, 1.5}, {NOTE_D5, 0.5}, {NOTE_C5, 1}, {NOTE_A4, 1}, {NOTE_A5, 1.5}, {NOTE_G5, 0.5}, {NOTE_F5, 4},
+    {NOTE_E5, 1.5}, {NOTE_F5, 0.5}, {NOTE_G5, 1}, {NOTE_E5, 1}, {NOTE_F5, 1.5}, {NOTE_B4, 0.5}, {NOTE_C5, 1}, {NOTE_D5, 1}, {NOTE_B5, 1.5}, {NOTE_E5, 0.5}, {NOTE_F5, 1}, {NOTE_G5, 1}, {NOTE_A5, 4}
+};
+
 // Succession Theme (Succession)
 const Note kSuccession[] PROGMEM = {
     {NOTE_C3, 0.5}, {NOTE_B4, 0.1}, {NOTE_C5, 0.4}, {REST, 0.75}, {NOTE_B4, 0.125}, {NOTE_C5, 0.125},
@@ -279,6 +285,7 @@ Song kSongList[] = {
   {"Sleep", kLullaby, COUNT(kLullaby), 100},
   {"Fnaf", kFnaf, COUNT(kFnaf), 108},
   {"Sponge", kSponge, COUNT(kSponge), 108},
+  {"Violin", kViolin, COUNT(kViolin), 110},
   {"Succession", kSuccession, COUNT(kSuccession), 70},
   {"Test", kTest, COUNT(kTest), 160},
   {"Granted", kGranted, COUNT(kGranted), 240},

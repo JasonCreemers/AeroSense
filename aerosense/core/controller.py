@@ -24,7 +24,7 @@ from config import settings
 # Valid songs
 HAPPY_SONGS = ["DAISY", "MV1"]
 ANGRY_SONGS = ["ULTRON", "FNAF"]
-SAD_SONGS = ["SPONGE"]
+SAD_SONGS = ["SPONGE", "VIOLIN"]
 SERIOUS_SONGS = ["TARS", "SUCCESSION"]
 OTHER_SONGS = ["MORNING", "SLEEP", "CURIOSITY"]
 
