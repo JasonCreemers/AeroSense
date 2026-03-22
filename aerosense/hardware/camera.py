@@ -75,8 +75,8 @@ class Camera:
                 "--width", str(self.resolution[0]),
                 "--height", str(self.resolution[1]),
                 "--nopreview",
-                '--autofocus-mode', 'manual',
-                '--lens-position', '1.8',
+                '--autofocus-mode', 'auto',
+                '--autofocus-on-capture',
             ]
             
             if self.rotation != 0:
