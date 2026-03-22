@@ -9,7 +9,7 @@ import csv
 import logging
 from pathlib import Path
 import time
-from typing import List, Any
+from typing import Dict, List
 
 from config import settings
 
