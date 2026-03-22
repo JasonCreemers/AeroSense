@@ -59,7 +59,7 @@ LIGHTS_MAX_DURATION_SEC: int = 86400 # Lights safety cutoff (24 hours)
 # --- Camera Configuration ---
 # Camera
 CAM_BURST_COUNT: int = 1
-CAM_RESOLUTION: Tuple[int, int] = (4608, 2592)
+CAM_RESOLUTION: Tuple[int, int] = (1920, 1080)
 CAM_ROTATION: int = 0
 CAM_VFLIP: bool = False
 
