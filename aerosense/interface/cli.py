@@ -27,6 +27,9 @@ MULTI_WORD_TOKENS = {
     "LIVE CAMERA": "LIVE_CAMERA",
     "CAMERA LIVE": "LIVE_CAMERA",
 
+    "SPLIT CAMERA": "SPLIT_CAM",
+    "SPLIT CAM": "SPLIT_CAM",
+
     "PI HEALTH": "PI_HEALTH",
 }
 
@@ -334,7 +337,7 @@ class CLI:
         Usage: RUN [COMPONENT]
         """
         if not args:
-            print(">> Usage: RUN [SENSORS|ENVIRONMENT|WATER_LEVEL|CAMERA|LIVE_CAMERA|PI_HEALTH]")
+            print(">> Usage: RUN [SENSORS|ENVIRONMENT|WATER_LEVEL|CAMERA|LIVE_CAMERA|SPLIT_CAM|PI_HEALTH]")
             return
             
         target = self._normalize_term(args[0])
@@ -396,10 +399,21 @@ class CLI:
             )
             t.start()
 
+        elif target == "SPLIT_CAM":
+            print(">> Splitting most recent image into training tiles...")
+            tiles = self.controller.split_latest_image()
+            if tiles:
+                print(f">> Saved {len(tiles)} tiles to data/training/:")
+                for name in tiles:
+                    print(f"   {name}")
+            else:
+                print(">> Error: Split failed. Check logs for details.")
+                self.controller.play_music("DENIED")
+
         elif target == "PI_HEALTH":
             print(">> Checking Pi Health...")
             data = self.controller.check_pi_health()
-            
+
             print(f"   CPU Temp:   {data['temp']}°C")
             print(f"   RAM Usage:  {data['ram']}%")
             print(f"   Disk Free:  {data['disk']} GB")
@@ -647,6 +661,7 @@ SENSORS (MANUAL):
   RUN CAMERA [COUNT]           - Capture image(s) (3s is Default)
   RUN PI HEALTH                - Check CPU Temp
               
+  RUN SPLIT CAM                - Split latest photo into 6 training tiles
   RUN LIVE CAMERA [SEC]        - Open live video preview (0s for indefinite)
 
                       

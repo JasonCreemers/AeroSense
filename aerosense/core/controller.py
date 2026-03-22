@@ -5,12 +5,14 @@ This module acts as the central control system for the AeroSense Garden.
 It orchestrates hardware interactions, safety logic, and coordinates data logging across all subsystems.
 """
 
+import csv
 import logging
 import random
 import shutil
 import time
 import threading
 from datetime import date
+from pathlib import Path
 from typing import Dict, Optional, Tuple, List
 
 from aerosense.core.logger import Logger
@@ -755,6 +757,116 @@ class Controller:
             "water": water,
             "pi": pi_temp
         }
+
+    def split_latest_image(self) -> List[str]:
+        """
+        Read the camera log to find the most recent photograph, split it into
+        a 3x2 grid of 6 tiles, and save the tiles to the training directory.
+
+        Returns:
+            List[str]: A list of 6 generated tile filenames, or an empty list on failure.
+        """
+        import cv2
+
+        camera_log_path = self.logger.paths["camera"]
+        training_dir: Path = settings.TRAINING_DIR
+
+        # Read camera log for latest image
+        if not camera_log_path.exists():
+            self.log.error("SPLIT CAM: Camera log does not exist. No images have been captured.")
+            return []
+
+        latest_image = None
+        try:
+            with open(camera_log_path, 'r', newline='') as f:
+                reader = csv.reader(f)
+                header = next(reader, None)
+                if header is None:
+                    self.log.error("SPLIT CAM: Camera log is empty.")
+                    return []
+
+                last_row = None
+                for row in reader:
+                    last_row = row
+
+                if last_row is None:
+                    self.log.error("SPLIT CAM: Camera log has no entries.")
+                    return []
+
+                # Validate row has expected columns
+                if len(last_row) < 2:
+                    self.log.error("SPLIT CAM: Most recent camera log row is malformed.")
+                    return []
+
+                # Image_Paths column may contain multiple filenames separated by ";"
+                image_paths_str = last_row[1].strip()
+                if not image_paths_str:
+                    self.log.error("SPLIT CAM: Most recent camera log entry has no image paths.")
+                    return []
+
+                # Take the last image from the entry
+                image_names = [name.strip() for name in image_paths_str.split(";") if name.strip()]
+                if not image_names:
+                    self.log.error("SPLIT CAM: Most recent camera log entry has no valid image paths.")
+                    return []
+                latest_image = image_names[-1]
+
+        except Exception as e:
+            self.log.error(f"SPLIT CAM: Failed to read camera log: {e}")
+            return []
+
+        # Verify source image exists
+        source_path = settings.IMG_DIR / latest_image
+        if not source_path.exists():
+            self.log.error(f"SPLIT CAM: Source image not found: {source_path}")
+            return []
+
+        # Load and split the image into a 3x2 grid
+        try:
+            img = cv2.imread(str(source_path))
+            if img is None:
+                self.log.error(f"SPLIT CAM: Failed to decode image: {source_path}")
+                return []
+
+            height, width = img.shape[:2]
+            tile_w = width // 3
+            tile_h = height // 2
+
+            stem = source_path.stem
+            ext = source_path.suffix
+
+            tile_filenames = []
+            tile_index = 1
+
+            # 2 rows, 3 columns - left to right, top to bottom
+            for row in range(2):
+                for col in range(3):
+                    x1 = col * tile_w
+                    y1 = row * tile_h
+                    # Use full remaining pixels on last column/row to avoid losing edge pixels
+                    x2 = width if col == 2 else (col + 1) * tile_w
+                    y2 = height if row == 1 else (row + 1) * tile_h
+
+                    tile = img[y1:y2, x1:x2]
+                    tile_name = f"{stem}_{tile_index}{ext}"
+                    tile_path = training_dir / tile_name
+
+                    success = cv2.imwrite(str(tile_path), tile)
+                    if not success:
+                        self.log.error(f"SPLIT CAM: Failed to write tile: {tile_name}")
+                        return []
+                    tile_filenames.append(tile_name)
+                    tile_index += 1
+
+            # Log the split operation
+            self.logger.log_training(tile_filenames)
+            self.log.info(f"SPLIT CAM: Successfully split '{latest_image}' into {len(tile_filenames)} tiles.")
+
+            return tile_filenames
+
+        except Exception as e:
+            self.log.error(f"SPLIT CAM: Image processing failed: {e}")
+            return []
 
     def get_countdown_message(self) -> str:
         """Returns the appropriate countdown message based on today's date."""

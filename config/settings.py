@@ -28,10 +28,12 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent
 DATA_DIR: Path = BASE_DIR / "data"
 LOG_DIR: Path = DATA_DIR / "logs"
 IMG_DIR: Path = DATA_DIR / "images"
+TRAINING_DIR: Path = DATA_DIR / "training"
 
 # Ensure directories exist
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 IMG_DIR.mkdir(parents=True, exist_ok=True)
+TRAINING_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Hardware Automation Schedules ---
 # Pump Logic

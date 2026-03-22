@@ -41,6 +41,7 @@ class Logger:
             "master": self.log_dir / "master_log.csv",
             "music": self.log_dir / "music_log.csv",
             "pi": self.log_dir / "pi_log.csv",
+            "training": self.log_dir / "training_log.csv",
             "system": self.log_dir / "system_status.log"
         }
 
@@ -63,7 +64,8 @@ class Logger:
             "master": ["Timestamp", "Temp_F", "Humidity_RH", "Water_Level_mm", "Image_Paths"],
             "camera": ["Timestamp", "Image_Paths"],
             "music": ["Timestamp", "Song_Title"],
-            "pi": ["Timestamp", "CPU_Temp_C", "RAM_Usage_Pct", "Disk_Free_GB", "Uptime_Hours"]
+            "pi": ["Timestamp", "CPU_Temp_C", "RAM_Usage_Pct", "Disk_Free_GB", "Uptime_Hours"],
+            "training": ["Timestamp", "Tile_1", "Tile_2", "Tile_3", "Tile_4", "Tile_5", "Tile_6"]
         }
 
         # Check and create each CSV
@@ -205,3 +207,13 @@ class Logger:
             uptime (float): System Uptime in Hours.
         """
         self._write_row("pi", [temp, ram, disk, uptime])
+
+    def log_training(self, tile_filenames: List[str]) -> None:
+        """
+        Log a training image split event.
+
+        Args:
+            tile_filenames (List[str]): A list of 6 filenames for the split tiles.
+        """
+        self._write_row("training", tile_filenames)
+        self.sys_log.info(f"TRAINING: Logged {len(tile_filenames)} tiles.")
