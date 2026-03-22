@@ -761,7 +761,7 @@ class Controller:
     def split_latest_image(self) -> List[str]:
         """
         Read the camera log to find the most recent photograph, split it into
-        a 3x2 grid of 6 tiles, and save the tiles to the training directory.
+        a 3x2 grid of 6 tiles, and save the tiles to the tiles directory.
 
         Returns:
             List[str]: A list of 6 generated tile filenames, or an empty list on failure.
@@ -769,7 +769,7 @@ class Controller:
         import cv2
 
         camera_log_path = self.logger.paths["camera"]
-        training_dir: Path = settings.TRAINING_DIR
+        tiles_dir: Path = settings.TILES_DIR
 
         # Read camera log for latest image
         if not camera_log_path.exists():
@@ -849,7 +849,7 @@ class Controller:
 
                     tile = img[y1:y2, x1:x2]
                     tile_name = f"{stem}_{tile_index}{ext}"
-                    tile_path = training_dir / tile_name
+                    tile_path = tiles_dir / tile_name
 
                     success = cv2.imwrite(str(tile_path), tile)
                     if not success:
@@ -859,7 +859,7 @@ class Controller:
                     tile_index += 1
 
             # Log the split operation
-            self.logger.log_training(tile_filenames)
+            self.logger.log_tiles(tile_filenames)
             self.log.info(f"SPLIT CAM: Successfully split '{latest_image}' into {len(tile_filenames)} tiles.")
 
             return tile_filenames

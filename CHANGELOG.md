@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.16.9] - 2026-03-22
+### Changed
+- Modified tiling structure.
+
 ## [v3.16.8] - 2026-03-22
 ### Added
 - Added new sad song.

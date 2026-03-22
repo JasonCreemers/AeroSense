@@ -400,10 +400,10 @@ class CLI:
             t.start()
 
         elif target == "SPLIT_CAM":
-            print(">> Splitting most recent image into training tiles...")
+            print(">> Splitting most recent image into tiles...")
             tiles = self.controller.split_latest_image()
             if tiles:
-                print(f">> Saved {len(tiles)} tiles to data/training/:")
+                print(f">> Saved {len(tiles)} tiles to data/tiles/:")
                 for name in tiles:
                     print(f"   {name}")
             else:
@@ -661,7 +661,7 @@ SENSORS (MANUAL):
   RUN CAMERA [COUNT]           - Capture image(s) (3s is Default)
   RUN PI HEALTH                - Check CPU Temp
               
-  RUN SPLIT CAM                - Split latest photo into 6 training tiles
+  RUN SPLIT CAM                - Split latest photo into 6 tiles
   RUN LIVE CAMERA [SEC]        - Open live video preview (0s for indefinite)
 
                       
