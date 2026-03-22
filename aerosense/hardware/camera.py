@@ -71,13 +71,12 @@ class Camera:
             cmd: List[str] = [
                 "rpicam-still",
                 "-o", str(filepath),
-                "-t", "3000",
+                "-t", "5000",
                 "--width", str(self.resolution[0]),
                 "--height", str(self.resolution[1]),
                 "--nopreview",
-                '--autofocus-mode', 'continuous',
-                #'--metering', 'center',
-                #'--awb', '(SOMETHING)',
+                '--autofocus-mode', 'auto',
+                '--autofocus-on-capture',
             ]
             
             if self.rotation != 0:

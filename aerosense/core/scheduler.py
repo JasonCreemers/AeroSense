@@ -202,6 +202,8 @@ class Scheduler:
                     if current_hour == start:
                         # Determine Song
                         song_to_play = "MORNING"
+                        birthday_name = None
+
                         # Check for countdown target date
                         if now.date() == settings.COUNTDOWN_TARGET_DATE:
                             self.log.info("Schedule: Special Date detected. It's Senior Design Day!")
@@ -212,8 +214,9 @@ class Scheduler:
                                 if now.month == month and now.day == day:
                                     self.log.info(f"Schedule: Special Date detected. Happy Birthday to {name}!")
                                     song_to_play = "CURIOSITY"
+                                    birthday_name = name
                                     break
-                        
+
                         self.controller.play_music(song_to_play)
                         music_played_this_cycle = True
 
@@ -221,6 +224,11 @@ class Scheduler:
                         msg = self.controller.get_countdown_message()
                         self.log.info(f"Good morning! {msg}")
                         print(f">> Good morning! {msg}")
+
+                        # Birthday shoutout
+                        if birthday_name:
+                            self.log.info(f"Happy Birthday to {birthday_name}!")
+                            print(f">> Happy Birthday to {birthday_name}!")
             
             else:
                 # Turn off lights

@@ -6,6 +6,7 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add UA Fight Song
 - Add UA Alma Mater.
 
+- csv tracking
 
 - Implement the RoboFlow Computer vision model.
     - Split the images into 6 or so segments once per day. Have these stores under a new name in a new folder for training purposes. Train on 50 or so images initially, and use augmentation to increase the image count.
