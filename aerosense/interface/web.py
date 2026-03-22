@@ -436,6 +436,8 @@ class WebServer:
             self.controller.check_pi_health()
         elif target == "CAMERA":
             self.controller.capture_smart_image(blocking=False)
+        elif target == "SPLIT_CAM":
+            self.controller.split_latest_image()
         elif target == "LIVE_CAMERA":
             threading.Thread(target=self.controller.run_live_camera, args=(0,), daemon=True).start()
 

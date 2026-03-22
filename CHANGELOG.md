@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v3.16.6] - 2026-03-22
+### Changed
+- Modified GUI camera code.
+
 ## [v3.16.5] - 2026-03-22
 ### Changed
 - Modified camera settings.

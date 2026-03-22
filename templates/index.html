@@ -91,8 +91,9 @@
             <div style="text-align: right; margin-top: 5px;">
                 <span class="time-tag" id="camera-time">Taken: {{ img_time }}</span>
             </div>
-            <div style="margin-top: 10px;">
-                <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM (Burst)</button>
+            <div class="grid-2" style="margin-top: 10px;">
+                <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM</button>
+                <button class="btn-blue" onclick="post('/api/run_sensor', {target: 'SPLIT_CAM'})">TILE CAM</button>
             </div>
         </div>
 
@@ -307,7 +308,7 @@
                 polls++;
                 if (polls >= 10) {
                     clearInterval(camPoll);
-                    btn.innerHTML = "RUN CAM (Burst)";
+                    btn.innerHTML = "RUN CAM";
                     btn.style.opacity = "1";
                 }
             }, 1000);
@@ -383,7 +384,7 @@
                         placeholder.style.display = 'none';
 
                         let btn = document.getElementById('btn-cam');
-                        btn.innerHTML = 'RUN CAM (Burst)';
+                        btn.innerHTML = 'RUN CAM';
                         btn.style.opacity = '1';
                     }
                     document.getElementById('camera-time').textContent =
