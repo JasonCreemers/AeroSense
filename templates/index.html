@@ -91,8 +91,10 @@
             <div style="text-align: right; margin-top: 5px;">
                 <span class="time-tag" id="camera-time">Taken: {{ img_time }}</span>
             </div>
-            <div class="grid-2" style="margin-top: 10px;">
+            <div style="margin-top: 10px;">
                 <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM</button>
+            </div>
+            <div style="margin-top: 5px;">
                 <button class="btn-blue" onclick="post('/api/run_sensor', {target: 'SPLIT_CAM'})">TILE CAM</button>
             </div>
         </div>
