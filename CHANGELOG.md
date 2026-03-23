@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.1.1] - 2026-03-23
+### Changed
+- Modified Vision panel on GUI.
+
 ## [v4.1.0] - 2026-03-23
 ### Changed
 - Switched vision inference from local model to RoboFlow cloud API.
