@@ -6,12 +6,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add UA Fight Song
 - Add UA Alma Mater.
 
-- Implement the RoboFlow Computer vision model.
-    - Split the images into 6 or so segments once per day. Have these stores under a new name in a new folder for training purposes. Train on 50 or so images initially, and use augmentation to increase the image count.
-    - Classes: chlorosis, necrosis, pest, tip_burn, wilting
-    - Get an exact pixel count for each of the classes
-    - Use OpenCV for HSV asking to find total number of green pixels (canopy area)
-
 - Implement the XGBoost health modifier.
     - Implement a XGBClassifier using XGBoost. Have it take in several inputs from the csv and make a determination of the overal plant health. Train this on synthetic data initially.
     - Inputs: Chlorosis Ratio, Decay Ratio, Wilting Ratio, Pest Density, Growth Velocity, Instant Temp, Delta Temp, Temp Slope, Instant Humidity, Instant VPD, VPD Shock, Water Volume, Light Interval, Time of Day X, Time of Day Y

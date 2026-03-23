@@ -14,6 +14,7 @@ from typing import List
 from aerosense.core.controller import Controller, VALID_SONGS, VALID_NOTES
 from aerosense.core.scheduler import Scheduler
 from aerosense.interface.web import WebServer
+from config import settings
 
 # --- Configuration ---
 # Multi-Word sanitization
@@ -337,7 +338,7 @@ class CLI:
         Usage: RUN [COMPONENT]
         """
         if not args:
-            print(">> Usage: RUN [SENSORS|ENVIRONMENT|WATER_LEVEL|CAMERA|LIVE_CAMERA|SPLIT_CAM|PI_HEALTH]")
+            print(">> Usage: RUN [SENSORS|ENVIRONMENT|WATER_LEVEL|CAMERA|LIVE_CAMERA|SPLIT_CAM|VISION|PI_HEALTH]")
             return
             
         target = self._normalize_term(args[0])
@@ -400,7 +401,7 @@ class CLI:
             t.start()
 
         elif target == "SPLIT_CAM":
-            print(">> Splitting most recent image into tiles...")
+            print(">> Capturing image and splitting into tiles...")
             tiles = self.controller.split_latest_image()
             if tiles:
                 print(f">> Saved {len(tiles)} tiles to data/tiles/:")
@@ -408,6 +409,23 @@ class CLI:
                     print(f"   {name}")
             else:
                 print(">> Error: Split failed. Check logs for details.")
+
+        elif target == "VISION":
+            print(">> Running Vision Analysis...")
+            result = self.controller.run_vision_analysis()
+            if result:
+                if result.get("model_active"):
+                    print(">> [MODEL ACTIVE] RoboFlow model loaded and running.")
+                else:
+                    print(">> [MODEL INACTIVE] No RoboFlow model — class pixels will be 0.")
+                print(f"\n--- VISION ANALYSIS ---")
+                print(f">> Total Pixels:  {result['total_pixels']}")
+                print(f">> Green Pixels:  {result['green_pixels']}")
+                for cls in settings.VISION_CLASSES:
+                    print(f">> {cls.capitalize():12s}: {result['class_pixels'].get(cls, 0)} px")
+                print("------------------------")
+            else:
+                print(">> Vision analysis failed. Check logs.")
                 self.controller.play_music("DENIED")
 
         elif target == "PI_HEALTH":
@@ -661,7 +679,8 @@ SENSORS (MANUAL):
   RUN CAMERA [COUNT]           - Capture image(s) (3s is Default)
   RUN PI HEALTH                - Check CPU Temp
               
-  RUN SPLIT CAM                - Split latest photo into 6 tiles
+  RUN SPLIT CAM                - Capture and split into 6 tiles
+  RUN VISION                   - Run full vision analysis
   RUN LIVE CAMERA [SEC]        - Open live video preview (0s for indefinite)
 
                       

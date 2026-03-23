@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v3.16.10** | **Release: 2026-03-22**
+**Version: v4.0.0** | **Release: 2026-03-23**
 
 **AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 4B** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -29,6 +29,9 @@
      * `__init__.py`
      * `cli.py`: Command line interface processor.
      * `web.py`: Flask web server for the graphical user interface.
+  * **`ml/`** - Machine Learning Package
+     * `__init__.py`
+     * `vision.py`: Computer vision analyzer.
   * `__init__.py`: Package initialization and versioning.
   * `main.py`: AeroSense application entry point.
 
@@ -47,8 +50,10 @@
      * `pump_log.csv`
      * `system_status.log`
      * `tiles_log.csv`
+     * `vision_log.csv`
      * `water_log.csv`
   * **`tiles/`** - Tiled Image Storage
+  * **`vision/`** - Vision Analysis Storage
 
 * **`firmware/`** - Microcontroller Unit (MCU) Package
   * `firmware.ino`: Main Arduino firmware entry point.
@@ -145,6 +150,9 @@ All system events are serialized and stored within the local `data/` directory.
 The system architecture includes critical fail-safes to prevent hardware damage:
 * **Dry Run Protection:** The firmware prevents pump operation if the ultrasonic sensor detects a low water level.
 * **Runtime Limits:** Both Python and Firmware enforce maximum runtime limits on the pump to prevent flooding.
+
+### Machine Learning
+*Coming soon.*
 
 ### Shutdown Procedure
 To terminate the session, the user must issue the `EXIT` command. This triggers a shutdown sequence that disables all active cycles, stops the actuators, and secures the serial connection before terminating.

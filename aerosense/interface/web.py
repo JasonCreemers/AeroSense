@@ -200,6 +200,7 @@ class WebServer:
         # View Routes
         self.app.add_url_rule('/', 'index', self.index)
         self.app.add_url_rule('/images/<path:filename>', 'images', self.serve_image)
+        self.app.add_url_rule('/vision/<path:filename>', 'vision_images', self.serve_vision_image)
 
         # API Routes - Automation
         self.app.add_url_rule('/api/cycles', 'get_cycles', self.get_cycles)
@@ -307,6 +308,15 @@ class WebServer:
             filename (str): The name of the file to serve.
         """
         return send_from_directory(settings.IMG_DIR, filename)
+
+    def serve_vision_image(self, filename: str):
+        """
+        Serve an annotated vision tile from the vision directory.
+
+        Args:
+            filename (str): The name of the file to serve.
+        """
+        return send_from_directory(str(settings.VISION_DIR), filename)
 
     # --- API Handlers ---
     def get_cycles(self):
@@ -437,7 +447,9 @@ class WebServer:
         elif target == "CAMERA":
             self.controller.capture_smart_image(blocking=False)
         elif target == "SPLIT_CAM":
-            self.controller.split_latest_image()
+            threading.Thread(target=self.controller.split_latest_image, daemon=True).start()
+        elif target == "VISION":
+            threading.Thread(target=self.controller.run_vision_analysis, daemon=True).start()
         elif target == "LIVE_CAMERA":
             threading.Thread(target=self.controller.run_live_camera, args=(0,), daemon=True).start()
 

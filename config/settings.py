@@ -15,6 +15,9 @@ from datetime import date
 from pathlib import Path
 from typing import Tuple
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # --- Serial Communication Configuration ---
 # Use env var 'AEROSENSE_PORT' to override hardware defaults
 SERIAL_PORT: str = os.getenv("AEROSENSE_PORT", "/dev/ttyACM0")
@@ -29,11 +32,13 @@ DATA_DIR: Path = BASE_DIR / "data"
 LOG_DIR: Path = DATA_DIR / "logs"
 IMG_DIR: Path = DATA_DIR / "images"
 TILES_DIR: Path = DATA_DIR / "tiles"
+VISION_DIR: Path = DATA_DIR / "vision"
 
 # Ensure directories exist
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 TILES_DIR.mkdir(parents=True, exist_ok=True)
+VISION_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Hardware Automation Schedules ---
 # Pump Logic
@@ -62,6 +67,13 @@ CAM_BURST_COUNT: int = 1
 CAM_RESOLUTION: Tuple[int, int] = (1920, 1080)
 CAM_ROTATION: int = 0
 CAM_VFLIP: bool = False
+
+# --- Computer Vision ---
+VISION_MODEL_ID: str = "moss-4nrjw/1"
+VISION_CONFIDENCE: float = 0.50
+VISION_CLASSES: list = ["chlorosis", "necrosis", "pest", "tip_burn", "wilting"]
+VISION_GREEN_LOWER: tuple = (35, 40, 40)
+VISION_GREEN_UPPER: tuple = (85, 255, 255)
 
 # --- Birthdays ---
 BIRTHDAYS = [

@@ -42,6 +42,7 @@ class Logger:
             "music": self.log_dir / "music_log.csv",
             "pi": self.log_dir / "pi_log.csv",
             "tiles": self.log_dir / "tiles_log.csv",
+            "vision": self.log_dir / "vision_log.csv",
             "system": self.log_dir / "system_status.log"
         }
 
@@ -65,7 +66,10 @@ class Logger:
             "camera": ["Timestamp", "Image_Paths"],
             "music": ["Timestamp", "Song_Title"],
             "pi": ["Timestamp", "CPU_Temp_C", "RAM_Usage_Pct", "Disk_Free_GB", "Uptime_Hours"],
-            "tiles": ["Timestamp", "Tile_1", "Tile_2", "Tile_3", "Tile_4", "Tile_5", "Tile_6"]
+            "tiles": ["Timestamp", "Tile_1", "Tile_2", "Tile_3", "Tile_4", "Tile_5", "Tile_6"],
+            "vision": ["Timestamp", "Source_Image", "Total_Pixels", "Green_Pixels",
+                        "Chlorosis_Pixels", "Necrosis_Pixels", "Pest_Pixels",
+                        "Tip_Burn_Pixels", "Wilting_Pixels"]
         }
 
         # Check and create each CSV
@@ -207,6 +211,26 @@ class Logger:
             uptime (float): System Uptime in Hours.
         """
         self._write_row("pi", [temp, ram, disk, uptime])
+
+    def log_vision(self, source_image: str, total_px: int, green_px: int, class_pixels: dict) -> None:
+        """
+        Log a vision analysis event.
+
+        Args:
+            source_image (str): Filename of the original source image.
+            total_px (int): Total pixel count across all tiles.
+            green_px (int): Green pixel count across all tiles.
+            class_pixels (dict): Mapping of class names to pixel counts.
+        """
+        self._write_row("vision", [
+            source_image, total_px, green_px,
+            class_pixels.get("chlorosis", 0),
+            class_pixels.get("necrosis", 0),
+            class_pixels.get("pest", 0),
+            class_pixels.get("tip_burn", 0),
+            class_pixels.get("wilting", 0)
+        ])
+        self.sys_log.info("VISION: Analysis logged.")
 
     def log_tiles(self, tile_filenames: List[str]) -> None:
         """

@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.0.0] - 2026-03-23
+### Added
+- Implemented computer vision analysis system.
+- Added RoboFlow instance segmentation integration.
+- Added OpenCV green pixel counting for canopy analysis.
+- Added Vision panel to GUI with annotated tile display.
+- Added RUN VISION command to CLI and web interface.
+- Added vision_log.csv for analysis data logging.
+- Added .env support for secure API key management.
+
 ## [v3.16.10] - 2026-03-22
 ### Fixed
 - Fixed Python importing discrepancy.

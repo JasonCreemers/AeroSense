@@ -18,6 +18,7 @@ from typing import Dict, Optional, Tuple, List
 from aerosense.core.logger import Logger
 from aerosense.hardware.arduino import Arduino
 from aerosense.hardware.camera import Camera
+from aerosense.ml.vision import VisionAnalyzer
 from config import settings
 
 # --- Configuration ---
@@ -63,6 +64,7 @@ class Controller:
         self.logger = Logger()
         self.arduino = Arduino()
         self.camera = Camera()
+        self.vision = VisionAnalyzer()
 
         self.camera_lock = threading.Lock()
         self.scan_lock = threading.Lock()
@@ -91,6 +93,7 @@ class Controller:
                 "timestamp": 0
             },
             "latest_photo":      {"value": None, "timestamp": 0},
+            "vision_result":     {"value": None, "timestamp": 0},
 
             # Pings (Status)
             "ping_env":    {"value": "UNKNOWN", "timestamp": 0},
@@ -760,13 +763,20 @@ class Controller:
 
     def split_latest_image(self) -> List[str]:
         """
-        Read the camera log to find the most recent photograph, split it into
-        a 3x2 grid of 6 tiles, and save the tiles to the tiles directory.
+        Capture a fresh photo, then split it into a 3x2 grid of 6 tiles
+        and save the tiles to the tiles directory.
 
         Returns:
             List[str]: A list of 6 generated tile filenames, or an empty list on failure.
         """
         import cv2
+
+        # Capture a fresh image first
+        images = self.capture_smart_image(blocking=True)
+        if not images:
+            self.log.error("SPLIT CAM: Capture failed.")
+            self.play_music("DENIED")
+            return []
 
         camera_log_path = self.logger.paths["camera"]
         tiles_dir: Path = settings.TILES_DIR
@@ -867,6 +877,48 @@ class Controller:
         except Exception as e:
             self.log.error(f"SPLIT CAM: Image processing failed: {e}")
             return []
+
+    def run_vision_analysis(self) -> Optional[Dict]:
+        """
+        Run the full vision analysis pipeline: capture, tile, analyze, log.
+
+        Returns:
+            Optional[Dict]: Results dict with pixel counts and vision tile paths, or None on failure.
+        """
+        # Capture and split into tiles
+        tile_names = self.split_latest_image()
+        if not tile_names:
+            self.log.error("Vision: Capture/tiling failed.")
+            return None
+
+        # Get source image name from cache (set by capture inside split)
+        source_image = self.data_cache["latest_photo"]["value"] or "unknown"
+
+        # Run vision analysis on all tiles
+        tile_paths = [str(settings.TILES_DIR / name) for name in tile_names]
+        source_stem = Path(source_image).stem
+        result = self.vision.analyze_all_tiles(tile_paths, settings.VISION_DIR, source_stem)
+        if result is None:
+            self.log.error("Vision: Analysis failed on all tiles.")
+            self.play_music("DENIED")
+            return None
+
+        # Log results
+        self.logger.log_vision(source_image, result["total_pixels"],
+                               result["green_pixels"], result["class_pixels"])
+
+        # Cache for GUI
+        self._update_cache("vision_result", {
+            "total_pixels": result["total_pixels"],
+            "green_pixels": result["green_pixels"],
+            "class_pixels": result["class_pixels"],
+            "vision_tiles": result["vision_tiles"],
+            "model_active": result["model_active"],
+            "source_image": source_image
+        })
+
+        self.play_music("GRANTED")
+        return result
 
     def get_countdown_message(self) -> str:
         """Returns the appropriate countdown message based on today's date."""
