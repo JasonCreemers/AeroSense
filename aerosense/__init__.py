@@ -13,7 +13,7 @@ Usage:
 from typing import List
 
 # --- Versioning ---
-__version__: str = "v4.0.0"
+__version__: str = "v4.1.0"
 __release__: str = "2026-03-23"
 
 # --- Component Exports ---

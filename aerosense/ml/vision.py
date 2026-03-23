@@ -6,9 +6,13 @@ It combines OpenCV-based green pixel counting with RoboFlow instance segmentatio
 to quantify canopy area and detect disease classes (chlorosis, necrosis, pest, tip_burn, wilting).
 """
 
+import base64
 import logging
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+import requests
 
 from config import settings
 
@@ -22,6 +26,9 @@ VISION_COLORS: Dict[str, Tuple[int, int, int]] = {
     "wilting": (255, 0, 128), # Purple
 }
 
+# RoboFlow API endpoint for instance segmentation
+ROBOFLOW_API_URL = "https://outline.roboflow.com"
+
 
 class VisionAnalyzer:
     """
@@ -32,43 +39,36 @@ class VisionAnalyzer:
     """
 
     def __init__(self):
-        """Initialize the VisionAnalyzer. Model loading is deferred to first use."""
+        """Initialize the VisionAnalyzer. API readiness is checked on first use."""
         self.log = logging.getLogger("AeroSense.ML.Vision")
-        self._model = None
         self._model_active: bool = False
-        self._model_load_attempted: bool = False
+        self._model_check_done: bool = False
+        self._api_key: str = ""
 
-    def _load_model(self) -> bool:
+    def _check_api(self) -> bool:
         """
-        Lazy-load the RoboFlow inference model on first use.
+        Check that the RoboFlow API key and model ID are configured.
 
         Returns:
-            bool: True if model loaded successfully, False otherwise.
+            bool: True if API is ready, False otherwise.
         """
-        if self._model_load_attempted:
+        if self._model_check_done:
             return self._model_active
 
-        self._model_load_attempted = True
+        self._model_check_done = True
 
-        # Skip if no model ID configured
         if not settings.VISION_MODEL_ID:
             self.log.info("RoboFlow model not configured (VISION_MODEL_ID is empty).")
             return False
 
-        try:
-            from inference import get_model
-            self._model = get_model(model_id=settings.VISION_MODEL_ID)
-            self._model_active = True
-            self.log.info("RoboFlow model loaded successfully.")
-            return True
-
-        except ImportError:
-            self.log.warning("RoboFlow model not available: 'inference' package not installed.")
+        self._api_key = os.getenv("ROBOFLOW_API_KEY", "")
+        if not self._api_key:
+            self.log.warning("RoboFlow API key not set in environment.")
             return False
 
-        except Exception as e:
-            self.log.warning(f"RoboFlow model not available: {e}")
-            return False
+        self._model_active = True
+        self.log.info("RoboFlow API configured successfully.")
+        return True
 
     def count_green_pixels(self, image_path: str) -> Tuple[int, int]:
         """
@@ -106,7 +106,7 @@ class VisionAnalyzer:
 
     def run_inference_on_tile(self, image_path: str) -> Tuple[Dict[str, int], list]:
         """
-        Run RoboFlow instance segmentation on a single tile.
+        Run RoboFlow instance segmentation on a single tile via HTTP API.
 
         Args:
             image_path (str): Path to the tile image.
@@ -115,24 +115,37 @@ class VisionAnalyzer:
             Tuple[Dict[str, int], list]:
                 - Dict mapping class names to pixel counts.
                 - List of detection dicts with 'class_name' and 'points' for overlay drawing.
-                Returns (all-zero dict, empty list) if model unavailable or on failure.
+                Returns (all-zero dict, empty list) if API unavailable or on failure.
         """
         zero_counts = {cls: 0 for cls in settings.VISION_CLASSES}
 
-        if not self._model_active or self._model is None:
+        if not self._model_active:
             return (zero_counts, [])
 
         try:
             import cv2
             import numpy as np
 
-            result = self._model.infer(image_path, confidence=settings.VISION_CONFIDENCE)
+            # Encode image as base64
+            with open(image_path, "rb") as f:
+                img_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-            # Handle result format
-            if isinstance(result, list):
-                result = result[0]
+            # Call RoboFlow API
+            url = f"{ROBOFLOW_API_URL}/{settings.VISION_MODEL_ID}"
+            resp = requests.post(
+                url,
+                params={
+                    "api_key": self._api_key,
+                    "confidence": int(settings.VISION_CONFIDENCE * 100),
+                },
+                data=img_b64,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                timeout=30,
+            )
+            resp.raise_for_status()
+            result = resp.json()
 
-            predictions = result.predictions if hasattr(result, 'predictions') else []
+            predictions = result.get("predictions", [])
 
             class_pixels: Dict[str, int] = {cls: 0 for cls in settings.VISION_CLASSES}
             detections: list = []
@@ -144,16 +157,14 @@ class VisionAnalyzer:
             height, width = img.shape[:2]
 
             for pred in predictions:
-                class_name = pred.class_name.lower() if hasattr(pred, 'class_name') else ""
+                class_name = pred.get("class", "").lower()
 
                 if class_name not in settings.VISION_CLASSES:
                     continue
 
                 # Extract segmentation polygon points
-                if hasattr(pred, 'points'):
-                    points = [(int(p.x), int(p.y)) for p in pred.points]
-                else:
-                    continue
+                points_raw = pred.get("points", [])
+                points = [(int(p["x"]), int(p["y"])) for p in points_raw]
 
                 if len(points) < 3:
                     continue
@@ -232,7 +243,7 @@ class VisionAnalyzer:
             Optional[Dict]: Aggregated results dict, or None if ALL tiles fail.
                 Keys: total_pixels, green_pixels, class_pixels, vision_tiles, model_active
         """
-        self._load_model()
+        self._check_api()
 
         total_pixels = 0
         green_pixels = 0

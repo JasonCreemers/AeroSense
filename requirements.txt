@@ -11,5 +11,5 @@ python-dotenv>=1.0.0
 # --- Image Processing ---
 opencv-python>=4.8.0
 
-# --- Computer Vision ---
-inference>=0.18.0
+# --- HTTP Requests (RoboFlow API) ---
+requests>=2.28.0
