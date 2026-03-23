@@ -234,28 +234,34 @@ class VisionAnalyzer:
         """
         Run the full vision pipeline across all 6 tiles.
 
+        Saves individual annotated tiles to tiled_vision/, then stitches them
+        into a single combined image saved to vision/.
+
         Args:
             tile_paths (List[str]): List of full paths to tile images.
-            vision_dir (Path): Directory to save annotated vision tiles.
+            vision_dir (Path): Directory to save the combined vision image.
             source_stem (str): Stem of the original source image (for naming output files).
 
         Returns:
             Optional[Dict]: Aggregated results dict, or None if ALL tiles fail.
-                Keys: total_pixels, green_pixels, class_pixels, vision_tiles, model_active
+                Keys: total_pixels, green_pixels, class_pixels, vision_image, model_active
         """
         self._check_api()
 
         total_pixels = 0
         green_pixels = 0
         class_pixels: Dict[str, int] = {cls: 0 for cls in settings.VISION_CLASSES}
-        vision_tiles: List[str] = []
+        tiled_paths: List[str] = []
         tiles_processed = 0
+
+        tiled_dir = settings.TILED_VISION_DIR
 
         for i, tile_path in enumerate(tile_paths, start=1):
             # Green pixel count
             t_total, t_green = self.count_green_pixels(tile_path)
             if t_total == 0:
                 self.log.warning(f"Vision: Tile {i} unreadable, skipping.")
+                tiled_paths.append(tile_path)
                 continue
 
             total_pixels += t_total
@@ -267,15 +273,20 @@ class VisionAnalyzer:
             for cls in settings.VISION_CLASSES:
                 class_pixels[cls] += t_class_pixels.get(cls, 0)
 
-            # Draw overlay and save
-            vision_name = f"{source_stem}_{i}_vision.jpg"
-            vision_path = str(vision_dir / vision_name)
-            self.draw_overlay(tile_path, detections, vision_path)
-            vision_tiles.append(vision_name)
+            # Draw overlay and save to tiled_vision/
+            tiled_name = f"{source_stem}_{i}_tiled_vision.jpg"
+            tiled_path = str(tiled_dir / tiled_name)
+            if self.draw_overlay(tile_path, detections, tiled_path):
+                tiled_paths.append(tiled_path)
+            else:
+                tiled_paths.append(tile_path)
 
         if tiles_processed == 0:
             self.log.error("Vision: All tiles failed to process.")
             return None
+
+        # Stitch 6 tiles into one combined image (3 columns x 2 rows)
+        vision_image = self._stitch_tiles(tiled_paths, vision_dir, source_stem)
 
         self.log.info(f"Vision: Analyzed {tiles_processed}/{len(tile_paths)} tiles.")
 
@@ -283,6 +294,50 @@ class VisionAnalyzer:
             "total_pixels": total_pixels,
             "green_pixels": green_pixels,
             "class_pixels": class_pixels,
-            "vision_tiles": vision_tiles,
+            "vision_image": vision_image,
             "model_active": self._model_active
         }
+
+    def _stitch_tiles(self, tile_paths: List[str], vision_dir: Path, source_stem: str) -> Optional[str]:
+        """
+        Combine 6 tile images into a single 3x2 grid image.
+
+        Args:
+            tile_paths (List[str]): List of 6 tile image paths.
+            vision_dir (Path): Directory to save the combined image.
+            source_stem (str): Stem name for the output file.
+
+        Returns:
+            Optional[str]: Filename of the combined image, or None on failure.
+        """
+        try:
+            import cv2
+            import numpy as np
+
+            tiles = []
+            for tp in tile_paths:
+                img = cv2.imread(tp)
+                if img is None:
+                    self.log.error(f"Stitch: Failed to read tile: {tp}")
+                    return None
+                tiles.append(img)
+
+            # Normalize tile sizes (last col/row may differ by 1-2px)
+            tile_h = min(t.shape[0] for t in tiles)
+            tile_w = min(t.shape[1] for t in tiles)
+            tiles = [t[:tile_h, :tile_w] for t in tiles]
+
+            # Build 2 rows of 3 tiles each
+            row_top = np.hstack(tiles[0:3])
+            row_bot = np.hstack(tiles[3:6])
+            combined = np.vstack([row_top, row_bot])
+
+            vision_name = f"{source_stem}_vision.jpg"
+            vision_path = str(vision_dir / vision_name)
+            cv2.imwrite(vision_path, combined)
+
+            return vision_name
+
+        except Exception as e:
+            self.log.error(f"Stitch failed: {e}")
+            return None

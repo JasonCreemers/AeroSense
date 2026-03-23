@@ -101,19 +101,12 @@
 
         <div class="panel">
             <h2>Vision</h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0;" id="vision-grid">
-                <img id="vtile-1" style="display:none; width:100%; vertical-align:middle;">
-                <img id="vtile-2" style="display:none; width:100%; vertical-align:middle;">
-                <img id="vtile-3" style="display:none; width:100%; vertical-align:middle;">
-                <img id="vtile-4" style="display:none; width:100%; vertical-align:middle;">
-                <img id="vtile-5" style="display:none; width:100%; vertical-align:middle;">
-                <img id="vtile-6" style="display:none; width:100%; vertical-align:middle;">
-            </div>
+            <img id="vision-image" class="cam-feed" style="display:none;">
             <div style="margin-top: 10px;">
                 <button id="btn-vision" class="btn-blue" onclick="runVision()">RUN VISION</button>
             </div>
             <div style="margin-top: 10px; text-align: center; font-size: 0.85rem; line-height: 1.8;">
-                <span style="color:#00FFFF;">&#9632;</span> <span class="data-tag" id="v-chlorosis">Chlorosis: --</span> &nbsp;
+                <span style="color:#FFFF00;">&#9632;</span> <span class="data-tag" id="v-chlorosis">Chlorosis: --</span> &nbsp;
                 <span style="color:#A52A2A;">&#9632;</span> <span class="data-tag" id="v-necrosis">Necrosis: --</span> &nbsp;
                 <span style="color:#FF0000;">&#9632;</span> <span class="data-tag" id="v-pest">Pest: --</span><br>
                 <span style="color:#FFA500;">&#9632;</span> <span class="data-tag" id="v-tipburn">Tip Burn: --</span> &nbsp;
@@ -444,15 +437,11 @@
                     if (vr && vr.value && vr.value !== '--') {
                         let v = vr.value;
 
-                        // Update tiles
-                        if (v.vision_tiles) {
-                            for (let i = 0; i < v.vision_tiles.length; i++) {
-                                let tileEl = document.getElementById('vtile-' + (i + 1));
-                                if (tileEl) {
-                                    tileEl.src = '/vision/' + v.vision_tiles[i] + '?' + Date.now();
-                                    tileEl.style.display = 'block';
-                                }
-                            }
+                        // Update combined vision image
+                        if (v.vision_image) {
+                            let imgEl = document.getElementById('vision-image');
+                            imgEl.src = '/vision/' + v.vision_image + '?' + Date.now();
+                            imgEl.style.display = 'block';
                         }
 
                         // Update class percentages (class pixels / green pixels * 100)

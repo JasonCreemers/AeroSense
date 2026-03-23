@@ -912,7 +912,7 @@ class Controller:
             "total_pixels": result["total_pixels"],
             "green_pixels": result["green_pixels"],
             "class_pixels": result["class_pixels"],
-            "vision_tiles": result["vision_tiles"],
+            "vision_image": result["vision_image"],
             "model_active": result["model_active"],
             "source_image": source_image
         })

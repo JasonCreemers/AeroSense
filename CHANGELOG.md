@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.2.0] - 2026-03-23
+### Changed
+- Modified vision command.
+
+## [v4.1.2] - 2026-03-23
+### Fixed
+- Fixed mismatched GUI coloring.
+
 ## [v4.1.1] - 2026-03-23
 ### Changed
 - Modified Vision panel on GUI.

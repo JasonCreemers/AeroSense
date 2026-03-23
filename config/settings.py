@@ -33,12 +33,14 @@ LOG_DIR: Path = DATA_DIR / "logs"
 IMG_DIR: Path = DATA_DIR / "images"
 TILES_DIR: Path = DATA_DIR / "tiles"
 VISION_DIR: Path = DATA_DIR / "vision"
+TILED_VISION_DIR: Path = DATA_DIR / "tiled_vision"
 
 # Ensure directories exist
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 TILES_DIR.mkdir(parents=True, exist_ok=True)
 VISION_DIR.mkdir(parents=True, exist_ok=True)
+TILED_VISION_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Hardware Automation Schedules ---
 # Pump Logic

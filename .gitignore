@@ -17,6 +17,7 @@ data/logs/*
 data/images/*
 data/tiles/*
 data/vision/*
+data/tiled_vision/*
 
 # --- VS Code Settings ---
 .vscode/
