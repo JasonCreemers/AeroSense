@@ -11,7 +11,7 @@ import textwrap
 import threading
 from typing import List
 
-from aerosense.core.controller import Controller, VALID_SONGS, VALID_NOTES
+from aerosense.core.controller import Controller, VALID_SONGS, VALID_NOTES, CATEGORY_POOLS
 from aerosense.core.scheduler import Scheduler
 from aerosense.interface.web import WebServer
 from config import settings
@@ -487,10 +487,20 @@ class CLI:
                     print(f">> Invalid Note: {note_name}")
                     self.controller.play_music("DENIED")
 
-            # Random song
+            # Random song (global or per-category)
             elif target == "RANDOM":
-                 self.controller.play_music("RANDOM")
-                 print(">> Playing Random Track")
+                if len(args) >= 3:
+                    category = args[2].upper()
+                    if category in CATEGORY_POOLS:
+                        self.controller.play_music(f"RANDOM_{category}")
+                        print(f">> Playing Random {category.capitalize()} Track")
+                    else:
+                        valid = ", ".join(CATEGORY_POOLS.keys())
+                        print(f">> Unknown category: '{category}'. Options: {valid}")
+                        self.controller.play_music("DENIED")
+                else:
+                    self.controller.play_music("RANDOM")
+                    print(">> Playing Random Track")
 
             # Song
             elif target in VALID_SONGS:
@@ -684,6 +694,7 @@ AUDIO
   MUSIC PLAY [SONG/NOTE]       - Play a song
   MUSIC PLAY NOTE [NOTE] [SEC] - Play a note (1s is Default)
   MUSIC PLAY RANDOM            - Play a random song
+  MUSIC PLAY RANDOM [CATEGORY] - Play random from category (HAPPY, SAD, etc.)
   MUSIC LIST                   - List all songs and notes
   MUSIC STOP                   - Stop buzzer
 

@@ -153,6 +153,8 @@ class Arduino:
                             if "_" in value:
                                 target_prefix = value.split("_", 1)[0]
                                 self.data_store[f"PONG_{target_prefix}"] = (value, now)
+                            else:
+                                self.data_store["PONG_SYSTEM"] = (value, now)
 
                     # --- Heartbeat Response ---
                     elif line.startswith("HEARTBEAT"):

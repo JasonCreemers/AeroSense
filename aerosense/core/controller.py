@@ -1076,5 +1076,4 @@ class Controller:
             self.state["lights_expected_duration"] = 0.0
             
         self.log.info("State Sync Complete.")
-        self.play_music("GRANTED")
         

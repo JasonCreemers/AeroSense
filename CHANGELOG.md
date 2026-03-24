@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.6] - 2026-03-24
+### Added
+- Added random category to CLI.
+
+### Fixed
+- Fixed PING SYSTEM always returning TIMEOUT.
+- Removed startup GRANTED sound.
+
+### Changed
+- Modified Audio shuffle buttons in GUI.
+
 ## [v4.3.5] - 2026-03-24
 ### Added
 - Added category shuffle buttons to Audio GUI panel.
