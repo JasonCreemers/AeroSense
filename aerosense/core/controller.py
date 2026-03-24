@@ -881,9 +881,12 @@ class Controller:
             self.log.error(f"SPLIT CAM: Image processing failed: {e}")
             return []
 
-    def run_vision_analysis(self) -> Optional[Dict]:
+    def run_vision_analysis(self, silent: bool = False) -> Optional[Dict]:
         """
         Run the full vision analysis pipeline: capture, tile, analyze, log.
+
+        Args:
+            silent (bool): If True, suppress audio feedback (used when called from health pipeline).
 
         Returns:
             Optional[Dict]: Results dict with pixel counts and vision tile paths, or None on failure.
@@ -903,7 +906,8 @@ class Controller:
         result = self.vision.analyze_all_tiles(tile_paths, settings.VISION_DIR, source_stem)
         if result is None:
             self.log.error("Vision: Analysis failed on all tiles.")
-            self.play_music("DENIED")
+            if not silent:
+                self.play_music("DENIED")
             return None
 
         # Log results
@@ -920,7 +924,8 @@ class Controller:
             "source_image": source_image
         })
 
-        self.play_music("GRANTED")
+        if not silent:
+            self.play_music("GRANTED")
         return result
 
     def run_plant_health(self) -> Optional[Dict]:
@@ -942,40 +947,43 @@ class Controller:
         with self.scan_lock:
             self.log.info("Plant Health: Starting analysis pipeline...")
 
-            # Step 1: Run vision pipeline (capture + tile + inference)
-            vision_result = self.run_vision_analysis()
+            # Run vision pipeline (capture + tile + inference)
+            vision_result = self.run_vision_analysis(silent=True)
             if not vision_result:
                 self.log.error("Plant Health: Vision pipeline failed.")
                 return None
 
-            # Step 2: Read environment sensors (fresh temp/humidity)
+            # Read environment sensors (fresh temp/humidity)
             env_data = self.read_environment()
             if not env_data:
                 self.log.error("Plant Health: Environment read failed.")
                 return None
 
-            # Step 3: Compute features (works even without model)
+            # Compute features (works even without model)
             features = self.health.compute_features(vision_result, env_data, self.logger.log_dir)
             if not features:
                 self.log.error("Plant Health: Feature computation failed.")
                 return None
 
-            # Step 4: Predict (may return None if model missing)
-            prediction = self.health.predict(features)
-            if not prediction:
+            # Predict (may return None if model missing)
+            pred_result = self.health.predict(features)
+            if not pred_result:
                 prediction = "NO_MODEL"
-                self.logger.log_health(features, prediction)
-                result = {"prediction": prediction, "features": features}
+                confidence = 0.0
+                self.logger.log_health(features, prediction, confidence)
+                result = {"prediction": prediction, "confidence": confidence, "features": features}
                 self._update_cache("health_result", result)
                 self.play_music("DENIED")
                 self.log.warning("Plant Health: No model loaded. Features logged with NO_MODEL.")
                 return result
 
-            # Step 5: Log
-            self.logger.log_health(features, prediction)
+            prediction, confidence = pred_result
 
-            # Step 6: Cache and return
-            result = {"prediction": prediction, "features": features}
+            # Log
+            self.logger.log_health(features, prediction, confidence)
+
+            # Cache and return
+            result = {"prediction": prediction, "confidence": confidence, "features": features}
             self._update_cache("health_result", result)
             self.play_music("GRANTED")
             self.log.info(f"Plant Health: Diagnosis = {prediction}")

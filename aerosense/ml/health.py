@@ -165,7 +165,7 @@ class HealthClassifier:
             self.log.error(f"Feature computation failed: {e}")
             return None
 
-    def predict(self, features: Dict[str, float]) -> Optional[str]:
+    def predict(self, features: Dict[str, float]) -> Optional[Tuple[str, float]]:
         """
         Run XGBoost inference on computed features.
 
@@ -173,7 +173,7 @@ class HealthClassifier:
             features (dict): Feature name → float mapping from compute_features().
 
         Returns:
-            Optional[str]: Predicted class label string, or None if model unavailable.
+            Optional[Tuple[str, float]]: (predicted_label, confidence_percent) or None if model unavailable.
         """
         if self.model is None or self.label_encoder is None:
             return None
@@ -187,9 +187,13 @@ class HealthClassifier:
                 self.log.error(f"Feature count mismatch: expected {len(self.feature_names)}, got {feature_array.shape[1]}")
                 return None
 
-            prediction = self.model.predict(feature_array)
-            label = self.label_encoder.inverse_transform(prediction)
-            return str(label[0])
+            # Get class probabilities and pick the top prediction
+            probabilities = self.model.predict_proba(feature_array)[0]
+            top_index = int(np.argmax(probabilities))
+            confidence = float(probabilities[top_index]) * 100.0
+            label = str(self.label_encoder.inverse_transform([top_index])[0])
+
+            return (label, confidence)
 
         except Exception as e:
             self.log.error(f"Prediction failed: {e}")

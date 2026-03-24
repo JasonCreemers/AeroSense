@@ -441,7 +441,8 @@ class CLI:
                     print(f">> Run scripts/train_health.py on your PC to generate models/health_model.pkl")
                     print(f">> Features were still computed and logged to health_log.csv.")
                 else:
-                    print(f">> Diagnosis: {prediction}")
+                    confidence = result.get('confidence', 0.0)
+                    print(f">> Diagnosis: {prediction} ({confidence:.1f}%)")
                 print(f"\n   Features:")
                 for k, v in result['features'].items():
                     label = k.replace('_', ' ').title()

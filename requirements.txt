@@ -1,3 +1,5 @@
+# --- Required Python Version: 3.12.9 ---
+
 # --- Hardware Interface ---
 pyserial>=3.5
 

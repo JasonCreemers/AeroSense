@@ -20,7 +20,7 @@ from config import settings
 # Vision overlay colors for each disease class
 VISION_COLORS: Dict[str, Tuple[int, int, int]] = {
     "chlorosis": (0, 255, 255), # Yellow
-    "necrosis": (42, 42, 165), # Brown
+    "necrosis": (50, 50, 50), # Dark Gray
     "pest": (0, 0, 255), # Red
     "tip_burn": (0, 165, 255), # Orange
     "wilting": (255, 0, 128), # Purple

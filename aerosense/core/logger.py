@@ -78,7 +78,7 @@ class Logger:
                         "Instant_Humidity", "Instant_VPD", "VPD_Shock",
                         "Water_Volume", "Light_Interval",
                         "Time_Of_Day_X", "Time_Of_Day_Y",
-                        "Prediction"]
+                        "Prediction", "Confidence"]
         }
 
         # Check and create each CSV
@@ -241,13 +241,14 @@ class Logger:
         ])
         self.sys_log.info("VISION: Analysis logged.")
 
-    def log_health(self, features: dict, prediction: str) -> None:
+    def log_health(self, features: dict, prediction: str, confidence: float) -> None:
         """
         Log a plant health classification event.
 
         Args:
             features (dict): The 16 computed feature values.
             prediction (str): The predicted class label.
+            confidence (float): Prediction confidence percentage (0-100).
         """
         self._write_row("health", [
             round(features.get("chlorosis_ratio", 0), 6),
@@ -267,8 +268,9 @@ class Logger:
             round(features.get("time_of_day_x", 0), 6),
             round(features.get("time_of_day_y", 0), 6),
             prediction,
+            round(confidence, 2),
         ])
-        self.sys_log.info(f"HEALTH: {prediction}")
+        self.sys_log.info(f"HEALTH: {prediction} ({confidence:.1f}%)")
 
     def log_tiles(self, tile_filenames: List[str]) -> None:
         """
