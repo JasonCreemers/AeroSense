@@ -220,11 +220,16 @@ class VisionAnalyzer:
 
                 pts = np.array([points], dtype=np.int32)
                 cv2.fillPoly(overlay, pts, color)
-                border_color = tuple(max(0, int(c * 0.5)) for c in color)
-                cv2.polylines(overlay, [pts], isClosed=True, color=border_color, thickness=3)
 
-            # Blend at ~40% opacity
+            # Blend fills at ~40% opacity
             result = cv2.addWeighted(overlay, 0.4, img, 0.6, 0)
+
+            # Draw solid borders after blend so they are fully opaque
+            for det in detections:
+                color = VISION_COLORS.get(det["class_name"], (128, 128, 128))
+                border_color = tuple(max(0, int(c * 0.5)) for c in color)
+                pts = np.array([det["points"]], dtype=np.int32)
+                cv2.polylines(result, [pts], isClosed=True, color=border_color, thickness=3)
 
             return cv2.imwrite(output_path, result)
 

@@ -1,9 +1,13 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.4] - 2026-03-24
+### Changed
+- Modified masking borders.
+
 ## [v4.3.3] - 2026-03-24
 ### Changed
-- Enabled border around masking.
+- Enabled borders around masking.
 - Modified masking colors.
 
 ## [v4.3.2] - 2026-03-24
