@@ -20,10 +20,10 @@ from config import settings
 # Vision overlay colors for each disease class
 VISION_COLORS: Dict[str, Tuple[int, int, int]] = {
     "chlorosis": (0, 255, 255), # Yellow
-    "necrosis": (50, 50, 50), # Dark Gray
+    "necrosis": (255, 0, 128), # Purple
     "pest": (0, 0, 255), # Red
     "tip_burn": (0, 165, 255), # Orange
-    "wilting": (255, 0, 128), # Purple
+    "wilting": (200, 100, 0), # Blue
 }
 
 # RoboFlow API endpoint for instance segmentation
@@ -220,6 +220,8 @@ class VisionAnalyzer:
 
                 pts = np.array([points], dtype=np.int32)
                 cv2.fillPoly(overlay, pts, color)
+                border_color = tuple(max(0, int(c * 0.5)) for c in color)
+                cv2.polylines(overlay, [pts], isClosed=True, color=border_color, thickness=3)
 
             # Blend at ~40% opacity
             result = cv2.addWeighted(overlay, 0.4, img, 0.6, 0)

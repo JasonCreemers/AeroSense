@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.3] - 2026-03-24
+### Changed
+- Enabled border around masking.
+- Modified masking colors.
+
 ## [v4.3.2] - 2026-03-24
 ### Changed
 - Moved Vision and Plant Health output into controller for GUI terminal parity.
