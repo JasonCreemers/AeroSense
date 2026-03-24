@@ -18,6 +18,7 @@ from typing import Dict, Optional, Tuple, List
 from aerosense.core.logger import Logger
 from aerosense.hardware.arduino import Arduino
 from aerosense.hardware.camera import Camera
+from aerosense.ml.health import HealthClassifier
 from aerosense.ml.vision import VisionAnalyzer
 from config import settings
 
@@ -65,6 +66,7 @@ class Controller:
         self.arduino = Arduino()
         self.camera = Camera()
         self.vision = VisionAnalyzer()
+        self.health = HealthClassifier()
 
         self.camera_lock = threading.Lock()
         self.scan_lock = threading.Lock()
@@ -94,6 +96,7 @@ class Controller:
             },
             "latest_photo":      {"value": None, "timestamp": 0},
             "vision_result":     {"value": None, "timestamp": 0},
+            "health_result":     {"value": None, "timestamp": 0},
 
             # Pings (Status)
             "ping_env":    {"value": "UNKNOWN", "timestamp": 0},
@@ -919,6 +922,64 @@ class Controller:
 
         self.play_music("GRANTED")
         return result
+
+    def run_plant_health(self) -> Optional[Dict]:
+        """
+        Run the full plant health classification pipeline.
+
+        Steps: vision capture → environment read → feature computation → XGBoost prediction → log.
+        Gracefully handles missing model by logging features with prediction="NO_MODEL".
+        Acquires scan_lock to prevent concurrent hardware access with run_master_task.
+
+        Returns:
+            Optional[Dict]: Result with 'prediction' and 'features', or None on pipeline failure.
+        """
+        if self.scan_lock.locked():
+            self.log.warning("Plant Health: Skipped — hardware locked by another task.")
+            self.play_music("DENIED")
+            return None
+
+        with self.scan_lock:
+            self.log.info("Plant Health: Starting analysis pipeline...")
+
+            # Step 1: Run vision pipeline (capture + tile + inference)
+            vision_result = self.run_vision_analysis()
+            if not vision_result:
+                self.log.error("Plant Health: Vision pipeline failed.")
+                return None
+
+            # Step 2: Read environment sensors (fresh temp/humidity)
+            env_data = self.read_environment()
+            if not env_data:
+                self.log.error("Plant Health: Environment read failed.")
+                return None
+
+            # Step 3: Compute features (works even without model)
+            features = self.health.compute_features(vision_result, env_data, self.logger.log_dir)
+            if not features:
+                self.log.error("Plant Health: Feature computation failed.")
+                return None
+
+            # Step 4: Predict (may return None if model missing)
+            prediction = self.health.predict(features)
+            if not prediction:
+                prediction = "NO_MODEL"
+                self.logger.log_health(features, prediction)
+                result = {"prediction": prediction, "features": features}
+                self._update_cache("health_result", result)
+                self.play_music("DENIED")
+                self.log.warning("Plant Health: No model loaded. Features logged with NO_MODEL.")
+                return result
+
+            # Step 5: Log
+            self.logger.log_health(features, prediction)
+
+            # Step 6: Cache and return
+            result = {"prediction": prediction, "features": features}
+            self._update_cache("health_result", result)
+            self.play_music("GRANTED")
+            self.log.info(f"Plant Health: Diagnosis = {prediction}")
+            return result
 
     def get_countdown_message(self) -> str:
         """Returns the appropriate countdown message based on today's date."""

@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.0] - 2026-03-24
+### Added
+- Implemented XGBoost plant health classification system.
+- Added `aerosense/ml/health.py` with 16-features.
+- Added `RUN PLANT HEALTH` command.
+- Added MOSS panel to GUI.
+- Added `health_log.csv`.
+- Added `models/health_model.pkl` with 7 classes.
+
 ## [v4.2.1] - 2026-03-23
 ### Changed
 - Upgraded to next Vision model.

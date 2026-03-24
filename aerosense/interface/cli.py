@@ -32,6 +32,8 @@ MULTI_WORD_TOKENS = {
     "SPLIT CAM": "SPLIT_CAM",
 
     "PI HEALTH": "PI_HEALTH",
+
+    "PLANT HEALTH": "PLANT_HEALTH",
 }
 
 # Component normalization
@@ -338,7 +340,7 @@ class CLI:
         Usage: RUN [COMPONENT]
         """
         if not args:
-            print(">> Usage: RUN [SENSORS|ENVIRONMENT|WATER_LEVEL|CAMERA|LIVE_CAMERA|SPLIT_CAM|VISION|PI_HEALTH]")
+            print(">> Usage: RUN [SENSORS|ENVIRONMENT|WATER_LEVEL|CAMERA|LIVE_CAMERA|SPLIT_CAM|VISION|PLANT_HEALTH|PI_HEALTH]")
             return
             
         target = self._normalize_term(args[0])
@@ -426,6 +428,27 @@ class CLI:
                 print("------------------------")
             else:
                 print(">> Vision analysis failed. Check logs.")
+                self.controller.play_music("DENIED")
+
+        elif target == "PLANT_HEALTH":
+            print(">> Running Plant Health Analysis...")
+            result = self.controller.run_plant_health()
+            if result:
+                prediction = result['prediction']
+                print(f"\n--- PLANT HEALTH ---")
+                if prediction == "NO_MODEL":
+                    print(f">> [NO MODEL] Health model not loaded.")
+                    print(f">> Run scripts/train_health.py on your PC to generate models/health_model.pkl")
+                    print(f">> Features were still computed and logged to health_log.csv.")
+                else:
+                    print(f">> Diagnosis: {prediction}")
+                print(f"\n   Features:")
+                for k, v in result['features'].items():
+                    label = k.replace('_', ' ').title()
+                    print(f"   {label:20s}: {v:.4f}")
+                print("--------------------")
+            else:
+                print(">> Plant health analysis failed. Check logs.")
                 self.controller.play_music("DENIED")
 
         elif target == "PI_HEALTH":
@@ -681,6 +704,7 @@ SENSORS (MANUAL):
               
   RUN SPLIT CAM                - Capture and split into 6 tiles
   RUN VISION                   - Run full vision analysis
+  RUN PLANT HEALTH             - Run full plant health classifier
   RUN LIVE CAMERA [SEC]        - Open live video preview (0s for indefinite)
 
                       

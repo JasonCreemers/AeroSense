@@ -450,6 +450,8 @@ class WebServer:
             threading.Thread(target=self.controller.split_latest_image, daemon=True).start()
         elif target == "VISION":
             threading.Thread(target=self.controller.run_vision_analysis, daemon=True).start()
+        elif target == "PLANT_HEALTH":
+            threading.Thread(target=self.controller.run_plant_health, daemon=True).start()
         elif target == "LIVE_CAMERA":
             threading.Thread(target=self.controller.run_live_camera, args=(0,), daemon=True).start()
 

@@ -136,6 +136,15 @@
         </div>
 
         <div class="panel">
+            <h2>MOSS</h2>
+            <div style="text-align: center; margin-bottom: 10px;">
+                <span id="health-prediction" class="data-tag" style="font-size: 1.3rem;">--</span>
+                <div><span class="time-tag" id="health-time"></span></div>
+            </div>
+            <button id="btn-health" class="btn-green" onclick="runHealth()">RUN PLANT HEALTH</button>
+        </div>
+
+        <div class="panel">
             <h2>Automation Cycles</h2>
             <div class="grid-3" style="margin-bottom: 15px;">
                 <button class="btn-gray" onclick="post('/api/toggle_group', {group: 'system'})">SYSTEM</button>
@@ -359,6 +368,29 @@
             }, 1000);
         }
 
+        function runHealth() {
+            let btn = document.getElementById("btn-health");
+            btn.innerHTML = "ANALYZING...";
+            btn.style.opacity = "0.7";
+
+            fetch('/api/run_sensor', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target: 'PLANT_HEALTH'})
+            });
+
+            let polls = 0;
+            let healthPoll = setInterval(() => {
+                refreshUI();
+                polls++;
+                if (polls >= 60) {
+                    clearInterval(healthPoll);
+                    btn.innerHTML = "RUN PLANT HEALTH";
+                    btn.style.opacity = "1";
+                }
+            }, 1000);
+        }
+
         // --- Live Stream Controls ---
         function startStream() {
             fetch('/api/stream/start', { method: 'POST' }).then(() => {
@@ -463,6 +495,21 @@
                         let vBtn = document.getElementById('btn-vision');
                         vBtn.innerHTML = 'RUN VISION';
                         vBtn.style.opacity = '1';
+                    }
+
+                    // Health Result
+                    let hr = c.health_result;
+                    if (hr && hr.value && hr.value !== '--') {
+                        let pred = hr.value.prediction || '--';
+                        let el = document.getElementById('health-prediction');
+                        el.textContent = pred;
+                        if (pred === 'Healthy') el.style.color = '#28a745';
+                        else if (pred === 'NO_MODEL') el.style.color = '#dc3545';
+                        else el.style.color = '#ffc107';
+                        document.getElementById('health-time').textContent = hr.time;
+                        let hBtn = document.getElementById('btn-health');
+                        hBtn.innerHTML = 'RUN PLANT HEALTH';
+                        hBtn.style.opacity = '1';
                     }
 
                     // Cycle Toggles

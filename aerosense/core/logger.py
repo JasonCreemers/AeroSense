@@ -43,6 +43,7 @@ class Logger:
             "pi": self.log_dir / "pi_log.csv",
             "tiles": self.log_dir / "tiles_log.csv",
             "vision": self.log_dir / "vision_log.csv",
+            "health": self.log_dir / "health_log.csv",
             "system": self.log_dir / "system_status.log"
         }
 
@@ -69,7 +70,15 @@ class Logger:
             "tiles": ["Timestamp", "Tile_1", "Tile_2", "Tile_3", "Tile_4", "Tile_5", "Tile_6"],
             "vision": ["Timestamp", "Source_Image", "Total_Pixels", "Green_Pixels",
                         "Chlorosis_Pixels", "Necrosis_Pixels", "Pest_Pixels",
-                        "Tip_Burn_Pixels", "Wilting_Pixels"]
+                        "Tip_Burn_Pixels", "Wilting_Pixels"],
+            "health": ["Timestamp",
+                        "Chlorosis_Ratio", "Decay_Ratio", "Tip_Burn_Ratio",
+                        "Pest_Density", "Wilting_Ratio", "Growth_Velocity",
+                        "Instant_Temp", "Delta_Temp", "Temp_Slope",
+                        "Instant_Humidity", "Instant_VPD", "VPD_Shock",
+                        "Water_Volume", "Light_Interval",
+                        "Time_Of_Day_X", "Time_Of_Day_Y",
+                        "Prediction"]
         }
 
         # Check and create each CSV
@@ -231,6 +240,35 @@ class Logger:
             class_pixels.get("wilting", 0)
         ])
         self.sys_log.info("VISION: Analysis logged.")
+
+    def log_health(self, features: dict, prediction: str) -> None:
+        """
+        Log a plant health classification event.
+
+        Args:
+            features (dict): The 16 computed feature values.
+            prediction (str): The predicted class label.
+        """
+        self._write_row("health", [
+            round(features.get("chlorosis_ratio", 0), 6),
+            round(features.get("decay_ratio", 0), 6),
+            round(features.get("tip_burn_ratio", 0), 6),
+            round(features.get("pest_density", 0), 6),
+            round(features.get("wilting_ratio", 0), 6),
+            round(features.get("growth_velocity", 0), 4),
+            round(features.get("instant_temp", 0), 2),
+            round(features.get("delta_temp", 0), 4),
+            round(features.get("temp_slope", 0), 4),
+            round(features.get("instant_humidity", 0), 2),
+            round(features.get("instant_vpd", 0), 4),
+            round(features.get("vpd_shock", 0), 4),
+            round(features.get("water_volume", 0), 2),
+            round(features.get("light_interval", 0), 4),
+            round(features.get("time_of_day_x", 0), 6),
+            round(features.get("time_of_day_y", 0), 6),
+            prediction,
+        ])
+        self.sys_log.info(f"HEALTH: {prediction}")
 
     def log_tiles(self, tile_filenames: List[str]) -> None:
         """

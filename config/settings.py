@@ -77,6 +77,16 @@ VISION_CLASSES: list = ["chlorosis", "necrosis", "pest", "tip_burn", "wilting"]
 VISION_GREEN_LOWER: tuple = (35, 40, 40)
 VISION_GREEN_UPPER: tuple = (85, 255, 255)
 
+# --- Plant Health Classifier ---
+MODELS_DIR: Path = BASE_DIR / "models"
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
+HEALTH_MODEL_PATH: Path = MODELS_DIR / "health_model.pkl"
+HEALTH_CLASSES: list = [
+    "Healthy", "Underwatered", "Overwatered",
+    "More_Light", "Less_Light", "Nutrient_Burn", "Pathogen"
+]
+CONTAINER_AREA_CM2: float = 30.48 * 26.67  # 12in x 10.5in = 812.9 cm²
+
 # --- Birthdays ---
 BIRTHDAYS = [
     (1, 1, "MOSS"),
