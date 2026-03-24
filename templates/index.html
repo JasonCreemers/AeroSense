@@ -224,16 +224,15 @@
             </div>
             {% for category, songs in song_categories.items() %}
                 <div style="margin-top: 10px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px;">
-                        <span style="font-size: 1rem; color: #ccc; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">{{ category }}</span>
+                    <div style="text-align: center; margin-bottom: 5px;">
+                        <span style="font-size: 1rem; color: #ccc; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px;">{{ category }}</span>
+                    </div>
+                    <div class="grid-3">
                         {% if category != 'System' %}
-                        <span style="color: #555;">|</span>
-                        <button class="btn-blue" style="width: auto;" onclick="post('/api/music', {action: 'RANDOM_CATEGORY', category: '{{ category }}'})">
+                        <button class="btn-blue" onclick="post('/api/music', {action: 'RANDOM_CATEGORY', category: '{{ category }}'})">
                             RANDOM {{ category.upper() }}
                         </button>
                         {% endif %}
-                    </div>
-                    <div class="grid-3">
                         {% for song in songs %}
                             <button class="btn-outline" onclick="post('/api/music', {action: 'PLAY', song: '{{ song }}'})">
                                 {{ song }}

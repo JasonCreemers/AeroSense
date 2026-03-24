@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.9] - 2026-03-24
+### Changed
+- Restyled Audio category headers.
+
 ## [v4.3.8] - 2026-03-24
 ### Fixed
 - Moved startup GRANTED sound earlier.
