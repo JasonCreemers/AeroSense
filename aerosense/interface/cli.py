@@ -415,42 +415,14 @@ class CLI:
         elif target == "VISION":
             print(">> Running Vision Analysis...")
             result = self.controller.run_vision_analysis()
-            if result:
-                if result.get("model_active"):
-                    print(">> [MODEL ACTIVE] RoboFlow model loaded and running.")
-                else:
-                    print(">> [MODEL INACTIVE] No RoboFlow model — class pixels will be 0.")
-                print(f"\n--- VISION ANALYSIS ---")
-                print(f">> Total Pixels:  {result['total_pixels']}")
-                print(f">> Green Pixels:  {result['green_pixels']}")
-                for cls in settings.VISION_CLASSES:
-                    print(f">> {cls.capitalize():12s}: {result['class_pixels'].get(cls, 0)} px")
-                print("------------------------")
-            else:
+            if not result:
                 print(">> Vision analysis failed. Check logs.")
-                self.controller.play_music("DENIED")
 
         elif target == "PLANT_HEALTH":
             print(">> Running Plant Health Analysis...")
             result = self.controller.run_plant_health()
-            if result:
-                prediction = result['prediction']
-                print(f"\n--- PLANT HEALTH ---")
-                if prediction == "NO_MODEL":
-                    print(f">> [NO MODEL] Health model not loaded.")
-                    print(f">> Run scripts/train_health.py on your PC to generate models/health_model.pkl")
-                    print(f">> Features were still computed and logged to health_log.csv.")
-                else:
-                    confidence = result.get('confidence', 0.0)
-                    print(f">> Diagnosis: {prediction} ({confidence:.1f}%)")
-                print(f"\n   Features:")
-                for k, v in result['features'].items():
-                    label = k.replace('_', ' ').title()
-                    print(f"   {label:20s}: {v:.4f}")
-                print("--------------------")
-            else:
+            if not result:
                 print(">> Plant health analysis failed. Check logs.")
-                self.controller.play_music("DENIED")
 
         elif target == "PI_HEALTH":
             print(">> Checking Pi Health...")

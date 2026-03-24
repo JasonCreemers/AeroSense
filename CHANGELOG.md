@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.2] - 2026-03-24
+### Changed
+- Moved Vision and Plant Health output into controller for GUI terminal parity.
+
 ## [v4.3.1] - 2026-03-24
 ### Added
 - Added prediction confidence percentage to CLI and GUI output.

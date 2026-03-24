@@ -925,6 +925,16 @@ class Controller:
         })
 
         if not silent:
+            if result.get("model_active"):
+                print(">> [MODEL ACTIVE] RoboFlow model loaded and running.")
+            else:
+                print(">> [MODEL INACTIVE] No RoboFlow model — class pixels will be 0.")
+            print(f"\n--- VISION ANALYSIS ---")
+            print(f">> Total Pixels:  {result['total_pixels']}")
+            print(f">> Green Pixels:  {result['green_pixels']}")
+            for cls in settings.VISION_CLASSES:
+                print(f">> {cls.capitalize():12s}: {result['class_pixels'].get(cls, 0)} px")
+            print("------------------------")
             self.play_music("GRANTED")
         return result
 
@@ -974,7 +984,12 @@ class Controller:
                 result = {"prediction": prediction, "confidence": confidence, "features": features}
                 self._update_cache("health_result", result)
                 self.play_music("DENIED")
-                self.log.warning("Plant Health: No model loaded. Features logged with NO_MODEL.")
+                print("\n--- PLANT HEALTH ---")
+                print(">> [NO MODEL] Health model not loaded.")
+                print(">> Run scripts/train_health.py on your PC to generate models/health_model.pkl")
+                print(">> Features were still computed and logged to health_log.csv.")
+                self._print_health_features(features)
+                print("--------------------")
                 return result
 
             prediction, confidence = pred_result
@@ -986,8 +1001,18 @@ class Controller:
             result = {"prediction": prediction, "confidence": confidence, "features": features}
             self._update_cache("health_result", result)
             self.play_music("GRANTED")
-            self.log.info(f"Plant Health: Diagnosis = {prediction}")
+            print(f"\n--- PLANT HEALTH ---")
+            print(f">> Diagnosis: {prediction} ({confidence:.1f}%)")
+            self._print_health_features(features)
+            print("--------------------")
             return result
+
+    def _print_health_features(self, features: Dict[str, float]) -> None:
+        """Print formatted feature values for plant health analysis."""
+        print("\n   Features:")
+        for k, v in features.items():
+            label = k.replace('_', ' ').title()
+            print(f"   {label:20s}: {v:.4f}")
 
     def get_countdown_message(self) -> str:
         """Returns the appropriate countdown message based on today's date."""
