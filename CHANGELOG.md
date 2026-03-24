@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.5] - 2026-03-24
+### Added
+- Added category shuffle buttons to Audio GUI panel.
+- Added formatted startup output block.
+
+### Fixed
+- Fixed PING PONG storage.
+
+### Changed
+- Centered Plant Health feature values in GUI.
+
 ## [v4.3.4] - 2026-03-24
 ### Changed
 - Modified masking borders.

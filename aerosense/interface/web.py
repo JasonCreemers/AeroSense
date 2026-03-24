@@ -465,8 +465,10 @@ class WebServer:
         """
         action = request.json.get('action')
         song = request.json.get('song', "")
+        category = request.json.get('category', "")
         if action == "STOP": self.controller.stop_music()
         elif action == "RANDOM": self.controller.play_music("RANDOM")
+        elif action == "RANDOM_CATEGORY": self.controller.play_music(f"RANDOM_{category.upper()}")
         elif action == "PLAY": self.controller.play_music(song)
         return jsonify(success=True)
 

@@ -36,6 +36,14 @@ VALID_SONGS = HAPPY_SONGS + ANGRY_SONGS + SAD_SONGS + SERIOUS_SONGS + OTHER_SONG
 
 SHUFFLE_POOL = HAPPY_SONGS + ANGRY_SONGS + SAD_SONGS + SERIOUS_SONGS + OTHER_SONGS
 
+CATEGORY_POOLS = {
+    "HAPPY": HAPPY_SONGS,
+    "ANGRY": ANGRY_SONGS,
+    "SAD": SAD_SONGS,
+    "SERIOUS": SERIOUS_SONGS,
+    "OTHER": OTHER_SONGS,
+}
+
 # Valid notes
 VALID_NOTES = []
 _notes = ["C", "CS", "D", "DS", "E", "F", "FS", "G", "GS", "A", "AS", "B"]
@@ -669,7 +677,15 @@ class Controller:
         """
         clean_name = song_name.strip().upper()
 
-        if clean_name == "RANDOM":
+        if clean_name.startswith("RANDOM_"):
+            category = clean_name[7:]
+            pool = CATEGORY_POOLS.get(category, [])
+            if not pool:
+                self.log.warning(f"Random category '{category}' not found or empty!")
+                return
+            clean_name = random.choice(pool)
+            self.log.info(f"Randomly selected {category} song: {clean_name}")
+        elif clean_name == "RANDOM":
             if not SHUFFLE_POOL:
                 self.log.warning("Random shuffle requested, but SHUFFLE_POOL is empty!")
                 return
@@ -733,8 +749,8 @@ class Controller:
             if cache_key: self._update_cache(cache_key, res)
             return res
 
-        # Wait for specific response, ensuring it is fresh
-        response = self.arduino.get_latest_data("PONG", min_timestamp=request_time, timeout=1.0)
+        # Wait for target-specific response to avoid cross-contamination during PING ALL
+        response = self.arduino.get_latest_data(f"PONG_{fw_target}", min_timestamp=request_time, timeout=1.0)
         
         final_result = response if response else "TIMEOUT"
 

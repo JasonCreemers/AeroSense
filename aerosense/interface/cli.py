@@ -117,7 +117,6 @@ class CLI:
         """
         input_thread = threading.Thread(target=self._input_loop, daemon=True)
         input_thread.start()
-        print("\n[CLI] Ready. Type 'HELP' for commands.\n")
 
     def _input_loop(self):
         """

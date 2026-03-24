@@ -25,7 +25,7 @@ def main():
     )
     log = logging.getLogger("AeroSense.Main")
     
-    print(f"\n=== AEROSENSE GARDEN CONTROLLER {aerosense.__version__} | ({aerosense.__release__}) ===")
+    print(f"\n=== AEROSENSE GARDEN CONTROLLER {aerosense.__version__} | ({aerosense.__release__}) ===\n")
     log.info("System initializing...")
 
     # --- Start and Run Application ---
@@ -33,9 +33,6 @@ def main():
         # Initialize core systems
         # The Controller manages hardware state
         controller = Controller()
-        
-        # Countdown
-        print(f">> {controller.get_countdown_message()}")
 
         # The Scheduler manages automation logic
         scheduler = Scheduler(controller)
@@ -52,8 +49,13 @@ def main():
 
         # --- Start Interface ---
         cli.start()
-        
+
         log.info("System Active.")
+
+        print(f"\n--- SYSTEM READY ---")
+        print(f">> {controller.get_countdown_message()}")
+        print(f">> Type 'HELP' for commands.")
+        print(f"--------------------\n")
 
         # --- Main Automation Loop ---
         while cli.running:

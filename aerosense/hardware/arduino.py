@@ -147,9 +147,12 @@ class Arduino:
                         value = "OK"
                         if ":" in line:
                             _, value = line.split(":", 1)
-                            
+
                         with self.data_lock:
                             self.data_store["PONG"] = (value, now)
+                            if "_" in value:
+                                target_prefix = value.split("_", 1)[0]
+                                self.data_store[f"PONG_{target_prefix}"] = (value, now)
 
                     # --- Heartbeat Response ---
                     elif line.startswith("HEARTBEAT"):

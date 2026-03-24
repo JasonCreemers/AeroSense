@@ -125,7 +125,7 @@
                 <div><span class="time-tag" id="health-time"></span></div>
             </div>
             <div id="health-features" style="display:none; margin: 10px 0; font-size: 0.8rem; line-height: 1.6;">
-                <div class="grid-2" style="gap: 2px 10px;" id="health-features-grid"></div>
+                <div class="grid-2" style="gap: 2px 10px; text-align: center;" id="health-features-grid"></div>
             </div>
             <button id="btn-health" class="btn-green" onclick="runHealth()">RUN PLANT HEALTH</button>
         </div>
@@ -224,8 +224,15 @@
             </div>
             {% for category, songs in song_categories.items() %}
                 <div style="margin-top: 10px;">
-                    <span style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">{{ category }}</span>
-                    <div class="grid-3" style="margin-top: 5px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                        <span style="font-size: 0.85rem; color: #ccc; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">{{ category }}</span>
+                        {% if category != 'System' %}
+                        <button class="btn-outline" style="font-size: 0.65rem; padding: 2px 8px; font-weight: bold; border-style: dashed;" onclick="post('/api/music', {action: 'RANDOM_CATEGORY', category: '{{ category }}'})">
+                            &#9634; SHUFFLE
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="grid-3">
                         {% for song in songs %}
                             <button class="btn-outline" onclick="post('/api/music', {action: 'PLAY', song: '{{ song }}'})">
                                 {{ song }}
