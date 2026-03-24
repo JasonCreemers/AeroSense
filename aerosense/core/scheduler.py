@@ -278,12 +278,20 @@ class Scheduler:
 
         # --- Sensor Logging ---
         if (current_minute % settings.SENSOR_INTERVAL_MINS == 0) and (current_minute != self.last_sensor_min):
-            
-            self.log.info(f"Schedule: Sensor Interval Reached (Minute : {current_minute:02d})")
-            
+
+            any_sensor_active = (self.cycles["environment"] or
+                                 self.cycles["water_level"] or
+                                 self.cycles["camera"] or
+                                 self.cycles["pi_health"])
+
+            if not any_sensor_active:
+                self.last_sensor_min = current_minute
+            else:
+                self.log.info(f"Schedule: Sensor Interval Reached (Minute : {current_minute:02d})")
+
             # If all main sensors are enabled, run the synchronized "Master Task"
-            run_master = (self.cycles["environment"] and 
-                          self.cycles["water_level"] and 
+            run_master = (self.cycles["environment"] and
+                          self.cycles["water_level"] and
                           self.cycles["camera"])
 
             if run_master:

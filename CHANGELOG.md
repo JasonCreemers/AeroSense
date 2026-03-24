@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.8] - 2026-03-24
+### Fixed
+- Moved startup GRANTED sound earlier.
+- Suppressed sensor interval log when no sensor cycles are active.
+- Fixed random category button width in GUI.
+
 ## [v4.3.7] - 2026-03-24
 ### Fixed
 - Restored startup GRANTED sound.

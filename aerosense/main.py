@@ -50,8 +50,8 @@ def main():
         # --- Start Interface ---
         cli.start()
 
-        log.info("System Active.")
         controller.play_music("GRANTED")
+        log.info("System Active.")
 
         print(f"\n--- SYSTEM READY ---")
         print(f">> {controller.get_countdown_message()}")
