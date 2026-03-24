@@ -71,7 +71,7 @@ CAM_ROTATION: int = 0
 CAM_VFLIP: bool = False
 
 # --- Computer Vision ---
-VISION_MODEL_ID: str = "moss-4nrjw/1"
+VISION_MODEL_ID: str = "moss-4nrjw/2"
 VISION_CONFIDENCE: float = 0.50
 VISION_CLASSES: list = ["chlorosis", "necrosis", "pest", "tip_burn", "wilting"]
 VISION_GREEN_LOWER: tuple = (35, 40, 40)

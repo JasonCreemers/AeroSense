@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.2.1] - 2026-03-23
+### Changed
+- Upgraded to next Vision model.
+
 ## [v4.2.0] - 2026-03-23
 ### Changed
 - Modified vision command.
