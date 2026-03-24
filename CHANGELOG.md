@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.3.7] - 2026-03-24
+### Fixed
+- Restored startup GRANTED sound.
+- Fixed random category button width in GUI.
+
 ## [v4.3.6] - 2026-03-24
 ### Added
 - Added random category to CLI.

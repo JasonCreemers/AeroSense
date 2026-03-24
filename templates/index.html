@@ -228,7 +228,7 @@
                         <span style="font-size: 1rem; color: #ccc; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">{{ category }}</span>
                         {% if category != 'System' %}
                         <span style="color: #555;">|</span>
-                        <button class="btn-blue" onclick="post('/api/music', {action: 'RANDOM_CATEGORY', category: '{{ category }}'})">
+                        <button class="btn-blue" style="width: auto;" onclick="post('/api/music', {action: 'RANDOM_CATEGORY', category: '{{ category }}'})">
                             RANDOM {{ category.upper() }}
                         </button>
                         {% endif %}
