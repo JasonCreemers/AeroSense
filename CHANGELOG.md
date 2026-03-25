@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.0.0] - 2026-03-25
+### Added
+- Implemented MOSS with full CLI and GUI features.
+- 11 MOSS tools including read sensors, run vision/health pipelines, play music, read files/logs, get system status, set mood.
+- MOSS personality files including system prompt, plant care guidelines, fun facts, team profiles, jukebox guide.
+- MOSS conversation management with auto-save, resume on reboot, 40-message sliding window, 30-day archive cleanup.
+- MOSS stats tracking for total messages, tool calls, resets, first boot, last active.
+
 ## [v4.4.2] - 2026-03-24
 ### Changed
 - Modified water log.

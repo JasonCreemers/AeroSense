@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v4.4.2** | **Release: 2026-03-24**
+**Version: v5.0.0** | **Release: 2026-03-25**
 
 **AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 5 (16GB)** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -31,12 +31,22 @@
      * `web.py`: Flask web server for the graphical user interface.
   * **`ml/`** - Machine Learning Package
      * `__init__.py`
+     * `agent.py`: MOSS AI agent core logic.
      * `health.py`: XGBoost plant health classifier.
+     * `tools.py`: MOSS tool definitions and executor.
      * `vision.py`: Computer vision analyzer.
   * `__init__.py`: Package initialization and versioning.
   * `main.py`: AeroSense application entry point.
 
 * **`models/`** - Machine Learning Models
+  * **`moss/`** - MOSS AI Agent Files
+     * `facts.md`: Facts for MOSS to share.
+     * `guidelines.md`: Plant care guidelines and reference data.
+     * `mood.json`: Persisted MOSS emotional state.
+     * `songs.md`: Jukebox guide and music categories.
+     * `stats.json`: MOSS usage statistics.
+     * `system_prompt.md`: MOSS personality and system prompt.
+     * `users.md`: Team member profiles.
   * `health_model.pkl`: Trained XGBoost model weights.
 
 * **`config/`**
@@ -50,6 +60,7 @@
      * `env_log.csv`
      * `health_log.csv`
      * `lights_log.csv`
+     * `master_log.csv`
      * `music_log.csv`
      * `pi_log.csv`
      * `pump_log.csv`
@@ -57,7 +68,9 @@
      * `tiles_log.csv`
      * `vision_log.csv`
      * `water_log.csv`
+  * **`moss_conversations/`** - MOSS Conversation History
   * **`tiles/`** - Tiled Image Storage
+  * **`tiled_vision/`** - Tiled Vision Overlay Storage
   * **`vision/`** - Vision Analysis Storage
 
 * **`firmware/`** - Microcontroller Unit (MCU) Package

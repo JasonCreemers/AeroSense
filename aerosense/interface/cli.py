@@ -96,17 +96,20 @@ class CLI:
         log (logging.Logger): Dedicated logger for interface events.
     """
 
-    def __init__(self, controller: Controller, scheduler: Scheduler, web_server: WebServer):
+    def __init__(self, controller: Controller, scheduler: Scheduler, web_server: WebServer, moss=None):
         """
         Initialize the CLI.
 
         Args:
             controller (Controller): The active system controller instance.
             scheduler (Scheduler): The active system scheduler instance.
+            web_server (WebServer): The active web server instance.
+            moss (Optional[MossAgent]): The MOSS AI agent instance, or None if unavailable.
         """
         self.controller = controller
         self.scheduler = scheduler
         self.web_interface = web_server
+        self.moss = moss
         self.running = True
         self.log = logging.getLogger("AeroSense.Interface.CLI")
 
@@ -149,6 +152,14 @@ class CLI:
         """
         ## Ignore empty line
         if not raw_input:
+            return
+
+        # Intercept MOSS commands before standard tokenization
+        stripped = raw_input.strip()
+        upper = stripped.upper()
+        if upper == "MOSS" or upper.startswith("MOSS "):
+            moss_msg = stripped[4:].strip()
+            self._handle_moss(moss_msg)
             return
 
         # Sanitize and split
@@ -573,6 +584,64 @@ class CLI:
             else:
                 self.controller.play_music("GRANTED")
 
+    def _handle_moss(self, message: str):
+        """
+        Handle MOSS command.
+        Usage: MOSS <message> | MOSS RESET | MOSS STATUS
+        """
+        # Check availability
+        if not self.moss:
+            print(">> MOSS is not configured.")
+            return
+
+        if not self.moss.is_available:
+            if self.moss._loading:
+                print(">> MOSS is still loading, please wait...")
+            else:
+                print(">> MOSS is not available. Is Ollama running?")
+            return
+
+        # Handle subcommands
+        if message.upper() == "RESET":
+            self.moss.reset()
+            print(">> MOSS conversation reset.")
+            self.controller.play_music("GRANTED")
+            return
+
+        if message.upper() == "STATUS":
+            stats = self.moss.stats
+            mood = self.moss.mood.get("current_mood", "unknown")
+            msg_count = len(self.moss.conversation)
+            print(f"\n--- MOSS STATUS ---")
+            print(f">> Mood: {mood}")
+            print(f">> Current Conversation: {msg_count} messages")
+            print(f">> Total Messages: {stats.get('total_messages', 0)}")
+            print(f">> Total Tool Calls: {stats.get('total_tool_calls', 0)}")
+            print(f">> Total Resets: {stats.get('total_resets', 0)}")
+            print(f"-------------------")
+            return
+
+        if not message:
+            print(">> Usage: MOSS <message> | MOSS RESET | MOSS STATUS")
+            return
+
+        # Check if MOSS is busy
+        if self.moss.is_busy:
+            print(">> MOSS is still thinking. Please wait...")
+            return
+
+        # Stream response in a background thread so CLI input isn't blocked
+        def run():
+            print(">> MOSS: ", end="", flush=True)
+            response = self.moss.chat(
+                message,
+                stream_callback=lambda t: print(t, end="", flush=True)
+            )
+            print()
+
+        t = threading.Thread(target=run, daemon=True)
+        t.start()
+
     def _print_status(self):
         """
         Print a formatted system report checking Cycles and Hardware.
@@ -716,6 +785,12 @@ DIAGNOSTICS
   PING CAMERA                  - Ping Camera module
 
                           
+MOSS:
+  MOSS <message>               - Chat with MOSS
+  MOSS RESET                   - Reset MOSS conversation
+  MOSS STATUS                  - Show MOSS stats and mood
+
+
 SYSTEM:
   GUI                          - Open a web based GUI
   STOP                         - Emergency Stop

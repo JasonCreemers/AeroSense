@@ -7,10 +7,12 @@ It initializes the logging system, instantiates core subsystems, and launches th
 
 import logging
 import sys
+import threading
 import time
 
 import aerosense
 from aerosense import CLI, Controller, Scheduler, WebServer
+from aerosense.ml.agent import MossAgent
 
 
 def main():
@@ -37,15 +39,22 @@ def main():
         # The Scheduler manages automation logic
         scheduler = Scheduler(controller)
 
+        # Initialize MOSS AI Agent
+        moss = MossAgent(controller)
+
         # Initialize Web Server
         web = WebServer(controller, scheduler)
-        
+        web.moss = moss
+
         # The CLI manages user input
-        cli = CLI(controller, scheduler, web)
+        cli = CLI(controller, scheduler, web, moss)
 
         # Wire CLI into WebServer for remote terminal commands
         web.set_cli(cli)
         web.setup_terminal_capture()
+
+        # Start MOSS initialization in background (non-blocking)
+        threading.Thread(target=moss.initialize, daemon=True, name="MOSS-Init").start()
 
         # --- Start Interface ---
         cli.start()
@@ -79,11 +88,15 @@ def main():
         controller.play_music("DENIED")
         
     finally:
+        # Save MOSS state before shutdown
+        if 'moss' in locals():
+            moss.shutdown()
+
         # Ensure hardware is turned off safely before process exit
         if 'controller' in locals():
             controller.stop_all()
             controller.play_music("DENIED")
-            
+
         print(">> System Shutdown Complete.")
         sys.exit(0)
 

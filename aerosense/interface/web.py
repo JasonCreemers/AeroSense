@@ -102,6 +102,7 @@ class WebServer:
         self.controller = controller
         self.scheduler = scheduler
         self.cli = None
+        self.moss = None
         self.log = logging.getLogger("AeroSense.Interface.Web")
 
         # Configure Flask paths relative to this module location
@@ -225,6 +226,9 @@ class WebServer:
         self.app.add_url_rule('/api/stream/start', 'stream_start', self.start_stream, methods=['POST'])
         self.app.add_url_rule('/api/stream/stop', 'stream_stop', self.stop_stream, methods=['POST'])
 
+        # API Routes - MOSS
+        self.app.add_url_rule('/api/moss/status', 'moss_status', self.get_moss_status)
+
     def _register_socket_events(self):
         """
         Register WebSocket event handlers for the real-time terminal.
@@ -242,6 +246,42 @@ class WebServer:
                 self.cli._process_command(cmd)
             else:
                 emit('terminal_output', {'data': '>> Terminal not ready. CLI not connected.\n'})
+
+        @self.socketio.on('moss_message')
+        def handle_moss_message(data):
+            message = data.get('message', '').strip()
+            if not message:
+                return
+
+            if not self.moss or not self.moss.is_available:
+                if self.moss and self.moss._loading:
+                    emit('moss_response', {'data': 'MOSS is still loading, please wait...', 'done': True})
+                else:
+                    emit('moss_response', {'data': 'MOSS is not available. Is Ollama running?', 'done': True})
+                return
+
+            # Check if MOSS is busy processing another request
+            if self.moss.is_busy:
+                emit('moss_response', {'data': "I'm still thinking about the last message. Please wait a moment.", 'done': True})
+                return
+
+            if message.upper() == 'RESET':
+                self.moss.reset()
+                emit('moss_response', {'data': 'Conversation reset.', 'done': True})
+                return
+
+            # Stream MOSS response in a background thread
+            def stream():
+                def on_token(token):
+                    self.socketio.emit('moss_token', {'data': token}, namespace='/')
+
+                try:
+                    response = self.moss.chat(message, stream_callback=on_token)
+                    self.socketio.emit('moss_response', {'data': response, 'done': True}, namespace='/')
+                except Exception as e:
+                    self.socketio.emit('moss_response', {'data': f'Error: {e}', 'done': True}, namespace='/')
+
+            threading.Thread(target=stream, daemon=True, name="MOSS-Web").start()
 
     # --- Helpers ---
     def _fmt_time(self, timestamp: float) -> str:
@@ -546,3 +586,20 @@ class WebServer:
         """
         self.controller.stop_live_stream()
         return jsonify(success=True)
+
+    # --- MOSS API ---
+
+    def get_moss_status(self):
+        """
+        API: Return MOSS availability, mood, and stats.
+        """
+        if not self.moss:
+            return jsonify(available=False, loading=False, mood="unknown", stats={})
+
+        return jsonify(
+            available=self.moss.is_available,
+            loading=self.moss._loading,
+            mood=self.moss.mood.get("current_mood", "unknown"),
+            conversation_length=len(self.moss.conversation),
+            stats=self.moss.stats
+        )

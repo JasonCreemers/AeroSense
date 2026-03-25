@@ -13,8 +13,8 @@ Usage:
 from typing import List
 
 # --- Versioning ---
-__version__: str = "v4.4.2"
-__release__: str = "2026-03-24"
+__version__: str = "v5.0.0"
+__release__: str = "2026-03-25"
 
 # --- Component Exports ---
 from .core.controller import Controller
@@ -24,6 +24,7 @@ from .hardware.arduino import Arduino
 from .hardware.camera import Camera
 from .interface.cli import CLI
 from .interface.web import WebServer
+from .ml.agent import MossAgent
 
 # --- Public API ---
 __all__: List[str] = [
@@ -33,5 +34,6 @@ __all__: List[str] = [
     "Arduino",
     "Camera",
     "CLI",
-    "WebServer"
+    "WebServer",
+    "MossAgent"
 ]
