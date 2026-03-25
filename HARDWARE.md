@@ -4,17 +4,17 @@
 | Component | Voltage | Source | Wiring Notes |
 | :--- | :--- | :--- | :--- |
 | **Arduino Mega** | 5V | USB | Powered via USB-B from Raspberry Pi. |
-| **Raspberry Pi 4B** | 5V | PSU | Powered via USB-C from buck converter. |
+| **Raspberry Pi 5** | 5.1V | Official PSU | Powered via USB-C from official Raspberry Pi 27W power supply. |
 | **Grow Lights** | 12V | PSU | Switched via N-Channel MOSFET. |
 | **Water Pump** | 12V | PSU | Switched via N-Channel MOSFET. |
 
 ---
 
-## Controller: Raspberry Pi 4B
+## Controller: Raspberry Pi 5 (16GB)
 The Pi acts as the central brain, handling telemetry, scheduling, and computer vision.
 
 ### Peripherals
-* **Camera:** IMX708 connected via CSI-to-HDMI adapter.
+* **Camera:** IMX708 connected via CSI-to-HDMI adapter on CAM1 (22-pin connector).
 * **Controller:** Arduino Mega 2560 connected via USB-A (Pi) to USB-B (Mega).
     * **Interface:** UART.
     * **Port:** `/dev/ttyACM0`.
