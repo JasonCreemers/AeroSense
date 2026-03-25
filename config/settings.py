@@ -88,7 +88,7 @@ HEALTH_CLASSES: list = [
 CONTAINER_AREA_CM2: float = 30.48 * 26.67  # 12in x 10.5in = 812.9 cm²
 
 # --- MOSS AI Agent ---
-MOSS_MODEL: str = "llama3.1:8b"
+MOSS_MODEL: str = "llama3.2:3b"
 MOSS_HOST: str = "http://localhost:11434" # Ollama default
 MOSS_MAX_TOOLS_PER_TURN: int = 5 # Safety cap to prevent tool call loops
 MOSS_CONTEXT_LENGTH: int = 8192 # Context window tokens

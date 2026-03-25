@@ -205,10 +205,14 @@ class MossAgent:
         # Tool calling loop
         tool_calls_made = 0
         full_response = ""
+        streamed_any_text = False
 
         while True:
             # Call Ollama with streaming
             response_text, tool_calls = self._call_ollama(messages, stream_callback)
+
+            if response_text.strip():
+                streamed_any_text = True
 
             if not tool_calls:
                 # No tool calls — we have the final response
@@ -233,10 +237,15 @@ class MossAgent:
                     self.log.warning(f"Tool call cap reached mid-batch. Skipping remaining tool calls.")
                     break
 
-                # Safely extract function info
-                func = tc.get("function", {}) if isinstance(tc, dict) else {}
-                tool_name = func.get("name", "unknown")
-                tool_args = func.get("arguments", {})
+                # Safely extract function info — support both dict and object tool calls
+                if isinstance(tc, dict):
+                    func = tc.get("function", {})
+                    tool_name = func.get("name", "unknown")
+                    tool_args = func.get("arguments", {})
+                else:
+                    func = getattr(tc, "function", None)
+                    tool_name = getattr(func, "name", "unknown") if func else "unknown"
+                    tool_args = getattr(func, "arguments", {}) if func else {}
 
                 # Handle string arguments (some models return JSON string)
                 if isinstance(tool_args, str):
@@ -250,6 +259,14 @@ class MossAgent:
                     tool_args = {}
 
                 self.log.info(f"Tool call: {tool_name}({tool_args})")
+
+                # Show tool activity feedback to user via stream callback
+                if stream_callback and not streamed_any_text:
+                    try:
+                        stream_callback(f"[checking {tool_name}...] ")
+                    except Exception:
+                        pass
+
                 result = self.tool_executor.execute(tool_name, tool_args)
                 tool_calls_made += 1
 
@@ -307,20 +324,20 @@ class MossAgent:
 
             stream = self.client.chat(**kwargs, stream=True)
             for chunk in stream:
-                msg = chunk.get("message", {})
+                # Support both object attributes and dict access
+                msg = getattr(chunk, "message", None) or (chunk.get("message", {}) if isinstance(chunk, dict) else {})
 
                 # Collect streamed text
-                token = msg.get("content", "")
+                token = getattr(msg, "content", None) or (msg.get("content", "") if isinstance(msg, dict) else "")
                 if token:
                     response_text += token
-                    # Safely invoke callback — don't let callback errors kill the stream
                     try:
                         stream_callback(token)
                     except Exception as cb_err:
                         self.log.warning(f"Stream callback error (non-fatal): {cb_err}")
 
                 # Collect tool calls (usually in the last chunk)
-                tc = msg.get("tool_calls")
+                tc = getattr(msg, "tool_calls", None) or (msg.get("tool_calls") if isinstance(msg, dict) else None)
                 if tc and isinstance(tc, list):
                     tool_calls.extend(tc)
 
@@ -328,9 +345,9 @@ class MossAgent:
         else:
             # Non-streaming mode
             response = self.client.chat(**kwargs)
-            msg = response.get("message", {})
-            response_text = msg.get("content", "")
-            tool_calls = msg.get("tool_calls", [])
+            msg = getattr(response, "message", None) or (response.get("message", {}) if isinstance(response, dict) else {})
+            response_text = getattr(msg, "content", None) or (msg.get("content", "") if isinstance(msg, dict) else "")
+            tool_calls = getattr(msg, "tool_calls", None) or (msg.get("tool_calls", []) if isinstance(msg, dict) else [])
             if not isinstance(tool_calls, list):
                 tool_calls = []
             return response_text, tool_calls

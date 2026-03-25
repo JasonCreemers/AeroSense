@@ -633,11 +633,18 @@ class CLI:
         # Stream response in a background thread so CLI input isn't blocked
         def run():
             print(">> MOSS: ", end="", flush=True)
-            response = self.moss.chat(
-                message,
-                stream_callback=lambda t: print(t, end="", flush=True)
-            )
-            print()
+            streamed = []
+            def on_token(t):
+                streamed.append(t)
+                print(t, end="", flush=True)
+
+            response = self.moss.chat(message, stream_callback=on_token)
+
+            # If streaming produced nothing (e.g. error), print the response directly
+            if not streamed and response:
+                print(response)
+            else:
+                print()
 
         t = threading.Thread(target=run, daemon=True)
         t.start()

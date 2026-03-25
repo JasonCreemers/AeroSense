@@ -23,5 +23,5 @@ scikit-learn>=1.3.0
 
 # --- MOSS ---
 # Requires Ollama installed separately
-# Requires llama3.1:8b model pulled through Ollama
+# Requires llama3.2:3b model pulled through Ollama
 ollama>=0.4.0

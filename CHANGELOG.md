@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.2.0] - 2026-03-25
+### Changed
+- Switched MOSS model from llama3.1:8b to llama3.2:3b for faster CPU inference on Pi 5.
+
 ## [v5.1.0] - 2026-03-25
 ### Changed
 - Switched MOSS model from gemma3:4b to llama3.1:8b for native tool calling support.

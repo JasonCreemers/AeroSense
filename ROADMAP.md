@@ -6,6 +6,8 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add UA Fight Song
 - Add UA Alma Mater.
 
+- Better loading capabilities when sending first moss message and when its thinking
+
 ---
 
 ## Upcoming Tasks
