@@ -19,6 +19,9 @@ data/tiles/*
 data/vision/*
 data/tiled_vision/*
 
+# --- Training Scripts ---
+scripts/
+
 # --- VS Code Settings ---
 .vscode/
 *.code-workspace

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.4.1] - 2026-03-24
+### Fixed
+- Fixed `.gitignore`.
+
 ## [v4.4.0] - 2026-03-24
 ### Changed
 - Upgraded system from Raspberry Pi 4B to Raspberry Pi 5 (16GB).
