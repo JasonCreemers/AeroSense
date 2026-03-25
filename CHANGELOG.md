@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v4.4.2] - 2026-03-24
+### Changed
+- Modified water log.
+
 ## [v4.4.1] - 2026-03-24
 ### Fixed
 - Fixed `.gitignore`.

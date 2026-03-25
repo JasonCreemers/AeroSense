@@ -36,7 +36,7 @@ class Logger:
             "pump": self.log_dir / "pump_log.csv",
             "lights": self.log_dir / "lights_log.csv",
             "env": self.log_dir / "env_log.csv",
-            "water": self.log_dir / "water_level_log.csv",
+            "water": self.log_dir / "water_log.csv",
             "camera": self.log_dir / "camera_log.csv",
             "master": self.log_dir / "master_log.csv",
             "music": self.log_dir / "music_log.csv",
