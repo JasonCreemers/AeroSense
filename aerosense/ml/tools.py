@@ -23,7 +23,7 @@ TOOL_SCHEMAS: List[Dict] = [
         "type": "function",
         "function": {
             "name": "read_environment",
-            "description": "Read the current temperature (Fahrenheit) and humidity (% RH) from the DHT22 sensor. Returns live data from the Arduino.",
+            "description": "Read live temperature (°F) and humidity (% RH) from sensors.",
             "parameters": {"type": "object", "properties": {}, "required": []}
         }
     },
@@ -31,7 +31,7 @@ TOOL_SCHEMAS: List[Dict] = [
         "type": "function",
         "function": {
             "name": "read_water_level",
-            "description": "Read the current water level from the ultrasonic sensor. Returns distance in mm — lower number means more water, higher means less. Over 100mm is critically low.",
+            "description": "Read live water level (mm). Lower = more water. Over 100mm = critical.",
             "parameters": {"type": "object", "properties": {}, "required": []}
         }
     },
@@ -39,7 +39,7 @@ TOOL_SCHEMAS: List[Dict] = [
         "type": "function",
         "function": {
             "name": "run_plant_health",
-            "description": "Run the full plant health classification pipeline: vision capture, environment sensors, feature computation, and XGBoost prediction. Returns a health class (Healthy, Underwatered, etc.) and confidence score. This is a heavy operation — takes 20-60 seconds.",
+            "description": "Run plant health classifier. Returns health class and confidence. Takes 20-60 seconds.",
             "parameters": {"type": "object", "properties": {}, "required": []}
         }
     },
@@ -47,13 +47,13 @@ TOOL_SCHEMAS: List[Dict] = [
         "type": "function",
         "function": {
             "name": "read_file",
-            "description": "Read a documentation file (.md) from the models/moss/ directory. Available files: overview.md (system overview), guidelines.md (plant care guide).",
+            "description": "Read a reference file: 'overview.md' (system info) or 'guidelines.md' (plant care).",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "filename": {
                         "type": "string",
-                        "description": "The filename to read: 'overview.md' or 'guidelines.md'."
+                        "description": "'overview.md' or 'guidelines.md'"
                     }
                 },
                 "required": ["filename"]
@@ -64,13 +64,13 @@ TOOL_SCHEMAS: List[Dict] = [
         "type": "function",
         "function": {
             "name": "read_log",
-            "description": "Read the most recent entry from a system log file. Returns the header and last row.",
+            "description": "Read most recent entry from a log file.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "log_name": {
                         "type": "string",
-                        "description": "Which log to read. Options: 'env' (temperature/humidity), 'water' (water level), 'health' (plant health), 'pump' (pump activity), 'lights' (light activity), 'master' (combined sensor sweep)."
+                        "description": "'env', 'water', 'health', 'pump', 'lights', or 'master'"
                     }
                 },
                 "required": ["log_name"]

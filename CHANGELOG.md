@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.4.0] - 2026-03-25
+### Changed
+- Reduced MOSS context window from 8192 to 4096 tokens.
+- Reduced conversation window from 20 to 10 messages.
+- Reduced max tools per turn from 5 to 3.
+- Trimmed tool  descriptions.
+- Rewrote system prompt.
+
 ## [v5.3.0] - 2026-03-25
 ### Changed
 - Reduced MOSS tools from 11 to 5.
