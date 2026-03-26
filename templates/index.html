@@ -173,7 +173,7 @@
                      class="cam-feed" style="display: {{ 'block' if latest_image else 'none' }};"
                      onerror="this.style.display='none'; document.getElementById('camera-placeholder').style.display='flex';">
                 <div id="camera-placeholder" class="cam-feed"
-                     style="display: {{ 'none' if latest_image else 'flex' }}; align-items:center; justify-content:center; color:#555; aspect-ratio:4/3;">
+                     style="display: {{ 'none' if latest_image else 'flex' }}; align-items:center; justify-content:center; color:#555; aspect-ratio:16/9;">
                     NO IMAGE DATA
                 </div>
                 <div style="text-align: right; margin-top: 5px;">
@@ -197,7 +197,7 @@
                 <img id="vision-image" class="cam-feed" style="display:none;"
                      onerror="this.style.display='none'; document.getElementById('vision-placeholder').style.display='flex';">
                 <div id="vision-placeholder" class="cam-feed"
-                     style="display:flex; align-items:center; justify-content:center; color:#555; aspect-ratio:4/3;">
+                     style="display:flex; align-items:center; justify-content:center; color:#555; aspect-ratio:16/9;">
                     NO VISION DATA
                 </div>
                 <div style="text-align: right; margin-top: 5px;">
@@ -272,13 +272,13 @@
                         <div><span style="color:#888;">Tip Burn:</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Pest:</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Wilting:</span> <span class="data-tag">--</span></div>
-                        <div><span style="color:#888;">Growth Vel.:</span> <span class="data-tag">--</span></div>
-                        <div><span style="color:#888;">Temp (°F):</span> <span class="data-tag">--</span></div>
-                        <div><span style="color:#888;">Δ Temp:</span> <span class="data-tag">--</span></div>
-                        <div><span style="color:#888;">Temp Slope:</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Growth Velocity (%):</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Temperature (°F):</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Δ Temperature (°F):</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Temperature Slope (°F):</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Humidity (%):</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">VPD (kPa):</span> <span class="data-tag">--</span></div>
-                        <div><span style="color:#888;">VPD Shock:</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">VPD Shock (kPa):</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Water (mL):</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Light (hrs):</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Time X:</span> <span class="data-tag">--</span></div>
@@ -299,7 +299,7 @@
             </div>
             <div class="panel-body">
                 <img id="live-stream" class="cam-feed" src="/api/stream" style="display: {{ 'block' if is_streaming else 'none' }};">
-                <div id="live-placeholder" class="cam-feed" style="display: {{ 'none' if is_streaming else 'flex' }}; align-items:center; justify-content:center; color:#555; aspect-ratio:4/3;">
+                <div id="live-placeholder" class="cam-feed" style="display: {{ 'none' if is_streaming else 'flex' }}; align-items:center; justify-content:center; color:#555; aspect-ratio:16/9;">
                     STREAM OFFLINE
                 </div>
                 <div class="stream-status">
@@ -852,10 +852,10 @@
                             let labels = {
                                 'chlorosis_ratio': 'Chlorosis', 'decay_ratio': 'Decay',
                                 'tip_burn_ratio': 'Tip Burn', 'pest_density': 'Pest',
-                                'wilting_ratio': 'Wilting', 'growth_velocity': 'Growth Vel.',
-                                'instant_temp': 'Temp (\u00B0F)', 'delta_temp': '\u0394 Temp',
-                                'temp_slope': 'Temp Slope', 'instant_humidity': 'Humidity (%)',
-                                'instant_vpd': 'VPD (kPa)', 'vpd_shock': 'VPD Shock',
+                                'wilting_ratio': 'Wilting', 'growth_velocity': 'Growth Velocity (%)',
+                                'instant_temp': 'Temperature (\u00B0F)', 'delta_temp': '\u0394 Temperature (\u00B0F)',
+                                'temp_slope': 'Temperature Slope (\u00B0F)', 'instant_humidity': 'Humidity (%)',
+                                'instant_vpd': 'VPD (kPa)', 'vpd_shock': 'VPD Shock (kPa)',
                                 'water_volume': 'Water (mL)', 'light_interval': 'Light (hrs)',
                                 'time_of_day_x': 'Time X', 'time_of_day_y': 'Time Y'
                             };
