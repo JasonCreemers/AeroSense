@@ -122,7 +122,9 @@ class MossAgent:
 
         # Load persisted state
         self._load_stats()
-        self._load_conversation()
+
+        # Reset conversation on boot for a clean context
+        self.reset()
 
         # Clean up old archived conversations
         self._cleanup_archives()
@@ -137,6 +139,26 @@ class MossAgent:
         self.is_available = True
         self._loading = False
         self.log.info("MOSS is ready.")
+
+    # --- Tool Gating ---
+
+    # Keywords that indicate the user wants sensor data, diagnostics, or reference info.
+    # If none of these appear in the message, tools are withheld to avoid unnecessary calls.
+    TOOL_KEYWORDS = {
+        "temp", "temperature", "humid", "humidity", "water", "level",
+        "health", "plant", "sensor", "log", "read", "check", "run",
+        "diagnose", "diagnosis", "status", "data", "environment",
+        "overview", "guidelines", "guideline", "care", "nutrient",
+        "disease", "wilting", "chlorosis", "necrosis", "pest", "burn",
+    }
+
+    def _needs_tools(self, message: str) -> bool:
+        """
+        Check if the user's message likely requires tool access.
+        Returns True if any tool-related keyword is found, False otherwise.
+        """
+        words = set(message.lower().split())
+        return bool(words & self.TOOL_KEYWORDS)
 
     # --- Chat ---
 
@@ -199,14 +221,27 @@ class MossAgent:
         # Build messages for the API call
         messages = [{"role": "system", "content": system_msg}] + self.conversation
 
+        # Determine if tools should be available for this message
+        use_tools = self._needs_tools(message)
+        if not use_tools:
+            self.log.info("No tool keywords detected — skipping tool schemas.")
+
         # Tool calling loop
         tool_calls_made = 0
         full_response = ""
         streamed_any_text = False
+        used_tools = False
 
         while True:
+            # Re-print MOSS prefix before streaming if tools were used (logs bury the original)
+            if used_tools and stream_callback:
+                try:
+                    stream_callback("\n>> MOSS: ")
+                except Exception:
+                    pass
+
             # Call Ollama with streaming
-            response_text, tool_calls = self._call_ollama(messages, stream_callback)
+            response_text, tool_calls = self._call_ollama(messages, stream_callback, use_tools=use_tools)
 
             if response_text.strip():
                 streamed_any_text = True
@@ -225,7 +260,8 @@ class MossAgent:
                 full_response = response_text
                 break
 
-            # Execute each tool call
+            # Execute each tool call — mark that we entered a tool loop
+            used_tools = True
             messages.append({"role": "assistant", "content": response_text, "tool_calls": tool_calls})
 
             for tc in tool_calls:

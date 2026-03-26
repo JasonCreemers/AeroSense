@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.7.0] - 2026-03-25
+### Added
+- Implemented keyword-based tool gating.
+- Auto-reset conversation on system boot.
+
 ## [v5.6.0] - 2026-03-25
 ### Changed
 - Reverted MOSS model back to llama3.2:3b.
