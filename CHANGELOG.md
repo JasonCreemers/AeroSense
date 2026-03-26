@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.11.0] - 2026-03-26
+### Changed
+- Revamp of entire GUI page.
+
 ## [v5.10.1] - 2026-03-25
 ### Changed
 - Reduced model keep_alive from 2h to 30m.

@@ -267,7 +267,7 @@ class WebServer:
 
             if message.upper() == 'RESET':
                 self.moss.reset()
-                emit('moss_response', {'data': 'Conversation reset.', 'done': True})
+                emit('moss_response', {'data': '', 'done': True})
                 return
 
             # Stream MOSS response in a background thread

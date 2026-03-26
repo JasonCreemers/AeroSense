@@ -42,6 +42,7 @@ CATEGORY_POOLS = {
     "SAD": SAD_SONGS,
     "SERIOUS": SERIOUS_SONGS,
     "OTHER": OTHER_SONGS,
+    "SYSTEM": SYSTEM_SOUNDS,
 }
 
 # Valid notes

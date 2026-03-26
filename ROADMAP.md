@@ -3,22 +3,18 @@
 This document outlines the development trajectory for the AeroSense project. Tasks are prioritized by execution window: **Immediate**, **Upcoming**, and **Long Term**.
 
 ## Immediate Tasks
-- Add UA Fight Song
+- Add UA Fight song
 - Add UA Alma Mater.
+- Add another happpy song.
+- Add another angry song.
+- Add another sad song.
+- Add another serious song.
 
 - Have better way to load up moss
 
 ---
 
 ## Upcoming Tasks
-
-- GUI full revamp.
-    - Have each box able to be dropped down or not.
-    - Have new sliders and graphs and just better information and whatnot.
-    - Have it more consistent.
-    - Maybe make it like a situation monitoring webpage.
-
-- README.md full revamp.
 
 - Fine tune XGBoost model
     - Heavy weight on pixel ratios.
@@ -30,6 +26,8 @@ This document outlines the development trajectory for the AeroSense project. Tas
     - Less of a focus on water volume, time x, and time y.
     - More focus on VPD
     - Less focus on temp/humidity.
+
+- README.md full revamp.
 
 ---
 

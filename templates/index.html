@@ -10,7 +10,14 @@
 
         /* Sections */
         .panel { background: var(--panel); padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        h2 { margin-top: 0; border-bottom: 2px solid #444; padding-bottom: 10px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+        h2 { margin: 0; border-bottom: 2px solid #444; padding-bottom: 10px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+
+        /* Collapsible Panels */
+        .panel-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; min-height: 44px; }
+        .panel-header::after { content: '\25BC'; color: #666; font-size: 0.8rem; margin-left: 10px; transition: transform 0.2s; }
+        .panel.collapsed .panel-header::after { content: '\25B6'; }
+        .panel.collapsed .panel-body { display: none; }
+        .panel-body { margin-top: 10px; }
 
         /* Inputs & Layouts */
         .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; }
@@ -35,9 +42,10 @@
         /* Data Display */
         .data-tag { font-family: monospace; font-size: 0.9rem; color: #4dc9f6; }
         .time-tag { font-size: 0.75rem; color: #888; margin-left: 5px; }
+        .sep { color: white; opacity: 0.6; margin: 0 4px; }
 
         /* Camera */
-        .cam-feed { width: 100%; border-radius: 5px; border: 2px solid #444; min-height: 200px; background: #000; object-fit: cover; }
+        .cam-feed { width: 100%; border-radius: 5px; border: 2px solid #444; min-height: 200px; aspect-ratio: 4/3; background: #000; object-fit: cover; }
 
         /* Terminal */
         #terminal-output {
@@ -75,7 +83,9 @@
         /* MOSS Chat */
         #moss-messages {
             background: #111;
-            height: 300px;
+            height: 600px;
+            max-height: 60vh;
+            min-height: 300px;
             overflow-y: auto;
             padding: 10px;
             border-radius: 5px;
@@ -87,7 +97,7 @@
         .moss-msg { padding: 8px 12px; border-radius: 8px; max-width: 85%; word-wrap: break-word; font-size: 0.85rem; white-space: pre-wrap; }
         .moss-msg.user { background: var(--accent); align-self: flex-end; color: white; }
         .moss-msg.assistant { background: #2a2a2a; align-self: flex-start; color: #e0e0e0; border: 1px solid #444; }
-        .moss-msg.streaming { border-color: var(--accent); }
+        .moss-msg.streaming { border-color: var(--accent); padding: 10px 14px; }
         .moss-status { font-size: 0.75rem; color: #888; text-align: center; padding: 4px; }
         #moss-input {
             background: #222;
@@ -102,253 +112,430 @@
             text-align: left;
         }
         #moss-input::placeholder { color: #555; }
+
+        /* Dark Scrollbars */
+        #moss-messages::-webkit-scrollbar, #terminal-output::-webkit-scrollbar { width: 8px; }
+        #moss-messages::-webkit-scrollbar-track, #terminal-output::-webkit-scrollbar-track { background: #1a1a1a; }
+        #moss-messages::-webkit-scrollbar-thumb, #terminal-output::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        #moss-messages::-webkit-scrollbar-thumb:hover, #terminal-output::-webkit-scrollbar-thumb:hover { background: #777; }
+        #moss-messages, #terminal-output { scrollbar-color: #555 #1a1a1a; }
+
+        /* Vision Slider Bars */
+        .vision-bar { position: relative; height: 10px; border-radius: 5px; margin: 4px 0 2px; background: linear-gradient(to right, var(--green) 0%, var(--green) 17%, #ffc107 17%, #ffc107 50%, var(--red) 50%, var(--red) 100%); }
+        .vision-bar-indicator { position: absolute; top: -3px; width: 4px; height: 16px; background: white; border-radius: 2px; transition: left 0.3s; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
+
+        /* Clickable Category Titles */
+        .category-title {
+            font-size: 1.15rem; color: #ccc; text-transform: uppercase; letter-spacing: 1px;
+            font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px;
+            cursor: pointer; transition: color 0.2s; display: inline-block; min-width: 70%;
+        }
+        .category-title:hover { color: var(--accent); }
+
+        /* Developer Tools Divider */
+        .section-divider { text-align: center; padding: 15px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; color: #666; }
     </style>
 </head>
 <body>
     <div class="container">
 
+        <!-- Title -->
         <div style="text-align: center;">
             <h1 style="margin:0;">AEROSENSE <span style="font-size: 0.5em; color: #666;">{{ version }}</span></h1>
+            <p style="color:#888; font-size:0.8rem; margin:4px 0 0;">Senior Design — University of Akron</p>
         </div>
 
+        <!-- MOSS -->
         <div class="panel">
-            <h2>Camera Feed</h2>
-            <img id="camera-image" src="{% if latest_image %}/images/{{ latest_image }}{% endif %}"
-                 class="cam-feed" style="display: {{ 'block' if latest_image else 'none' }};">
-            <div id="camera-placeholder" class="cam-feed"
-                 style="display: {{ 'none' if latest_image else 'flex' }}; align-items:center; justify-content:center; color:#555;">
-                NO IMAGE DATA
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>MOSS</h2>
             </div>
-            <div style="text-align: right; margin-top: 5px;">
-                <span class="time-tag" id="camera-time">Taken: {{ img_time }}</span>
-            </div>
-            <div style="margin-top: 10px;">
-                <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM</button>
-            </div>
-            <div style="margin-top: 5px;">
-                <button class="btn-blue" onclick="post('/api/run_sensor', {target: 'SPLIT_CAM'})">TILE CAM</button>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h2>Vision</h2>
-            <img id="vision-image" class="cam-feed" style="display:none;">
-            <div style="margin-top: 10px;">
-                <button id="btn-vision" class="btn-blue" onclick="runVision()">RUN VISION</button>
-            </div>
-            <div style="margin-top: 10px; text-align: center; font-size: 0.85rem; line-height: 1.8;">
-                <span style="color:#FFFF00;">&#9632;</span> <span class="data-tag" id="v-chlorosis">Chlorosis: --</span>
-                <span style="opacity:0.4;">|</span>
-                <span style="color:#8000FF;">&#9632;</span> <span class="data-tag" id="v-necrosis">Necrosis: --</span>
-                <span style="opacity:0.4;">|</span>
-                <span style="color:#FF0000;">&#9632;</span> <span class="data-tag" id="v-pest">Pest: --</span><br>
-                <span style="color:#FFA500;">&#9632;</span> <span class="data-tag" id="v-tipburn">Tip Burn: --</span>
-                <span style="opacity:0.4;">|</span>
-                <span style="color:#0064C8;">&#9632;</span> <span class="data-tag" id="v-wilting">Wilting: --</span>
-                <div><span class="time-tag" id="v-time"></span></div>
+            <div class="panel-body">
+                <div class="moss-status" id="moss-status">Loading...</div>
+                <div id="moss-messages"></div>
+                <div class="row" style="margin-top: 10px;">
+                    <input type="text" id="moss-input" placeholder="Talk to MOSS..."
+                           onkeydown="if(event.key==='Enter') sendMoss()">
+                    <button class="btn-blue" style="width: auto; padding: 10px 20px;" onclick="sendMoss()">SEND</button>
+                    <button class="btn-outline" style="width: auto; padding: 10px 15px;" onclick="resetMoss()">RESET</button>
+                </div>
             </div>
         </div>
 
+        <!-- Camera Feed -->
         <div class="panel">
-            <h2>Plant Health</h2>
-            <div style="text-align: center; margin-bottom: 10px;">
-                <span id="health-prediction" class="data-tag" style="font-size: 1.3rem;">--</span>
-                <div><span class="time-tag" id="health-time"></span></div>
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Camera Feed</h2>
             </div>
-            <div id="health-features" style="display:none; margin: 10px 0; font-size: 0.8rem; line-height: 1.6;">
-                <div class="grid-2" style="gap: 2px 10px; text-align: center;" id="health-features-grid"></div>
-            </div>
-            <button id="btn-health" class="btn-green" onclick="runHealth()">RUN PLANT HEALTH</button>
-        </div>
-
-        <div class="panel">
-            <h2>Live Feed</h2>
-            <img id="live-stream" class="cam-feed" src="/api/stream" style="display: {{ 'block' if is_streaming else 'none' }};">
-            <div id="live-placeholder" class="cam-feed" style="display: {{ 'none' if is_streaming else 'flex' }}; align-items:center; justify-content:center; color:#555;">
-                STREAM OFFLINE
-            </div>
-            <div class="stream-status">
-                <span id="stream-indicator" class="{{ 'stream-live' if is_streaming else 'stream-off' }}">
-                    {{ 'LIVE' if is_streaming else 'OFFLINE' }}
-                </span>
-            </div>
-            <div class="grid-2" style="margin-top: 10px;">
-                <button id="btn-stream-start" class="btn-green" onclick="startStream()">START STREAM</button>
-                <button id="btn-stream-stop" class="btn-red" onclick="stopStream()">STOP STREAM</button>
+            <div class="panel-body">
+                <img id="camera-image" src="{% if latest_image %}/images/{{ latest_image }}{% endif %}"
+                     class="cam-feed" style="display: {{ 'block' if latest_image else 'none' }};"
+                     onerror="this.style.display='none'; document.getElementById('camera-placeholder').style.display='flex';">
+                <div id="camera-placeholder" class="cam-feed"
+                     style="display: {{ 'none' if latest_image else 'flex' }}; align-items:center; justify-content:center; color:#555;">
+                    NO IMAGE DATA
+                </div>
+                <div style="text-align: right; margin-top: 5px;">
+                    <span class="time-tag" id="camera-time">{% if latest_image %}Taken: {{ img_time }}{% endif %}</span>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM</button>
+                </div>
+                <div style="margin-top: 5px;">
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'SPLIT_CAM'})">RUN TILE CAM</button>
+                </div>
             </div>
         </div>
 
+        <!-- Vision -->
         <div class="panel">
-            <h2>Automation Cycles</h2>
-            <div class="grid-3" style="margin-bottom: 15px;">
-                <button class="btn-gray" onclick="post('/api/toggle_group', {group: 'system'})">SYSTEM</button>
-                <button class="btn-gray" onclick="post('/api/toggle_group', {group: 'hardware'})">HARDWARE</button>
-                <button class="btn-gray" onclick="post('/api/toggle_group', {group: 'sensors'})">SENSORS</button>
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Vision</h2>
             </div>
-            <div class="grid-2">
-                {% for key in ['pump', 'lights', 'environment', 'water_level', 'camera', 'pi_health'] %}
-                    <button id="cycle-{{ key }}"
-                            class="{{ 'toggle-on' if cycles[key] else 'toggle-off' }}"
-                            onclick="post('/api/toggle_cycle', {target: '{{ key }}'})">
-                        {{ key.upper().replace('_', ' ') }}
-                    </button>
+            <div class="panel-body">
+                <img id="vision-image" class="cam-feed" style="display:none;"
+                     onerror="this.style.display='none'; document.getElementById('vision-placeholder').style.display='flex';">
+                <div id="vision-placeholder" class="cam-feed"
+                     style="display:flex; align-items:center; justify-content:center; color:#555;">
+                    NO VISION DATA
+                </div>
+                <div style="text-align: right; margin-top: 5px;">
+                    <span class="time-tag" id="v-time"></span>
+                </div>
+                <div style="margin-top: 10px;">
+                    <button id="btn-vision" class="btn-blue" onclick="runVision()">RUN VISION</button>
+                </div>
+                <div style="margin-top: 10px;">
+                    <div style="margin: 8px 0;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                            <span style="color:#FFFF00;">Chlorosis</span>
+                            <span class="data-tag" id="v-chlorosis">--</span>
+                        </div>
+                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-chlorosis" style="left:0%;"></div></div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#666;"><span>Good</span><span>Watch</span><span>Attention</span></div>
+                    </div>
+                    <div style="margin: 8px 0;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                            <span style="color:#8000FF;">Necrosis</span>
+                            <span class="data-tag" id="v-necrosis">--</span>
+                        </div>
+                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-necrosis" style="left:0%;"></div></div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#666;"><span>Good</span><span>Watch</span><span>Attention</span></div>
+                    </div>
+                    <div style="margin: 8px 0;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                            <span style="color:#FF0000;">Pest</span>
+                            <span class="data-tag" id="v-pest">--</span>
+                        </div>
+                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-pest" style="left:0%;"></div></div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#666;"><span>Good</span><span>Watch</span><span>Attention</span></div>
+                    </div>
+                    <div style="margin: 8px 0;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                            <span style="color:#FFA500;">Tip Burn</span>
+                            <span class="data-tag" id="v-tipburn">--</span>
+                        </div>
+                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-tipburn" style="left:0%;"></div></div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#666;"><span>Good</span><span>Watch</span><span>Attention</span></div>
+                    </div>
+                    <div style="margin: 8px 0;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                            <span style="color:#0064C8;">Wilting</span>
+                            <span class="data-tag" id="v-wilting">--</span>
+                        </div>
+                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-wilting" style="left:0%;"></div></div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#666;"><span>Good</span><span>Watch</span><span>Attention</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plant Health -->
+        <div class="panel">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Plant Health</h2>
+            </div>
+            <div class="panel-body">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <span id="health-prediction" class="data-tag" style="font-size: 1.3rem; font-weight: bold; color: #666;">No diagnosis yet</span>
+                </div>
+                <div id="health-features" style="display:none; margin: 10px 0; font-size: 0.8rem; line-height: 1.6;">
+                    <div class="grid-2" style="gap: 2px 10px; text-align: center;" id="health-features-grid"></div>
+                </div>
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <span class="time-tag" id="health-time"></span>
+                </div>
+                <button id="btn-health" class="btn-blue" onclick="runHealth()">RUN PLANT HEALTH</button>
+            </div>
+        </div>
+
+        <!-- Live Feed -->
+        <div class="panel">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Live Feed</h2>
+            </div>
+            <div class="panel-body">
+                <img id="live-stream" class="cam-feed" src="/api/stream" style="display: {{ 'block' if is_streaming else 'none' }};">
+                <div id="live-placeholder" class="cam-feed" style="display: {{ 'none' if is_streaming else 'flex' }}; align-items:center; justify-content:center; color:#555;">
+                    STREAM OFFLINE
+                </div>
+                <div class="stream-status">
+                    <span id="stream-indicator" class="{{ 'stream-live' if is_streaming else 'stream-off' }}">
+                        {{ 'LIVE' if is_streaming else 'OFFLINE' }}
+                    </span>
+                </div>
+                <div class="grid-2" style="margin-top: 10px;">
+                    <button id="btn-stream-start" class="btn-green" onclick="startStream()">START STREAM</button>
+                    <button id="btn-stream-stop" class="btn-red" onclick="stopStream()">STOP STREAM</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Automation Cycles -->
+        <div class="panel">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Automation Cycles</h2>
+            </div>
+            <div class="panel-body">
+                <div class="grid-3" style="margin-bottom: 25px;">
+                    <button class="btn-blue" onclick="post('/api/toggle_group', {group: 'system'})">SYSTEM</button>
+                    <button class="btn-blue" onclick="post('/api/toggle_group', {group: 'hardware'})">HARDWARE</button>
+                    <button class="btn-blue" onclick="post('/api/toggle_group', {group: 'sensors'})">SENSORS</button>
+                </div>
+                <div class="grid-2">
+                    {% for key in ['pump', 'lights', 'environment', 'water_level', 'camera', 'pi_health'] %}
+                        <button id="cycle-{{ key }}"
+                                class="{{ 'toggle-on' if cycles[key] else 'toggle-off' }}"
+                                onclick="post('/api/toggle_cycle', {target: '{{ key }}'})">
+                            {{ key.upper().replace('_', ' ') }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Control -->
+        <div class="panel">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Manual Control</h2>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <span style="width: 80px; font-weight: bold;">LIGHTS:</span>
+                    <button class="btn-green" onclick="manualRun('LIGHTS', 'ON')">ON</button>
+                    <input type="number" id="dur_lights" placeholder="Sec (0)">
+                    <button class="btn-red" onclick="manualRun('LIGHTS', 'OFF')">OFF</button>
+                </div>
+                <div class="row">
+                    <span style="width: 80px; font-weight: bold;">PUMP:</span>
+                    <button class="btn-green" onclick="manualRun('PUMP', 'ON')">ON</button>
+                    <input type="number" id="dur_pump" placeholder="Sec (0)">
+                    <button class="btn-red" onclick="manualRun('PUMP', 'OFF')">OFF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sensors -->
+        <div class="panel">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Sensors</h2>
+            </div>
+            <div class="panel-body">
+                <button class="btn-blue" style="margin-bottom: 10px;" onclick="post('/api/run_sensor', {target: 'SENSORS'})">RUN ALL SENSORS</button>
+
+                <div style="margin-bottom: 10px;">
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENVIRONMENTAL</button>
+                    <div style="margin-top: 5px; text-align: center;">
+                        <span class="data-tag" id="env-value">{{ cache['temp_reading']['value'] }}&deg;F <span class="sep">|</span> {{ cache['humidity_reading']['value'] }}%</span>
+                        <span class="sep">|</span>
+                        <span class="time-tag" id="env-time">Taken: {{ cache['temp_reading']['time'] }}</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER LEVEL</button>
+                    <div style="margin-top: 5px; text-align: center;">
+                        <span class="data-tag" id="water-value">{{ cache['water_reading']['value'] }} mm</span>
+                        <span class="sep">|</span>
+                        <span class="time-tag" id="water-time">Taken: {{ cache['water_reading']['time'] }}</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
+                    <div style="margin-top: 5px; text-align: center; font-size: 0.85rem;">
+                        <span class="data-tag" id="pi-temp">CPU: {{ cache['pi_health_reading']['value']['temp'] }}&deg;C</span>
+                        <span class="sep">|</span>
+                        <span class="data-tag" id="pi-ram">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</span>
+                        <span class="sep">|</span>
+                        <span class="data-tag" id="pi-disk">DSK: {{ cache['pi_health_reading']['value']['disk'] }}GB</span>
+                        <span class="sep">|</span>
+                        <span class="data-tag" id="pi-uptime">UPT: {{ cache['pi_health_reading']['value']['uptime'] }}hr</span>
+                        <span class="sep">|</span>
+                        <span class="time-tag" id="pi-time">Taken: {{ cache['pi_health_reading']['time'] }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio -->
+        <div class="panel">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Audio</h2>
+            </div>
+            <div class="panel-body">
+                <div class="row" style="margin-bottom: 20px;">
+                    <button class="btn-blue" onclick="post('/api/music', {action: 'RANDOM'})">PLAY RANDOM</button>
+                    <button class="btn-red" onclick="post('/api/music', {action: 'STOP'})">STOP MUSIC</button>
+                </div>
+                {% for category, songs in song_categories.items() %}
+                    <div style="margin-top: 10px;">
+                        <div style="text-align: center; margin-bottom: 5px;">
+                            <span class="category-title" onclick="post('/api/music', {action: 'RANDOM_CATEGORY', category: '{{ category }}'})">&#9654; {{ category }}</span>
+                        </div>
+                        <div class="grid-3">
+                            {% for song in songs %}
+                                <button class="btn-outline" onclick="post('/api/music', {action: 'PLAY', song: '{{ song }}'})">
+                                    {{ song }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
         </div>
 
+        <!-- System -->
         <div class="panel">
-            <h2>Manual Control</h2>
-
-            <div class="row">
-                <span style="width: 80px; font-weight: bold;">LIGHTS</span>
-                <button class="btn-green" onclick="manualRun('LIGHTS', 'ON')">ON</button>
-                <input type="number" id="dur_lights" placeholder="Sec (0)">
-                <button class="btn-red" onclick="manualRun('LIGHTS', 'OFF')">OFF</button>
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>System</h2>
             </div>
-            <div class="row">
-                <span style="width: 80px; font-weight: bold;">PUMP</span>
-                <button class="btn-green" onclick="manualRun('PUMP', 'ON')">ON</button>
-                <input type="number" id="dur_pump" placeholder="Sec (0)">
-                <button class="btn-red" onclick="manualRun('PUMP', 'OFF')">OFF</button>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h2>Sensors</h2>
-
-            <button class="btn-blue" style="margin-bottom: 10px;" onclick="post('/api/run_sensor', {target: 'SENSORS'})">RUN FULL SENSOR SWEEP</button>
-
-            <div style="margin-bottom: 10px;">
-                <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENV</button>
-                <div style="margin-top: 5px; text-align: center;">
-                    <span class="data-tag" id="env-value">{{ cache['temp_reading']['value'] }}°F | {{ cache['humidity_reading']['value'] }}%</span>
-                    <span class="time-tag"> | </span>
-                    <span class="time-tag" id="env-time">{{ cache['temp_reading']['time'] }}</span>
-                </div>
-            </div>
-            <div style="margin-bottom: 10px;">
-                <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER</button>
-                <div style="margin-top: 5px; text-align: center;">
-                    <span class="data-tag" id="water-value">{{ cache['water_reading']['value'] }} mm</span>
-                    <span class="time-tag"> | </span>
-                    <span class="time-tag" id="water-time">{{ cache['water_reading']['time'] }}</span>
-                </div>
-            </div>
-            <div style="margin-bottom: 10px;">
-                <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
-                <div style="margin-top: 5px; text-align: center; font-size: 0.85rem;">
-                    <span class="data-tag" id="pi-temp">CPU: {{ cache['pi_health_reading']['value']['temp'] }}°C</span> |
-                    <span class="data-tag" id="pi-ram">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</span> |
-                    <span class="data-tag" id="pi-disk">DSK: {{ cache['pi_health_reading']['value']['disk'] }}GB</span> |
-                    <span class="data-tag" id="pi-uptime">UPT: {{ cache['pi_health_reading']['value']['uptime'] }}hr</span>
-                    <span class="time-tag"> | </span>
-                    <span class="time-tag" id="pi-time">{{ cache['pi_health_reading']['time'] }}</span>
+            <div class="panel-body">
+                <div class="grid-2">
+                    <button class="btn-red" onclick="post('/api/system', {command: 'EXIT'})">EXIT SYSTEM</button>
+                    <button class="btn-red" onclick="post('/api/system', {command: 'STOP'})">EMERGENCY STOP</button>
                 </div>
             </div>
         </div>
 
-        <div class="panel">
-            <h2>Audio</h2>
-            <div class="row">
-                <button class="btn-red" onclick="post('/api/music', {action: 'STOP'})">STOP MUSIC</button>
-                <button class="btn-blue" onclick="post('/api/music', {action: 'RANDOM'})">PLAY RANDOM</button>
+        <!-- Developer Tools Divider -->
+        <div class="section-divider">DEVELOPER TOOLS</div>
+
+        <!-- Diagnostics -->
+        <div class="panel collapsed">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Diagnostics</h2>
             </div>
-            {% for category, songs in song_categories.items() %}
-                <div style="margin-top: 10px;">
+            <div class="panel-body">
+                <button class="btn-blue" style="margin-bottom: 15px;" onclick="post('/api/ping', {target: 'SYSTEM'}); post('/api/ping', {target: 'HARDWARE'}); post('/api/ping', {target: 'SENSORS'}); post('/api/ping', {target: 'MUSIC'})">PING ALL SYSTEMS</button>
+
+                <!-- SYSTEM Category -->
+                <div style="margin-bottom: 15px;">
                     <div style="text-align: center; margin-bottom: 5px;">
-                        <span style="font-size: 1rem; color: #ccc; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 2px;">{{ category }}</span>
+                        <span class="category-title" onclick="post('/api/ping', {target: 'SYSTEM'})">&#9654; SYSTEM</span>
                     </div>
-                    <div class="grid-3">
-                        {% if category != 'System' %}
-                        <button class="btn-blue" onclick="post('/api/music', {action: 'RANDOM_CATEGORY', category: '{{ category }}'})">
-                            RANDOM {{ category.upper() }}
-                        </button>
-                        {% endif %}
-                        {% for song in songs %}
-                            <button class="btn-outline" onclick="post('/api/music', {action: 'PLAY', song: '{{ song }}'})">
-                                {{ song }}
-                            </button>
-                        {% endfor %}
+                    <div>
+                        <button class="btn-outline" onclick="post('/api/ping', {target: 'SYSTEM'})">SYSTEM</button>
+                        <div style="margin-top: 5px; text-align: center;">
+                            <span class="data-tag" id="ping-system-value">{{ cache['ping_system']['value'] }}</span>
+                            <span class="sep">|</span>
+                            <span class="time-tag" id="ping-system-time">{{ cache['ping_system']['time'] }}</span>
+                        </div>
                     </div>
                 </div>
-            {% endfor %}
+
+                <!-- HARDWARE Category -->
+                <div style="margin-bottom: 15px;">
+                    <div style="text-align: center; margin-bottom: 5px;">
+                        <span class="category-title" onclick="post('/api/ping', {target: 'HARDWARE'})">&#9654; HARDWARE</span>
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <button class="btn-outline" onclick="post('/api/ping', {target: 'PUMP'})">PUMP</button>
+                            <div style="margin-top: 5px; text-align: center;">
+                                <span class="data-tag" id="ping-pump-value">{{ cache['ping_pump']['value'] }}</span>
+                                <span class="sep">|</span>
+                                <span class="time-tag" id="ping-pump-time">{{ cache['ping_pump']['time'] }}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn-outline" onclick="post('/api/ping', {target: 'LIGHTS'})">LIGHTS</button>
+                            <div style="margin-top: 5px; text-align: center;">
+                                <span class="data-tag" id="ping-lights-value">{{ cache['ping_lights']['value'] }}</span>
+                                <span class="sep">|</span>
+                                <span class="time-tag" id="ping-lights-time">{{ cache['ping_lights']['time'] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SENSORS Category -->
+                <div style="margin-bottom: 15px;">
+                    <div style="text-align: center; margin-bottom: 5px;">
+                        <span class="category-title" onclick="post('/api/ping', {target: 'SENSORS'})">&#9654; SENSORS</span>
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <button class="btn-outline" onclick="post('/api/ping', {target: 'ENVIRONMENT'})">ENVIRONMENTAL</button>
+                            <div style="margin-top: 5px; text-align: center;">
+                                <span class="data-tag" id="ping-env-value">{{ cache['ping_env']['value'] }}</span>
+                                <span class="sep">|</span>
+                                <span class="time-tag" id="ping-env-time">{{ cache['ping_env']['time'] }}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn-outline" onclick="post('/api/ping', {target: 'WATER_LEVEL'})">WATER LEVEL</button>
+                            <div style="margin-top: 5px; text-align: center;">
+                                <span class="data-tag" id="ping-water-value">{{ cache['ping_water']['value'] }}</span>
+                                <span class="sep">|</span>
+                                <span class="time-tag" id="ping-water-time">{{ cache['ping_water']['time'] }}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn-outline" onclick="post('/api/ping', {target: 'CAMERA'})">CAMERA</button>
+                            <div style="margin-top: 5px; text-align: center;">
+                                <span class="data-tag" id="ping-cam-value">{{ cache['ping_cam']['value'] }}</span>
+                                <span class="sep">|</span>
+                                <span class="time-tag" id="ping-cam-time">{{ cache['ping_cam']['time'] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AUDIO Category -->
+                <div style="margin-bottom: 15px;">
+                    <div style="text-align: center; margin-bottom: 5px;">
+                        <span class="category-title" onclick="post('/api/ping', {target: 'MUSIC'})">&#9654; AUDIO</span>
+                    </div>
+                    <div>
+                        <button class="btn-outline" onclick="post('/api/ping', {target: 'MUSIC'})">BUZZER</button>
+                        <div style="margin-top: 5px; text-align: center;">
+                            <span class="data-tag" id="ping-buzzer-value">{{ cache['ping_buzzer']['value'] }}</span>
+                            <span class="sep">|</span>
+                            <span class="time-tag" id="ping-buzzer-time">{{ cache['ping_buzzer']['time'] }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border-color:#444;">
+                <div class="row">
+                    <button class="btn-blue" onclick="post('/api/action', {action: 'SYNC'})">SYNC STATE</button>
+                    <button class="btn-blue" onclick="post('/api/action', {action: 'RESET'})">RESET</button>
+                </div>
+            </div>
         </div>
 
-        <div class="panel">
-            <h2>Diagnostics</h2>
-
-            <button class="btn-blue" style="margin-bottom: 10px;" onclick="post('/api/ping', {target: 'SYSTEM'}); post('/api/ping', {target: 'HARDWARE'}); post('/api/ping', {target: 'SENSORS'})">PING ALL</button>
-            <div class="grid-3" style="margin-bottom: 15px;">
-                <button class="btn-gray" onclick="post('/api/ping', {target: 'SYSTEM'})">PING SYS</button>
-                <button class="btn-gray" onclick="post('/api/ping', {target: 'HARDWARE'})">PING HW</button>
-                <button class="btn-gray" onclick="post('/api/ping', {target: 'SENSORS'})">PING SENS</button>
+        <!-- Terminal -->
+        <div class="panel collapsed">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Terminal</h2>
             </div>
-
-            <div class="grid-2">
-                <div>
-                    <button class="btn-outline" onclick="post('/api/ping', {target: 'SYSTEM'})">SYS</button>
-                    <div style="margin-top: 5px; text-align: center;"><span class="data-tag" id="ping-system-value">{{ cache['ping_system']['value'] }}</span> <span class="time-tag">|</span> <span class="time-tag" id="ping-system-time">{{ cache['ping_system']['time'] }}</span></div>
+            <div class="panel-body">
+                <div id="terminal-output"></div>
+                <div class="row" style="margin-top: 10px;">
+                    <input type="text" id="terminal-input" placeholder="Enter command..."
+                           onkeydown="if(event.key==='Enter') sendCommand()">
+                    <button class="btn-blue" style="width: auto; padding: 10px 20px;" onclick="sendCommand()">SEND</button>
+                    <button class="btn-outline" style="width: auto; padding: 10px 15px;" onclick="resetTerminal()">RESET</button>
                 </div>
-                <div>
-                    <button class="btn-outline" onclick="post('/api/ping', {target: 'PUMP'})">PUMP</button>
-                    <div style="margin-top: 5px; text-align: center;"><span class="data-tag" id="ping-pump-value">{{ cache['ping_pump']['value'] }}</span> <span class="time-tag">|</span> <span class="time-tag" id="ping-pump-time">{{ cache['ping_pump']['time'] }}</span></div>
-                </div>
-                <div>
-                    <button class="btn-outline" onclick="post('/api/ping', {target: 'LIGHTS'})">LIGHT</button>
-                    <div style="margin-top: 5px; text-align: center;"><span class="data-tag" id="ping-lights-value">{{ cache['ping_lights']['value'] }}</span> <span class="time-tag">|</span> <span class="time-tag" id="ping-lights-time">{{ cache['ping_lights']['time'] }}</span></div>
-                </div>
-                <div>
-                    <button class="btn-outline" onclick="post('/api/ping', {target: 'ENVIRONMENT'})">ENV</button>
-                    <div style="margin-top: 5px; text-align: center;"><span class="data-tag" id="ping-env-value">{{ cache['ping_env']['value'] }}</span> <span class="time-tag">|</span> <span class="time-tag" id="ping-env-time">{{ cache['ping_env']['time'] }}</span></div>
-                </div>
-                <div>
-                    <button class="btn-outline" onclick="post('/api/ping', {target: 'WATER_LEVEL'})">WATER</button>
-                    <div style="margin-top: 5px; text-align: center;"><span class="data-tag" id="ping-water-value">{{ cache['ping_water']['value'] }}</span> <span class="time-tag">|</span> <span class="time-tag" id="ping-water-time">{{ cache['ping_water']['time'] }}</span></div>
-                </div>
-                <div>
-                    <button class="btn-outline" onclick="post('/api/ping', {target: 'CAMERA'})">CAM</button>
-                    <div style="margin-top: 5px; text-align: center;"><span class="data-tag" id="ping-cam-value">{{ cache['ping_cam']['value'] }}</span> <span class="time-tag">|</span> <span class="time-tag" id="ping-cam-time">{{ cache['ping_cam']['time'] }}</span></div>
-                </div>
-                <div>
-                    <button class="btn-outline" onclick="post('/api/ping', {target: 'MUSIC'})">BUZZ</button>
-                    <div style="margin-top: 5px; text-align: center;"><span class="data-tag" id="ping-buzzer-value">{{ cache['ping_buzzer']['value'] }}</span> <span class="time-tag">|</span> <span class="time-tag" id="ping-buzzer-time">{{ cache['ping_buzzer']['time'] }}</span></div>
-                </div>
-            </div>
-
-            <hr style="border-color:#444;">
-            <div class="row">
-                <button class="btn-blue" onclick="post('/api/action', {action: 'SYNC'})">SYNC STATE</button>
-                <button class="btn-blue" onclick="post('/api/action', {action: 'RESET'})">RESET</button>
-                </div>
-        </div>
-
-        <div class="panel">
-            <h2>MOSS</h2>
-            <div class="moss-status" id="moss-status">Loading...</div>
-            <div id="moss-messages"></div>
-            <div class="row" style="margin-top: 10px;">
-                <input type="text" id="moss-input" placeholder="Talk to MOSS..."
-                       onkeydown="if(event.key==='Enter') sendMoss()">
-                <button class="btn-blue" style="width: auto; padding: 10px 20px;" onclick="sendMoss()">SEND</button>
-                <button class="btn-outline" style="width: auto; padding: 10px 15px;" onclick="resetMoss()">RESET</button>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h2>Terminal</h2>
-            <div id="terminal-output"></div>
-            <div class="row" style="margin-top: 10px;">
-                <input type="text" id="terminal-input" placeholder="Enter command..."
-                       onkeydown="if(event.key==='Enter') sendCommand()">
-                <button class="btn-blue" style="width: auto; padding: 10px 20px;" onclick="sendCommand()">SEND</button>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h2>System</h2>
-            <div class="grid-2">
-                <button class="btn-red" style="font-size: 1.1em;" onclick="post('/api/system', {command: 'STOP'})">EMERGENCY STOP</button>
-                <button class="btn-gray" onclick="post('/api/system', {command: 'EXIT'})">EXIT SYSTEM</button>
             </div>
         </div>
 
@@ -358,6 +545,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
 
     <script>
+        // --- Collapsible Panels ---
+        function togglePanel(el) {
+            el.closest('.panel').classList.toggle('collapsed');
+        }
+
+        // --- Terminal Reset ---
+        function resetTerminal() {
+            document.getElementById('terminal-output').textContent = '';
+        }
+
+        // --- Ping Status Formatter ---
+        function formatPingStatus(cacheKey, raw) {
+            if (!raw || raw === '--' || raw === 'UNKNOWN') return raw;
+            let s = raw.replace(/_/g, ' ');
+            if (cacheKey === 'ping_cam') {
+                if (s.includes('BUSY')) return 'CAMERA ACTIVE';
+                if (s.includes('IDLE')) return 'CAMERA IDLE';
+            }
+            if (cacheKey === 'ping_buzzer') {
+                if (s.includes('PONG') || s.includes('ON') || s.includes('ACTIVE')) return 'BUZZER ACTIVE';
+                if (s.includes('IDLE') || s.includes('OFF')) return 'BUZZER IDLE';
+            }
+            if (cacheKey === 'ping_system') {
+                if (s.includes('OK') || s.includes('PONG')) return 'SYSTEM OK';
+            }
+            return s;
+        }
+
         // --- API Helpers ---
         function post(url, data={}) {
             fetch(url, {
@@ -384,7 +599,6 @@
                 body: JSON.stringify({target: 'CAMERA'})
             });
 
-            // Poll more frequently for 10s to pick up the new image
             let polls = 0;
             let camPoll = setInterval(() => {
                 refreshUI();
@@ -484,26 +698,36 @@
                 .then(data => {
                     let c = data.cache;
 
-                    // Sensor Values
-                    document.getElementById('env-value').textContent =
-                        c.temp_reading.value + '\u00B0F | ' + c.humidity_reading.value + '%';
-                    document.getElementById('env-time').textContent = c.temp_reading.time;
+                    // --- Sensor Values ---
+                    let tempVal = c.temp_reading.value;
+                    let humVal = c.humidity_reading.value;
+                    if (tempVal != null && tempVal !== '--' && humVal != null && humVal !== '--') {
+                        document.getElementById('env-value').innerHTML =
+                            tempVal + '\u00B0F <span class="sep">|</span> ' + humVal + '%';
+                    } else {
+                        document.getElementById('env-value').textContent = '--';
+                    }
+                    let envTime = c.temp_reading.time;
+                    document.getElementById('env-time').textContent = envTime && envTime !== '--' ? 'Taken: ' + envTime : '';
 
+                    let waterVal = c.water_reading.value;
                     document.getElementById('water-value').textContent =
-                        c.water_reading.value + ' mm';
-                    document.getElementById('water-time').textContent = c.water_reading.time;
+                        (waterVal != null && waterVal !== '--') ? waterVal + ' mm' : '--';
+                    let waterTime = c.water_reading.time;
+                    document.getElementById('water-time').textContent = waterTime && waterTime !== '--' ? 'Taken: ' + waterTime : '';
 
                     // Pi Health
                     let pi = c.pi_health_reading.value;
-                    if (typeof pi === 'object') {
-                        document.getElementById('pi-temp').textContent = 'CPU: ' + pi.temp + '\u00B0C';
-                        document.getElementById('pi-ram').textContent  = 'RAM: ' + pi.ram + '%';
-                        document.getElementById('pi-disk').textContent = 'DSK: ' + pi.disk + 'GB';
-                        document.getElementById('pi-uptime').textContent = 'UPT: ' + pi.uptime + 'hr';
+                    if (typeof pi === 'object' && pi !== null) {
+                        document.getElementById('pi-temp').textContent = 'CPU: ' + (pi.temp || '--') + '\u00B0C';
+                        document.getElementById('pi-ram').textContent  = 'RAM: ' + (pi.ram || '--') + '%';
+                        document.getElementById('pi-disk').textContent = 'DSK: ' + (pi.disk || '--') + 'GB';
+                        document.getElementById('pi-uptime').textContent = 'UPT: ' + (pi.uptime || '--') + 'hr';
                     }
-                    document.getElementById('pi-time').textContent = c.pi_health_reading.time;
+                    let piTime = c.pi_health_reading.time;
+                    document.getElementById('pi-time').textContent = piTime && piTime !== '--' ? 'Taken: ' + piTime : '';
 
-                    // Camera Image
+                    // --- Camera Image ---
                     let newImg = c.latest_photo.value;
                     if (newImg && newImg !== '--' && newImg !== _lastImage) {
                         _lastImage = newImg;
@@ -517,32 +741,48 @@
                         btn.innerHTML = 'RUN CAM';
                         btn.style.opacity = '1';
                     }
+                    let camTime = c.latest_photo.time;
                     document.getElementById('camera-time').textContent =
-                        'Taken: ' + c.latest_photo.time;
+                        (camTime && camTime !== '--') ? 'Taken: ' + camTime : '';
 
-                    // Vision Results
+                    // --- Vision Results ---
                     let vr = c.vision_result;
                     if (vr && vr.value && vr.value !== '--') {
                         let v = vr.value;
 
-                        // Update combined vision image
+                        // Update vision image
                         if (v.vision_image) {
                             let imgEl = document.getElementById('vision-image');
+                            let vPlaceholder = document.getElementById('vision-placeholder');
                             imgEl.src = '/vision/' + v.vision_image + '?' + Date.now();
                             imgEl.style.display = 'block';
+                            vPlaceholder.style.display = 'none';
                         }
 
-                        // Update class percentages (class pixels / green pixels * 100)
+                        // Update class percentages and bar positions
                         if (v.class_pixels) {
                             let gp = v.green_pixels || 1;
-                            let pct = (val) => ((val || 0) / gp * 100).toFixed(1) + '%';
-                            document.getElementById('v-chlorosis').textContent = 'Chlorosis: ' + pct(v.class_pixels.chlorosis);
-                            document.getElementById('v-necrosis').textContent = 'Necrosis: ' + pct(v.class_pixels.necrosis);
-                            document.getElementById('v-pest').textContent = 'Pest: ' + pct(v.class_pixels.pest);
-                            document.getElementById('v-tipburn').textContent = 'Tip Burn: ' + pct(v.class_pixels.tip_burn);
-                            document.getElementById('v-wilting').textContent = 'Wilting: ' + pct(v.class_pixels.wilting);
+                            let classes = {
+                                'chlorosis': 'v-chlorosis', 'necrosis': 'v-necrosis',
+                                'pest': 'v-pest', 'tip_burn': 'v-tipburn', 'wilting': 'v-wilting'
+                            };
+                            let barIds = {
+                                'chlorosis': 'vbar-chlorosis', 'necrosis': 'vbar-necrosis',
+                                'pest': 'vbar-pest', 'tip_burn': 'vbar-tipburn', 'wilting': 'vbar-wilting'
+                            };
+                            for (let [key, elId] of Object.entries(classes)) {
+                                let raw = ((v.class_pixels[key] || 0) / gp * 100);
+                                let pctStr = raw.toFixed(1) + '%';
+                                document.getElementById(elId).textContent = pctStr;
+                                // Position bar: 3% maps to 100% of bar width
+                                let barPos = Math.min(Math.max(raw / 3.0 * 100, 0), 100);
+                                let barEl = document.getElementById(barIds[key]);
+                                if (barEl) barEl.style.left = barPos + '%';
+                            }
                         }
-                        document.getElementById('v-time').textContent = vr.time;
+
+                        let vTime = vr.time;
+                        document.getElementById('v-time').textContent = vTime && vTime !== '--' ? 'Taken: ' + vTime : '';
 
                         // Restore button
                         let vBtn = document.getElementById('btn-vision');
@@ -550,21 +790,25 @@
                         vBtn.style.opacity = '1';
                     }
 
-                    // Health Result
+                    // --- Health Result ---
                     let hr = c.health_result;
                     if (hr && hr.value && hr.value !== '--') {
                         let pred = hr.value.prediction || '--';
                         let conf = hr.value.confidence;
                         let el = document.getElementById('health-prediction');
-                        if (pred !== 'NO_MODEL' && conf !== undefined) {
+                        if (pred !== 'NO_MODEL' && conf !== undefined && conf !== null) {
                             el.textContent = pred + ' (' + conf.toFixed(1) + '%)';
                         } else {
                             el.textContent = pred;
                         }
                         if (pred === 'Healthy') el.style.color = '#28a745';
                         else if (pred === 'NO_MODEL') el.style.color = '#dc3545';
+                        else if (pred === '--') el.style.color = '#666';
                         else el.style.color = '#ffc107';
-                        document.getElementById('health-time').textContent = hr.time;
+
+                        let hTime = hr.time;
+                        document.getElementById('health-time').textContent =
+                            hTime && hTime !== '--' ? 'Taken: ' + hTime : '';
 
                         // Populate feature grid
                         let feats = hr.value.features;
@@ -575,7 +819,7 @@
                                 'chlorosis_ratio': 'Chlorosis', 'decay_ratio': 'Decay',
                                 'tip_burn_ratio': 'Tip Burn', 'pest_density': 'Pest',
                                 'wilting_ratio': 'Wilting', 'growth_velocity': 'Growth Vel.',
-                                'instant_temp': 'Temp (°F)', 'delta_temp': 'Δ Temp',
+                                'instant_temp': 'Temp (\u00B0F)', 'delta_temp': '\u0394 Temp',
                                 'temp_slope': 'Temp Slope', 'instant_humidity': 'Humidity (%)',
                                 'instant_vpd': 'VPD (kPa)', 'vpd_shock': 'VPD Shock',
                                 'water_volume': 'Water (mL)', 'light_interval': 'Light (hrs)',
@@ -583,7 +827,7 @@
                             };
                             for (let [key, label] of Object.entries(labels)) {
                                 let val = feats[key];
-                                if (val !== undefined) {
+                                if (val !== undefined && val !== null) {
                                     let item = document.createElement('div');
                                     item.innerHTML = '<span style="color:#888;">' + label + ':</span> <span class="data-tag">' + parseFloat(val).toFixed(4) + '</span>';
                                     grid.appendChild(item);
@@ -597,7 +841,7 @@
                         hBtn.style.opacity = '1';
                     }
 
-                    // Cycle Toggles
+                    // --- Cycle Toggles ---
                     ['pump','lights','environment','water_level','camera','pi_health'].forEach(key => {
                         let btn = document.getElementById('cycle-' + key);
                         if (btn) {
@@ -605,7 +849,7 @@
                         }
                     });
 
-                    // Ping Statuses
+                    // --- Ping Statuses ---
                     let pingMap = {
                         'ping_system': 'system', 'ping_pump': 'pump',
                         'ping_lights': 'lights', 'ping_env': 'env',
@@ -616,11 +860,17 @@
                         let id = pingMap[cacheKey];
                         let valEl = document.getElementById('ping-' + id + '-value');
                         let timeEl = document.getElementById('ping-' + id + '-time');
-                        if (valEl) valEl.textContent = c[cacheKey].value;
-                        if (timeEl) timeEl.textContent = c[cacheKey].time;
+                        if (valEl) {
+                            let rawVal = c[cacheKey] ? c[cacheKey].value : '--';
+                            valEl.textContent = formatPingStatus(cacheKey, rawVal);
+                        }
+                        if (timeEl) {
+                            let rawTime = c[cacheKey] ? c[cacheKey].time : '';
+                            timeEl.textContent = rawTime && rawTime !== '--' ? 'Taken: ' + rawTime : '';
+                        }
                     });
 
-                    // Stream Status
+                    // --- Stream Status ---
                     let streamEl = document.getElementById('live-stream');
                     let placeholderEl = document.getElementById('live-placeholder');
                     let indicatorEl = document.getElementById('stream-indicator');
@@ -726,7 +976,6 @@
             if (!socket) return;
             socket.emit('moss_message', { message: 'RESET' });
             mossMessages.innerHTML = '';
-            addMossMessage('Conversation reset.', 'assistant');
         }
 
         if (socket) {
@@ -740,9 +989,13 @@
             socket.on('moss_response', function(data) {
                 if (mossStreamEl) {
                     mossStreamEl.classList.remove('streaming');
-                    // If no tokens were streamed, set the full response
+                    // If no tokens were streamed, set the full response (only if non-empty)
                     if (!mossStreamEl.textContent && data.data) {
                         mossStreamEl.textContent = data.data;
+                    }
+                    // If response is empty (e.g. reset), remove the empty bubble
+                    if (!mossStreamEl.textContent) {
+                        mossStreamEl.remove();
                     }
                 }
                 mossStreamEl = null;
@@ -756,14 +1009,17 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.available) {
-                        mossStatus.textContent = 'Messages: ' + data.conversation_length;
+                        mossStatus.textContent = 'Online';
+                        mossStatus.style.color = '#28a745';
                     } else if (data.loading) {
                         mossStatus.textContent = 'MOSS is loading...';
+                        mossStatus.style.color = '#888';
                     } else {
                         mossStatus.textContent = 'MOSS unavailable';
+                        mossStatus.style.color = '#888';
                     }
                 })
-                .catch(() => { mossMood.textContent = 'MOSS status unknown'; });
+                .catch(() => { mossStatus.textContent = 'MOSS status unknown'; });
         }
         refreshMossStatus();
         setInterval(refreshMossStatus, 10000);

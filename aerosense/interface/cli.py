@@ -460,12 +460,12 @@ class CLI:
 
         if action == "LIST":
             print("\n--- AEROSENSE JUKEBOX ---")
-            
-            # Songs
+
+            # Songs by category
             print("Available Songs:")
-            song_txt = ", ".join(VALID_SONGS)
-            print(textwrap.fill(song_txt, width=60, initial_indent="  ", subsequent_indent="  "))
-            
+            for category, songs in CATEGORY_POOLS.items():
+                print(f"  {category}: {', '.join(songs)}")
+
             print("\nAvailable Notes:")
             all_notes = VALID_NOTES
             for oct_idx in range(3, 9):
@@ -773,7 +773,7 @@ AUDIO
   MUSIC PLAY [SONG/NOTE]       - Play a song
   MUSIC PLAY NOTE [NOTE] [SEC] - Play a note (1s is Default)
   MUSIC PLAY RANDOM            - Play a random song
-  MUSIC PLAY RANDOM [CATEGORY] - Play random from category (HAPPY, SAD, etc.)
+  MUSIC PLAY RANDOM [CATEGORY] - Play random from category (HAPPY, SAD, SYSTEM, etc.)
   MUSIC LIST                   - List all songs and notes
   MUSIC STOP                   - Stop buzzer
 
