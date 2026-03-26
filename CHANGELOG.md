@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.5.0] - 2026-03-25
+### Changed
+- Switched MOSS model from llama3.2:3b to llama3.2:1b.
+- Rewrote system prompt with explicit tool avoidance rules for casual messages.
+
 ## [v5.4.0] - 2026-03-25
 ### Changed
 - Reduced MOSS context window from 8192 to 4096 tokens.
