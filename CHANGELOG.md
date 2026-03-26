@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.10.1] - 2026-03-25
+### Changed
+- Reduced model keep_alive from 2h to 30m.
+
 ## [v5.10.0] - 2026-03-25
 ### Changed
 - Removed `read_environment` and `read_water_level` tools from MOSS.
