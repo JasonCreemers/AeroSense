@@ -173,7 +173,7 @@
                      class="cam-feed" style="display: {{ 'block' if latest_image else 'none' }};"
                      onerror="this.style.display='none'; document.getElementById('camera-placeholder').style.display='flex';">
                 <div id="camera-placeholder" class="cam-feed"
-                     style="display: {{ 'none' if latest_image else 'flex' }}; align-items:center; justify-content:center; color:#555;">
+                     style="display: {{ 'none' if latest_image else 'flex' }}; align-items:center; justify-content:center; color:#555; aspect-ratio:4/3;">
                     NO IMAGE DATA
                 </div>
                 <div style="text-align: right; margin-top: 5px;">
@@ -182,7 +182,7 @@
                 <div style="margin-top: 10px;">
                     <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM</button>
                 </div>
-                <div style="margin-top: 5px;">
+                <div style="margin-top: 10px;">
                     <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'SPLIT_CAM'})">RUN TILE CAM</button>
                 </div>
             </div>
@@ -197,7 +197,7 @@
                 <img id="vision-image" class="cam-feed" style="display:none;"
                      onerror="this.style.display='none'; document.getElementById('vision-placeholder').style.display='flex';">
                 <div id="vision-placeholder" class="cam-feed"
-                     style="display:flex; align-items:center; justify-content:center; color:#555;">
+                     style="display:flex; align-items:center; justify-content:center; color:#555; aspect-ratio:4/3;">
                     NO VISION DATA
                 </div>
                 <div style="text-align: right; margin-top: 5px;">
@@ -240,8 +240,8 @@
                             <span style="color:#ccc; font-weight:bold;">Tip Burn:</span>
                             <span class="data-tag" id="v-tipburn" style="color:#4dc9f6;">--</span>
                         </div>
-                        <div class="vision-bar" style="margin-top:6px; background: linear-gradient(to right, var(--green) 0%, var(--green) 25%, #ffc107 25%, #ffc107 50%, var(--red) 50%, var(--red) 100%);"><div class="vision-bar-indicator" id="vbar-tipburn" style="left:0%;"></div></div>
-                        <div style="display:flex; font-size:0.6rem; color:#666; margin-top:4px;"><span style="flex:25; text-align:center;">Good</span><span style="flex:25; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
+                        <div class="vision-bar" style="margin-top:6px; background: linear-gradient(to right, var(--green) 0%, var(--green) 20%, #ffc107 20%, #ffc107 53%, var(--red) 53%, var(--red) 100%);"><div class="vision-bar-indicator" id="vbar-tipburn" style="left:0%;"></div></div>
+                        <div style="display:flex; font-size:0.6rem; color:#666; margin-top:4px;"><span style="flex:20; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:47; text-align:center;">Attention</span></div>
                     </div>
                     <div style="margin: 14px 0;">
                         <div style="display:flex; align-items:center; font-size:0.85rem; gap:8px;">
@@ -261,7 +261,7 @@
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Plant Health</h2>
             </div>
-            <div class="panel-body" style="min-height: 320px;">
+            <div class="panel-body">
                 <div style="text-align: center; margin-bottom: 10px;">
                     <span id="health-prediction" class="data-tag" style="font-size: 1.3rem; font-weight: bold; color: #666;">No diagnosis yet</span>
                 </div>
@@ -274,9 +274,15 @@
                         <div><span style="color:#888;">Wilting:</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Growth Vel.:</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Temp (°F):</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Δ Temp:</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Temp Slope:</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Humidity (%):</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">VPD (kPa):</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">VPD Shock:</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Water (mL):</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Light (hrs):</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Time X:</span> <span class="data-tag">--</span></div>
+                        <div><span style="color:#888;">Time Y:</span> <span class="data-tag">--</span></div>
                     </div>
                 </div>
                 <div style="text-align: center; margin-bottom: 10px;">
@@ -293,7 +299,7 @@
             </div>
             <div class="panel-body">
                 <img id="live-stream" class="cam-feed" src="/api/stream" style="display: {{ 'block' if is_streaming else 'none' }};">
-                <div id="live-placeholder" class="cam-feed" style="display: {{ 'none' if is_streaming else 'flex' }}; align-items:center; justify-content:center; color:#555;">
+                <div id="live-placeholder" class="cam-feed" style="display: {{ 'none' if is_streaming else 'flex' }}; align-items:center; justify-content:center; color:#555; aspect-ratio:4/3;">
                     STREAM OFFLINE
                 </div>
                 <div class="stream-status">
@@ -360,24 +366,25 @@
             <div class="panel-body">
                 <button class="btn-blue" style="margin-bottom: 20px;" onclick="post('/api/run_sensor', {target: 'SENSORS'})">RUN ALL SENSORS</button>
 
-                <div style="margin-bottom: 20px;">
-                    <div style="text-align: center; margin-bottom: 10px;">
+                <div style="margin-bottom: 25px;">
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENVIRONMENTAL</button>
+                    <div style="margin-top: 8px; text-align: center;">
                         <span class="data-tag" id="env-value">{{ cache['temp_reading']['value'] }}&deg;F <span class="sep">|</span> {{ cache['humidity_reading']['value'] }}%</span>
                         <span class="sep">|</span>
                         <span class="time-tag" id="env-time">Taken: {{ cache['temp_reading']['time'] or 'Never' }}</span>
                     </div>
-                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENVIRONMENTAL</button>
                 </div>
-                <div style="margin-bottom: 20px;">
-                    <div style="text-align: center; margin-bottom: 10px;">
+                <div style="margin-bottom: 25px;">
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER LEVEL</button>
+                    <div style="margin-top: 8px; text-align: center;">
                         <span class="data-tag" id="water-value">{{ cache['water_reading']['value'] }} mm</span>
                         <span class="sep">|</span>
                         <span class="time-tag" id="water-time">Taken: {{ cache['water_reading']['time'] or 'Never' }}</span>
                     </div>
-                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER LEVEL</button>
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <div style="text-align: center; margin-bottom: 10px; font-size: 0.85rem;">
+                <div>
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
+                    <div style="margin-top: 8px; text-align: center; font-size: 0.85rem;">
                         <span class="data-tag" id="pi-temp">CPU: {{ cache['pi_health_reading']['value']['temp'] }}&deg;C</span>
                         <span class="sep">|</span>
                         <span class="data-tag" id="pi-ram">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</span>
@@ -388,7 +395,6 @@
                         <span class="sep">|</span>
                         <span class="time-tag" id="pi-time">Taken: {{ cache['pi_health_reading']['time'] or 'Never' }}</span>
                     </div>
-                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
                 </div>
             </div>
         </div>
@@ -793,7 +799,7 @@
                                 'chlorosis':  { elId: 'v-chlorosis',  barId: 'vbar-chlorosis',  max: 3.0 },
                                 'necrosis':   { elId: 'v-necrosis',   barId: 'vbar-necrosis',   max: 3.0 },
                                 'pest':       { elId: 'v-pest',       barId: 'vbar-pest',       max: 0.5 },
-                                'tip_burn':   { elId: 'v-tipburn',    barId: 'vbar-tipburn',    max: 2.0 },
+                                'tip_burn':   { elId: 'v-tipburn',    barId: 'vbar-tipburn',    max: 1.5 },
                                 'wilting':    { elId: 'v-wilting',    barId: 'vbar-wilting',    max: 3.0 }
                             };
                             for (let [key, cfg] of Object.entries(visionConfig)) {

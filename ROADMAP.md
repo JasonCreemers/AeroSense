@@ -20,7 +20,7 @@ This document outlines the development trajectory for the AeroSense project. Tas
         - Chlorosis: 0-0.5 good, 0.5-1.5 watchout, 1.5-3+ attention
         - Necrosis: 0-0.5 good, 0.5-1.5 watchout, 1.5-3+ attention
         - Pest: 0-0.1 good, 0.1-0.3 watchout, 0.3-0.5+ attention
-        - Tip burn: 0-0.5 good, 0.5-1 watchout, 1-2+ attention
+        - Tip burn: 0-0.3 good, 0.3-0.8 watchout, 0.8-1.5+ attention
         - Wilting: 0-0.5 good, 0.5-1.5 watchout, 1.5-3+ attention
     - Include more of a focus on the instantaneous VPD (Use expected values from resaerch on what is good vs not good). 
     - Less of a focus (but still some) on instant temperature, humidity, and light
