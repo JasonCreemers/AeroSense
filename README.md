@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v5.2.0** | **Release: 2026-03-25**
+**Version: v5.3.0** | **Release: 2026-03-25**
 
 **AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 5 (16GB)** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -40,13 +40,10 @@
 
 * **`models/`** - Machine Learning Models
   * **`moss/`** - MOSS AI Agent Files
-     * `facts.md`: Facts for MOSS to share.
-     * `guidelines.md`: Plant care guidelines and reference data.
-     * `mood.json`: Persisted MOSS emotional state.
-     * `songs.md`: Jukebox guide and music categories.
+     * `guidelines.md`: Plant care guidelines reference.
+     * `overview.md`: System overview reference.
      * `stats.json`: MOSS usage statistics.
      * `system_prompt.md`: MOSS personality and system prompt.
-     * `users.md`: Team member profiles.
   * `health_model.pkl`: Trained XGBoost model weights.
 
 * **`config/`**
@@ -69,6 +66,7 @@
      * `vision_log.csv`
      * `water_log.csv`
   * **`moss_conversations/`** - MOSS Conversation History
+     * `active_conversations.json`
   * **`tiles/`** - Tiled Image Storage
   * **`tiled_vision/`** - Tiled Vision Overlay Storage
   * **`vision/`** - Vision Analysis Storage

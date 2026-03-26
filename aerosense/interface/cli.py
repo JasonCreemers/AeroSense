@@ -610,10 +610,8 @@ class CLI:
 
         if message.upper() == "STATUS":
             stats = self.moss.stats
-            mood = self.moss.mood.get("current_mood", "unknown")
             msg_count = len(self.moss.conversation)
             print(f"\n--- MOSS STATUS ---")
-            print(f">> Mood: {mood}")
             print(f">> Current Conversation: {msg_count} messages")
             print(f">> Total Messages: {stats.get('total_messages', 0)}")
             print(f">> Total Tool Calls: {stats.get('total_tool_calls', 0)}")
@@ -795,7 +793,7 @@ DIAGNOSTICS
 MOSS:
   MOSS <message>               - Chat with MOSS
   MOSS RESET                   - Reset MOSS conversation
-  MOSS STATUS                  - Show MOSS stats and mood
+  MOSS STATUS                  - Show MOSS stats
 
 
 SYSTEM:

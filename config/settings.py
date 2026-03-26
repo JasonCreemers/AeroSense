@@ -92,13 +92,12 @@ MOSS_MODEL: str = "llama3.2:3b"
 MOSS_HOST: str = "http://localhost:11434" # Ollama default
 MOSS_MAX_TOOLS_PER_TURN: int = 5 # Safety cap to prevent tool call loops
 MOSS_CONTEXT_LENGTH: int = 8192 # Context window tokens
-MOSS_KEEP_ALIVE: str = "30m" # How long Ollama keeps model in RAM
-MOSS_MAX_CONVERSATION_MESSAGES: int = 40 # Max message pairs before auto-trim
+MOSS_KEEP_ALIVE: str = "2h" # How long Ollama keeps model in RAM
+MOSS_MAX_CONVERSATION_MESSAGES: int = 20 # Max message pairs before auto-trim
 MOSS_CONVERSATION_DIR: Path = DATA_DIR / "moss_conversations"
 MOSS_CONVERSATION_DIR.mkdir(parents=True, exist_ok=True)
 MOSS_MODEL_FILES_DIR: Path = MODELS_DIR / "moss"
 MOSS_MODEL_FILES_DIR.mkdir(parents=True, exist_ok=True)
-MOSS_MOOD_PATH: Path = MOSS_MODEL_FILES_DIR / "mood.json"
 MOSS_STATS_PATH: Path = MOSS_MODEL_FILES_DIR / "stats.json"
 
 # --- Birthdays ---

@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.3.0] - 2026-03-25
+### Changed
+- Reduced MOSS tools from 11 to 5.
+- Removed MOSS mood system, music tools, and set_mood tool.
+- Removed facts.md, users.md, songs.md documentation files.
+- Added overview.md as a compact system reference for MOSS.
+- Slimmed down system_prompt.md and guidelines.md.
+- Reduced conversation window from 40 to 20 messages.
+- Reduced log reads to 1 row (header + most recent entry).
+- Reduced conversation archive retention from 30 to 7 days.
+
 ## [v5.2.0] - 2026-03-25
 ### Changed
 - Switched MOSS model from llama3.1:8b to llama3.2:3b for faster CPU inference on Pi 5.

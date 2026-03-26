@@ -2,7 +2,7 @@
 MOSS
 
 This module implements the MossAgent class, the core AI agent for the AeroSense system.
-It manages conversation state, tool calling, streaming responses, mood tracking,
+It manages conversation state, tool calling, streaming responses,
 and all interactions with the Ollama LLM backend.
 
 Threading: The chat() method is designed to be called from a background thread.
@@ -21,7 +21,7 @@ from config import settings
 
 
 # Max age for archived conversation files (days)
-ARCHIVE_MAX_AGE_DAYS: int = 30
+ARCHIVE_MAX_AGE_DAYS: int = 7
 
 
 class MossAgent:
@@ -34,7 +34,6 @@ class MossAgent:
         client: The Ollama client instance (lazy-loaded).
         conversation (list): The current message history.
         system_prompt (str): The loaded system prompt text.
-        mood (dict): Current emotional state, persisted to disk.
         stats (dict): Usage statistics, persisted to disk.
         is_available (bool): Whether MOSS is ready to accept messages.
         is_busy (bool): Whether MOSS is currently processing a message.
@@ -49,11 +48,10 @@ class MossAgent:
             controller: The active Controller instance.
         """
         self.controller = controller
-        self.tool_executor = ToolExecutor(controller, mood_callback=self.set_mood)
+        self.tool_executor = ToolExecutor(controller)
         self.client = None
         self.conversation: List[Dict] = []
         self.system_prompt: str = ""
-        self.mood: Dict = {"current_mood": "happy", "last_updated": None}
         self.stats: Dict = {"total_messages": 0, "total_tool_calls": 0, "total_conversations": 0, "total_resets": 0, "first_boot": None, "last_active": None}
         self.is_available: bool = False
         self.is_busy: bool = False
@@ -123,7 +121,6 @@ class MossAgent:
         self._load_system_prompt()
 
         # Load persisted state
-        self._load_mood()
         self._load_stats()
         self._load_conversation()
 
@@ -190,7 +187,7 @@ class MossAgent:
         Returns:
             str: Complete response text.
         """
-        # Build the system message with current mood
+        # Build the system message
         system_msg = self._build_system_message()
 
         # Append user message
@@ -354,20 +351,16 @@ class MossAgent:
 
     def _build_system_message(self) -> str:
         """
-        Build the full system message: base prompt + dynamic state (mood, time, etc.).
+        Build the full system message: base prompt + dynamic state (time).
 
         Returns:
             str: The complete system prompt string.
         """
         parts = [self.system_prompt]
 
-        # Inject current mood
-        mood = self.mood.get("current_mood", "happy")
-        parts.append(f"\nYour current mood is: {mood}.")
-
         # Inject current date/time
         now = datetime.now()
-        parts.append(f"Current date and time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+        parts.append(f"\nCurrent date and time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
 
         return "\n".join(parts)
 
@@ -472,44 +465,6 @@ class MossAgent:
         except Exception as e:
             self.log.warning(f"Archive cleanup failed (non-fatal): {e}")
 
-    # --- Mood System ---
-
-    def set_mood(self, mood: str):
-        """
-        Set MOSS's mood. The model decides its own mood — no restrictions.
-
-        Args:
-            mood (str): Any mood string the model chooses.
-        """
-        mood = mood.strip().lower()
-        if not mood:
-            return
-
-        old_mood = self.mood.get("current_mood", "happy")
-        if mood != old_mood:
-            self.log.info(f"Mood changed: {old_mood} -> {mood}")
-
-        self.mood["current_mood"] = mood
-        self.mood["last_updated"] = datetime.now().isoformat()
-        self._save_mood()
-
-    def _load_mood(self):
-        """Load mood state from disk."""
-        try:
-            if settings.MOSS_MOOD_PATH.exists():
-                data = json.loads(settings.MOSS_MOOD_PATH.read_text(encoding="utf-8"))
-                if isinstance(data, dict) and "current_mood" in data:
-                    self.mood = data
-        except (json.JSONDecodeError, IOError) as e:
-            self.log.warning(f"Failed to load mood (using default): {e}")
-
-    def _save_mood(self):
-        """Persist mood state to disk."""
-        try:
-            settings.MOSS_MOOD_PATH.write_text(json.dumps(self.mood, indent=2), encoding="utf-8")
-        except IOError as e:
-            self.log.error(f"Failed to save mood: {e}")
-
     # --- Stats ---
 
     def _load_stats(self):
@@ -571,7 +526,6 @@ class MossAgent:
         try:
             if self.conversation:
                 self._save_conversation()
-            self._save_mood()
             self._save_stats()
             self.log.info("MOSS state saved.")
         finally:

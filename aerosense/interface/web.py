@@ -591,15 +591,14 @@ class WebServer:
 
     def get_moss_status(self):
         """
-        API: Return MOSS availability, mood, and stats.
+        API: Return MOSS availability and stats.
         """
         if not self.moss:
-            return jsonify(available=False, loading=False, mood="unknown", stats={})
+            return jsonify(available=False, loading=False, stats={})
 
         return jsonify(
             available=self.moss.is_available,
             loading=self.moss._loading,
-            mood=self.moss.mood.get("current_mood", "unknown"),
             conversation_length=len(self.moss.conversation),
             stats=self.moss.stats
         )
