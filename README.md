@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v5.11.5** | **Release: 2026-03-26**
+**Version: v5.12.0** | **Release: 2026-03-26**
 
 **AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 5 (16GB)** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -173,7 +173,36 @@ The system architecture includes critical fail-safes to prevent hardware damage:
 * **Runtime Limits:** Both Python and Firmware enforce maximum runtime limits on the pump to prevent flooding.
 
 ### Machine Learning
-*Coming soon.*
+AeroSense uses an **XGBoost classifier** to predict plant health from 16 engineered features. The model is trained on synthetic data via `scripts/train_health.py` and deployed as a pickle file (`models/health_model.pkl`) to the Raspberry Pi.
+
+#### Health Classes
+`Healthy` · `Underwatered` · `Overwatered` · `More_Light` · `Less_Light` · `Nutrient_Burn` · `Pathogen`
+
+#### Feature Importance (v5.11.5)
+| Rank | Feature | Importance | Tier |
+|------|---------|-----------|------|
+| 1 | pest_density | 0.1964 | T1-VISION |
+| 2 | instant_vpd | 0.1609 | T2-VPD |
+| 3 | chlorosis_ratio | 0.1296 | T1-VISION |
+| 4 | tip_burn_ratio | 0.1258 | T1-VISION |
+| 5 | light_interval | 0.1217 | T3-MODERATE |
+| 6 | vpd_shock | 0.0903 | T2-VPD |
+| 7 | wilting_ratio | 0.0761 | T1-VISION |
+| 8 | decay_ratio | 0.0493 | T1-VISION |
+| 9 | water_volume | 0.0343 | T4-MINIMAL |
+| 10 | instant_temp | 0.0060 | T3-MODERATE |
+| 11 | growth_velocity | 0.0038 | T3-MODERATE |
+| 12 | instant_humidity | 0.0029 | T3-MODERATE |
+| 13 | temp_slope | 0.0012 | T3-MODERATE |
+| 14 | delta_temp | 0.0009 | T3-MODERATE |
+| 15 | time_of_day_x | 0.0008 | T4-MINIMAL |
+| 16 | time_of_day_y | 0.0001 | T4-MINIMAL |
+
+**Importance Tiers:**
+* **T1-VISION** — Pixel ratios from computer vision (58% combined)
+* **T2-VPD** — Vapor Pressure Deficit (25% combined)
+* **T3-MODERATE** — Temperature, humidity, growth, light (<1% each)
+* **T4-MINIMAL** — Time encoding, water volume (~0%)
 
 ### Shutdown Procedure
 To terminate the session, the user must issue the `EXIT` command. This triggers a shutdown sequence that disables all active cycles, stops the actuators, and secures the serial connection before terminating.

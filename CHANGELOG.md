@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.12.0] - 2026-03-26
+### Changed
+- Fine-tuning XGBoost Classifier model.
+
 ## [v5.11.5] - 2026-03-26
 ### Changed
 - Modified GUI page.
