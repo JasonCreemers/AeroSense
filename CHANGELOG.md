@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.6.0] - 2026-03-25
+### Changed
+- Reverted MOSS model back to llama3.2:3b.
+- Reduced context window from 4096 to 2048 tokens.
+- Reduced conversation history from 10 to 5 messages.
+
 ## [v5.5.0] - 2026-03-25
 ### Changed
 - Switched MOSS model from llama3.2:3b to llama3.2:1b.
