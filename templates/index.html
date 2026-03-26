@@ -694,17 +694,19 @@
         // --- Live Stream Controls ---
         function startStream() {
             fetch('/api/stream/start', { method: 'POST' }).then(() => {
-                setTimeout(() => {
-                    let stream = document.getElementById('live-stream');
-                    let placeholder = document.getElementById('live-placeholder');
-                    let indicator = document.getElementById('stream-indicator');
+                let stream = document.getElementById('live-stream');
+                let placeholder = document.getElementById('live-placeholder');
+                let indicator = document.getElementById('stream-indicator');
 
-                    stream.src = '/api/stream?' + Date.now();
+                stream.src = '/api/stream?' + Date.now();
+                // Wait for first frame before swapping
+                stream.onload = function() {
                     stream.style.display = 'block';
                     placeholder.style.display = 'none';
                     indicator.textContent = 'LIVE';
                     indicator.className = 'stream-live';
-                }, 500);
+                    stream.onload = null;
+                };
             });
         }
 
