@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.10.0] - 2026-03-25
+### Changed
+- Removed `read_environment` and `read_water_level` tools from MOSS.
+- Reduced MOSS tools from 3 to 1.
+- Injected live sensor data directly into system prompt on every message.
+- Reduced conversation history from 5 to 3 messages.
+- Increased context window from 2048 to 4096 tokens.
+
 ## [v5.9.0] - 2026-03-25
 ### Changed
 - Removed `read_file` tool from MOSS.

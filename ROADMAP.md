@@ -6,10 +6,7 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add UA Fight Song
 - Add UA Alma Mater.
 
-- MOSS possible changes
-    - Remove ability to read .md files and just feed them all in every time
-    - Remove ability to check temperature and distance, just feed in every time.
-    - Only tool to have is to run plant health
+- Have better way to load up moss
 
 ---
 

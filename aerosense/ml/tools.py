@@ -18,22 +18,6 @@ TOOL_SCHEMAS: List[Dict] = [
     {
         "type": "function",
         "function": {
-            "name": "read_environment",
-            "description": "Read live temperature (°F) and humidity (% RH) from sensors.",
-            "parameters": {"type": "object", "properties": {}, "required": []}
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "read_water_level",
-            "description": "Read live water level (mm). Lower = more water. Over 100mm = critical.",
-            "parameters": {"type": "object", "properties": {}, "required": []}
-        }
-    },
-    {
-        "type": "function",
-        "function": {
             "name": "run_plant_health",
             "description": "Run plant health classifier. Returns health class and confidence. Takes 20-60 seconds.",
             "parameters": {"type": "object", "properties": {}, "required": []}
@@ -62,8 +46,6 @@ class ToolExecutor:
         self.log = logging.getLogger("AeroSense.ML.MOSS.Tools")
 
         self._handlers = {
-            "read_environment": self._read_environment,
-            "read_water_level": self._read_water_level,
             "run_plant_health": self._run_plant_health,
         }
 
@@ -94,28 +76,6 @@ class ToolExecutor:
             return f"Error: Tool '{tool_name}' failed — {e}"
 
     # --- Tool Handlers ---
-
-    def _read_environment(self) -> str:
-        data = self.controller.read_environment()
-        if data is None:
-            return "Error: Could not read environment sensor. The sensor may be disconnected or timed out."
-        return f"Temperature: {data[0]}°F, Humidity: {data[1]}% RH"
-
-    def _read_water_level(self) -> str:
-        level = self.controller.read_water_level()
-        if level is None:
-            return "Error: Could not read water level sensor. The sensor may be disconnected or timed out."
-
-        if level < 50:
-            status = "Reservoir is full."
-        elif level < 80:
-            status = "Water level is adequate."
-        elif level < 100:
-            status = "Water level is getting low. Consider refilling soon."
-        else:
-            status = "CRITICAL: Water level is very low! Refill immediately."
-
-        return f"Water Level: {level}mm. {status}"
 
     def _run_plant_health(self) -> str:
         result = self.controller.run_plant_health()

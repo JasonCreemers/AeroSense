@@ -145,21 +145,6 @@ class MossAgent:
     # Maps keywords (substring matched) to the tool names they should activate.
     # A keyword can activate multiple tools. Only matched tools are sent to the model.
     TOOL_KEYWORD_MAP = {
-        # read_environment
-        "temp":        {"read_environment"},
-        "humid":       {"read_environment"},
-        "hot":         {"read_environment"},
-        "cold":        {"read_environment"},
-        "warm":        {"read_environment"},
-        "cool":        {"read_environment"},
-        "environment": {"read_environment"},
-        # read_water_level
-        "water":       {"read_water_level"},
-        "level":       {"read_water_level"},
-        "reservoir":   {"read_water_level"},
-        "dry":         {"read_water_level", "read_environment"},
-        "wet":         {"read_water_level"},
-        "moist":       {"read_water_level"},
         # run_plant_health
         "health":      {"run_plant_health"},
         "diagnos":     {"run_plant_health"},
@@ -176,23 +161,7 @@ class MossAgent:
         "burn":        {"run_plant_health"},
         "disease":     {"run_plant_health"},
         "nutrient":    {"run_plant_health"},
-        # Multi-tool keywords
-        "plant":       {"run_plant_health", "read_environment", "read_water_level"},
-        "garden":      {"run_plant_health", "read_environment", "read_water_level"},
-        "sensor":      {"read_environment", "read_water_level"},
-        "reading":     {"read_environment", "read_water_level"},
-        "check":       {"read_environment", "read_water_level"},
         "run":         {"run_plant_health"},
-        "status":      {"read_environment", "read_water_level"},
-        "data":        {"read_environment", "read_water_level"},
-        "grow":        {"read_environment"},
-        "system":      {"read_environment", "read_water_level"},
-        # Phrase patterns
-        "how are the":  {"read_environment", "read_water_level", "run_plant_health"},
-        "how's the":    {"read_environment", "read_water_level"},
-        "whats the":    {"read_environment", "read_water_level"},
-        "what's the":   {"read_environment", "read_water_level"},
-        "what is the":  {"read_environment", "read_water_level"},
     }
 
     # Build a name→schema lookup from TOOL_SCHEMAS for fast filtering
@@ -452,6 +421,26 @@ class MossAgent:
                     parts.append(path.read_text(encoding="utf-8"))
             except IOError:
                 pass
+
+        # Inject live sensor data
+        sensor_line = "\n## Live Sensor Data (do NOT mention unless the user asks)"
+        try:
+            env = self.controller.read_environment()
+            if env:
+                sensor_line += f"\n- Temperature: {env[0]}°F, Humidity: {env[1]}% RH"
+            else:
+                sensor_line += "\n- Environment sensor: unavailable"
+        except Exception:
+            sensor_line += "\n- Environment sensor: error"
+        try:
+            level = self.controller.read_water_level()
+            if level is not None:
+                sensor_line += f"\n- Water Level: {level}mm"
+            else:
+                sensor_line += "\n- Water level sensor: unavailable"
+        except Exception:
+            sensor_line += "\n- Water level sensor: error"
+        parts.append(sensor_line)
 
         # Inject current date/time
         now = datetime.now()
