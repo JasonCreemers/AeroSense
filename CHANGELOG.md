@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.8.0] - 2026-03-25
+### Changed
+- Upgraded tool gating to selective schema sending.
+- Removed mood references from GUI.
+
 ## [v5.7.0] - 2026-03-25
 ### Added
 - Implemented keyword-based tool gating.

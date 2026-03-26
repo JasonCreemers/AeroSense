@@ -630,17 +630,22 @@ class CLI:
 
         # Stream response in a background thread so CLI input isn't blocked
         def run():
-            print(">> MOSS: ", end="", flush=True)
-            streamed = []
+            prefixed = [False]
             def on_token(t):
-                streamed.append(t)
+                # Don't prefix tool feedback like [checking ...]
+                if t.startswith("["):
+                    print(t, end="", flush=True)
+                    return
+                if not prefixed[0]:
+                    print("\n>> MOSS: ", end="", flush=True)
+                    prefixed[0] = True
                 print(t, end="", flush=True)
 
             response = self.moss.chat(message, stream_callback=on_token)
 
-            # If streaming produced nothing (e.g. error), print the response directly
-            if not streamed and response:
-                print(response)
+            # If no tokens were prefixed (e.g. error), print the response directly
+            if not prefixed[0] and response:
+                print(f"\n>> MOSS: {response}")
             else:
                 print()
 

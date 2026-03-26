@@ -142,23 +142,86 @@ class MossAgent:
 
     # --- Tool Gating ---
 
-    # Keywords that indicate the user wants sensor data, diagnostics, or reference info.
-    # If none of these appear in the message, tools are withheld to avoid unnecessary calls.
-    TOOL_KEYWORDS = {
-        "temp", "temperature", "humid", "humidity", "water", "level",
-        "health", "plant", "sensor", "log", "read", "check", "run",
-        "diagnose", "diagnosis", "status", "data", "environment",
-        "overview", "guidelines", "guideline", "care", "nutrient",
-        "disease", "wilting", "chlorosis", "necrosis", "pest", "burn",
+    # Maps keywords (substring matched) to the tool names they should activate.
+    # A keyword can activate multiple tools. Only matched tools are sent to the model.
+    TOOL_KEYWORD_MAP = {
+        # read_environment
+        "temp":        {"read_environment"},
+        "humid":       {"read_environment"},
+        "hot":         {"read_environment"},
+        "cold":        {"read_environment"},
+        "warm":        {"read_environment"},
+        "cool":        {"read_environment"},
+        "environment": {"read_environment"},
+        # read_water_level
+        "water":       {"read_water_level"},
+        "level":       {"read_water_level"},
+        "reservoir":   {"read_water_level"},
+        "dry":         {"read_water_level", "read_environment"},
+        "wet":         {"read_water_level"},
+        "moist":       {"read_water_level"},
+        # run_plant_health
+        "health":      {"run_plant_health"},
+        "diagnos":     {"run_plant_health"},
+        "sick":        {"run_plant_health"},
+        "dying":       {"run_plant_health"},
+        "dead":        {"run_plant_health"},
+        "yellow":      {"run_plant_health"},
+        "brown":       {"run_plant_health"},
+        "droop":       {"run_plant_health"},
+        "wilt":        {"run_plant_health"},
+        "chlorosis":   {"run_plant_health"},
+        "necrosis":    {"run_plant_health"},
+        "pest":        {"run_plant_health"},
+        "burn":        {"run_plant_health"},
+        "disease":     {"run_plant_health"},
+        "nutrient":    {"run_plant_health", "read_file"},
+        # read_file
+        "overview":    {"read_file"},
+        "guideline":   {"read_file"},
+        "care":        {"read_file"},
+        # read_log
+        "log":         {"read_log"},
+        "history":     {"read_log"},
+        # Multi-tool keywords
+        "plant":       {"run_plant_health", "read_environment", "read_water_level"},
+        "garden":      {"run_plant_health", "read_environment", "read_water_level"},
+        "sensor":      {"read_environment", "read_water_level"},
+        "reading":     {"read_environment", "read_water_level"},
+        "check":       {"read_environment", "read_water_level"},
+        "run":         {"run_plant_health"},
+        "status":      {"read_environment", "read_water_level"},
+        "data":        {"read_environment", "read_water_level", "read_log"},
+        "grow":        {"read_environment", "read_file"},
+        "light":       {"read_log"},
+        "pump":        {"read_log"},
+        "system":      {"read_file", "read_environment", "read_water_level"},
+        # Phrase patterns
+        "how are the":  {"read_environment", "read_water_level", "run_plant_health"},
+        "how's the":    {"read_environment", "read_water_level"},
+        "whats the":    {"read_environment", "read_water_level"},
+        "what's the":   {"read_environment", "read_water_level"},
+        "what is the":  {"read_environment", "read_water_level"},
     }
 
-    def _needs_tools(self, message: str) -> bool:
+    # Build a name→schema lookup from TOOL_SCHEMAS for fast filtering
+    _SCHEMA_BY_NAME = {s["function"]["name"]: s for s in TOOL_SCHEMAS}
+
+    def _get_relevant_tools(self, message: str) -> list:
         """
-        Check if the user's message likely requires tool access.
-        Returns True if any tool-related keyword is found, False otherwise.
+        Determine which tool schemas to send based on keywords in the message.
+        Returns a filtered list of tool schemas, or an empty list if no keywords match.
         """
-        words = set(message.lower().split())
-        return bool(words & self.TOOL_KEYWORDS)
+        lower = message.lower()
+        matched_names = set()
+        for keyword, tool_names in self.TOOL_KEYWORD_MAP.items():
+            if keyword in lower:
+                matched_names.update(tool_names)
+
+        if not matched_names:
+            return []
+
+        return [self._SCHEMA_BY_NAME[name] for name in matched_names if name in self._SCHEMA_BY_NAME]
 
     # --- Chat ---
 
@@ -221,9 +284,12 @@ class MossAgent:
         # Build messages for the API call
         messages = [{"role": "system", "content": system_msg}] + self.conversation
 
-        # Determine if tools should be available for this message
-        use_tools = self._needs_tools(message)
-        if not use_tools:
+        # Determine which tools (if any) are relevant to this message
+        relevant_tools = self._get_relevant_tools(message)
+        if relevant_tools:
+            tool_names = [t["function"]["name"] for t in relevant_tools]
+            self.log.info(f"Sending {len(relevant_tools)} tool(s): {tool_names}")
+        else:
             self.log.info("No tool keywords detected — skipping tool schemas.")
 
         # Tool calling loop
@@ -233,15 +299,8 @@ class MossAgent:
         used_tools = False
 
         while True:
-            # Re-print MOSS prefix before streaming if tools were used (logs bury the original)
-            if used_tools and stream_callback:
-                try:
-                    stream_callback("\n>> MOSS: ")
-                except Exception:
-                    pass
-
             # Call Ollama with streaming
-            response_text, tool_calls = self._call_ollama(messages, stream_callback, use_tools=use_tools)
+            response_text, tool_calls = self._call_ollama(messages, stream_callback, tools=relevant_tools)
 
             if response_text.strip():
                 streamed_any_text = True
@@ -256,7 +315,7 @@ class MossAgent:
                 self.log.warning(f"Tool call cap reached ({settings.MOSS_MAX_TOOLS_PER_TURN}). Forcing final response.")
                 messages.append({"role": "assistant", "content": response_text})
                 messages.append({"role": "user", "content": "[System: Tool call limit reached. Please provide your final response based on the information you have.]"})
-                response_text, _ = self._call_ollama(messages, stream_callback, use_tools=False)
+                response_text, _ = self._call_ollama(messages, stream_callback, tools=[])
                 full_response = response_text
                 break
 
@@ -328,14 +387,14 @@ class MossAgent:
 
         return full_response
 
-    def _call_ollama(self, messages: List[Dict], stream_callback: Optional[Callable], use_tools: bool = True):
+    def _call_ollama(self, messages: List[Dict], stream_callback: Optional[Callable], tools: Optional[list] = None):
         """
         Make a single call to Ollama's chat API with optional streaming.
 
         Args:
             messages (list): The full message list to send.
             stream_callback (Optional[Callable]): Token callback for streaming.
-            use_tools (bool): Whether to include tool schemas.
+            tools (Optional[list]): Tool schemas to include. Empty list or None = no tools.
 
         Returns:
             Tuple[str, list]: (response_text, tool_calls). tool_calls is empty if none were made.
@@ -347,8 +406,8 @@ class MossAgent:
             "keep_alive": settings.MOSS_KEEP_ALIVE,
         }
 
-        if use_tools:
-            kwargs["tools"] = TOOL_SCHEMAS
+        if tools:
+            kwargs["tools"] = tools
 
         if stream_callback:
             # Streaming mode

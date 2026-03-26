@@ -88,7 +88,7 @@
         .moss-msg.user { background: var(--accent); align-self: flex-end; color: white; }
         .moss-msg.assistant { background: #2a2a2a; align-self: flex-start; color: #e0e0e0; border: 1px solid #444; }
         .moss-msg.streaming { border-color: var(--accent); }
-        .moss-mood { font-size: 0.75rem; color: #888; text-align: center; padding: 4px; }
+        .moss-status { font-size: 0.75rem; color: #888; text-align: center; padding: 4px; }
         #moss-input {
             background: #222;
             border: 1px solid #555;
@@ -324,7 +324,7 @@
 
         <div class="panel">
             <h2>MOSS</h2>
-            <div class="moss-mood" id="moss-mood">Loading...</div>
+            <div class="moss-status" id="moss-status">Loading...</div>
             <div id="moss-messages"></div>
             <div class="row" style="margin-top: 10px;">
                 <input type="text" id="moss-input" placeholder="Talk to MOSS..."
@@ -694,7 +694,7 @@
 
         // --- MOSS Chat ---
         const mossMessages = document.getElementById('moss-messages');
-        const mossMood = document.getElementById('moss-mood');
+        const mossStatus = document.getElementById('moss-status');
         let mossStreaming = false;
         let mossStreamEl = null;
 
@@ -756,11 +756,11 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.available) {
-                        mossMood.textContent = 'Mood: ' + data.mood + ' | Messages: ' + data.conversation_length;
+                        mossStatus.textContent = 'Messages: ' + data.conversation_length;
                     } else if (data.loading) {
-                        mossMood.textContent = 'MOSS is loading...';
+                        mossStatus.textContent = 'MOSS is loading...';
                     } else {
-                        mossMood.textContent = 'MOSS unavailable';
+                        mossStatus.textContent = 'MOSS unavailable';
                     }
                 })
                 .catch(() => { mossMood.textContent = 'MOSS status unknown'; });
