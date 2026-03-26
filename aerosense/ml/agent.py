@@ -175,11 +175,7 @@ class MossAgent:
         "pest":        {"run_plant_health"},
         "burn":        {"run_plant_health"},
         "disease":     {"run_plant_health"},
-        "nutrient":    {"run_plant_health", "read_file"},
-        # read_file
-        "overview":    {"read_file"},
-        "guideline":   {"read_file"},
-        "care":        {"read_file"},
+        "nutrient":    {"run_plant_health"},
         # Multi-tool keywords
         "plant":       {"run_plant_health", "read_environment", "read_water_level"},
         "garden":      {"run_plant_health", "read_environment", "read_water_level"},
@@ -189,8 +185,8 @@ class MossAgent:
         "run":         {"run_plant_health"},
         "status":      {"read_environment", "read_water_level"},
         "data":        {"read_environment", "read_water_level"},
-        "grow":        {"read_environment", "read_file"},
-        "system":      {"read_file", "read_environment", "read_water_level"},
+        "grow":        {"read_environment"},
+        "system":      {"read_environment", "read_water_level"},
         # Phrase patterns
         "how are the":  {"read_environment", "read_water_level", "run_plant_health"},
         "how's the":    {"read_environment", "read_water_level"},
@@ -441,12 +437,21 @@ class MossAgent:
 
     def _build_system_message(self) -> str:
         """
-        Build the full system message: base prompt + dynamic state (time).
+        Build the full system message: base prompt + reference docs + dynamic state (time).
 
         Returns:
             str: The complete system prompt string.
         """
         parts = [self.system_prompt]
+
+        # Inject reference docs (overview + guidelines)
+        for filename in ("overview.md", "guidelines.md"):
+            path = settings.MOSS_MODEL_FILES_DIR / filename
+            try:
+                if path.exists():
+                    parts.append(path.read_text(encoding="utf-8"))
+            except IOError:
+                pass
 
         # Inject current date/time
         now = datetime.now()

@@ -7,12 +7,8 @@ that wraps existing Controller methods or reads system data.
 """
 
 import inspect
-import json
 import logging
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-from config import settings
+from typing import Dict, List
 
 
 # --- Ollama Tool Schemas ---
@@ -43,23 +39,6 @@ TOOL_SCHEMAS: List[Dict] = [
             "parameters": {"type": "object", "properties": {}, "required": []}
         }
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "read_file",
-            "description": "Read a reference file: 'overview.md' (system info) or 'guidelines.md' (plant care).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "filename": {
-                        "type": "string",
-                        "description": "'overview.md' or 'guidelines.md'"
-                    }
-                },
-                "required": ["filename"]
-            }
-        }
-    },
 ]
 
 
@@ -86,7 +65,6 @@ class ToolExecutor:
             "read_environment": self._read_environment,
             "read_water_level": self._read_water_level,
             "run_plant_health": self._run_plant_health,
-            "read_file": self._read_file,
         }
 
     def execute(self, tool_name: str, arguments: dict) -> str:
@@ -158,35 +136,4 @@ class ToolExecutor:
 
         return "\n".join(lines)
 
-    def _read_file(self, filename: str = "") -> str:
-        if not filename:
-            return "Error: No filename provided."
-
-        # Only allow .md files under the moss model files directory
-        if not filename.endswith(".md"):
-            return "Error: Only .md files can be read."
-
-        # Restrict to models/moss/ directory only
-        allowed_files = ["overview.md", "guidelines.md"]
-        clean_name = Path(filename).name
-        if clean_name not in allowed_files:
-            return f"Error: File not available. Allowed files: {', '.join(allowed_files)}"
-
-        try:
-            target = (settings.MOSS_MODEL_FILES_DIR / clean_name).resolve()
-        except (ValueError, OSError):
-            return "Error: Invalid file path."
-
-        if not target.exists():
-            return f"Error: File '{clean_name}' not found."
-
-        try:
-            content = target.read_text(encoding="utf-8")
-            # Truncate if too long for context window
-            max_chars = 2000
-            if len(content) > max_chars:
-                content = content[:max_chars] + "\n\n[... truncated]"
-            return content
-        except Exception as e:
-            return f"Error reading file: {e}"
 

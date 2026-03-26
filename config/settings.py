@@ -91,7 +91,7 @@ CONTAINER_AREA_CM2: float = 30.48 * 26.67  # 12in x 10.5in = 812.9 cm²
 MOSS_MODEL: str = "llama3.2:3b"
 MOSS_HOST: str = "http://localhost:11434" # Ollama default
 MOSS_MAX_TOOLS_PER_TURN: int = 3 # Safety cap to prevent tool call loops
-MOSS_CONTEXT_LENGTH: int = 2048 # Context window tokens
+MOSS_CONTEXT_LENGTH: int = 4096 # Context window tokens
 MOSS_KEEP_ALIVE: str = "2h" # How long Ollama keeps model in RAM
 MOSS_MAX_CONVERSATION_MESSAGES: int = 5 # Max message pairs before auto-trim
 MOSS_CONVERSATION_DIR: Path = DATA_DIR / "moss_conversations"
