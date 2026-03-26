@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.8.1] - 2026-03-25
+### Changed
+- Reduced MOSS tools from 5 to 4.
+- Fixed parameterless tool calls failing.
+
 ## [v5.8.0] - 2026-03-25
 ### Changed
 - Upgraded tool gating to selective schema sending.

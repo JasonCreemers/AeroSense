@@ -180,9 +180,6 @@ class MossAgent:
         "overview":    {"read_file"},
         "guideline":   {"read_file"},
         "care":        {"read_file"},
-        # read_log
-        "log":         {"read_log"},
-        "history":     {"read_log"},
         # Multi-tool keywords
         "plant":       {"run_plant_health", "read_environment", "read_water_level"},
         "garden":      {"run_plant_health", "read_environment", "read_water_level"},
@@ -191,10 +188,8 @@ class MossAgent:
         "check":       {"read_environment", "read_water_level"},
         "run":         {"run_plant_health"},
         "status":      {"read_environment", "read_water_level"},
-        "data":        {"read_environment", "read_water_level", "read_log"},
+        "data":        {"read_environment", "read_water_level"},
         "grow":        {"read_environment", "read_file"},
-        "light":       {"read_log"},
-        "pump":        {"read_log"},
         "system":      {"read_file", "read_environment", "read_water_level"},
         # Phrase patterns
         "how are the":  {"read_environment", "read_water_level", "run_plant_health"},

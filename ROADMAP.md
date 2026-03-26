@@ -6,7 +6,10 @@ This document outlines the development trajectory for the AeroSense project. Tas
 - Add UA Fight Song
 - Add UA Alma Mater.
 
-- Better loading capabilities when sending first moss message and when its thinking
+- MOSS possible changes
+    - Remove ability to read .md files and just feed them all in every time
+    - Remove ability to check temperature and distance, just feed in every time.
+    - Only tool to have is to run plant health
 
 ---
 
@@ -30,9 +33,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
     - Less of a focus on water volume, time x, and time y.
     - More focus on VPD
     - Less focus on temp/humidity.
-
-- Fine tune MOSS
-    - Fine tune all MOSS md files.
 
 ---
 

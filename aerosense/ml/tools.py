@@ -6,7 +6,7 @@ Each tool has an Ollama-compatible schema and a handler function
 that wraps existing Controller methods or reads system data.
 """
 
-import csv
+import inspect
 import json
 import logging
 from pathlib import Path
@@ -60,23 +60,6 @@ TOOL_SCHEMAS: List[Dict] = [
             }
         }
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "read_log",
-            "description": "Read most recent entry from a log file.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "log_name": {
-                        "type": "string",
-                        "description": "'env', 'water', 'health', 'pump', 'lights', or 'master'"
-                    }
-                },
-                "required": ["log_name"]
-            }
-        }
-    },
 ]
 
 
@@ -104,7 +87,6 @@ class ToolExecutor:
             "read_water_level": self._read_water_level,
             "run_plant_health": self._run_plant_health,
             "read_file": self._read_file,
-            "read_log": self._read_log,
         }
 
     def execute(self, tool_name: str, arguments: dict) -> str:
@@ -124,6 +106,10 @@ class ToolExecutor:
 
         try:
             self.log.info(f"Executing tool: {tool_name}")
+            # Strip bogus arguments for parameterless tools
+            sig = inspect.signature(handler)
+            if not sig.parameters:
+                return handler()
             return handler(**arguments)
         except Exception as e:
             self.log.error(f"Tool '{tool_name}' failed: {e}")
@@ -204,37 +190,3 @@ class ToolExecutor:
         except Exception as e:
             return f"Error reading file: {e}"
 
-    def _read_log(self, log_name: str = "") -> str:
-        valid_logs = ["env", "water", "health", "pump", "lights", "master"]
-        if log_name not in valid_logs:
-            return f"Error: Invalid log name '{log_name}'. Options: {', '.join(valid_logs)}"
-
-        log_path = self.controller.logger.paths.get(log_name)
-        if not log_path or not log_path.exists():
-            return f"No data yet — the {log_name} log file does not exist."
-
-        try:
-            with open(log_path, 'r', newline='') as f:
-                # Read header first
-                header_line = f.readline()
-                if not header_line.strip():
-                    return f"The {log_name} log is empty."
-
-                # Read only the last row efficiently using a deque
-                from collections import deque
-                reader = csv.reader(f)
-                recent = deque(reader, maxlen=1)
-
-                if not recent:
-                    return f"The {log_name} log has headers but no data entries yet."
-
-                header = next(csv.reader([header_line]))
-                lines = [" | ".join(header)]
-                lines.append("-" * len(lines[0]))
-                for row in recent:
-                    lines.append(" | ".join(row))
-
-                return f"Most recent {log_name} log entry:\n" + "\n".join(lines)
-
-        except Exception as e:
-            return f"Error reading {log_name} log: {e}"
