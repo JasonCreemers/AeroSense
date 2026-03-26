@@ -46,7 +46,7 @@
         .sep { color: white; opacity: 0.6; margin: 0 4px; }
 
         /* Camera */
-        .cam-feed { width: 100%; border-radius: 5px; border: 2px solid #444; min-height: 200px; aspect-ratio: 4/3; background: #000; object-fit: cover; }
+        .cam-feed { width: 100%; border-radius: 5px; border: 2px solid #444; min-height: 200px; background: #000; object-fit: contain; }
 
         /* Terminal */
         #terminal-output {
@@ -122,7 +122,7 @@
         #moss-messages, #terminal-output { scrollbar-color: #555 #1a1a1a; }
 
         /* Vision Slider Bars */
-        .vision-bar { position: relative; height: 10px; border-radius: 5px; margin: 4px 0 2px; background: linear-gradient(to right, var(--green) 0%, var(--green) 17%, #ffc107 17%, #ffc107 50%, var(--red) 50%, var(--red) 100%); }
+        .vision-bar { position: relative; height: 10px; border-radius: 5px; margin: 4px 0 2px; }
         .vision-bar-indicator { position: absolute; top: -3px; width: 4px; height: 16px; background: white; border-radius: 2px; transition: left 0.3s; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
 
         /* Clickable Category Titles */
@@ -142,12 +142,12 @@
 
         <!-- Title -->
         <div style="text-align: center;">
-            <h1 style="margin:0;">AEROSENSE <span style="font-size: 0.5em; color: #666;">{{ version }}</span></h1>
+            <h1 style="margin:0; cursor:pointer;" onclick="toggleGroup('main')">AEROSENSE <span style="font-size: 0.5em; color: #666;">{{ version }}</span></h1>
             <p style="color:#888; font-size:0.8rem; margin:4px 0 0;">Senior Design — University of Akron</p>
         </div>
 
         <!-- MOSS -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>MOSS</h2>
             </div>
@@ -164,7 +164,7 @@
         </div>
 
         <!-- Camera Feed -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Camera Feed</h2>
             </div>
@@ -177,7 +177,7 @@
                     NO IMAGE DATA
                 </div>
                 <div style="text-align: right; margin-top: 5px;">
-                    <span class="time-tag" id="camera-time">{% if latest_image %}Taken: {{ img_time }}{% endif %}</span>
+                    <span class="time-tag" id="camera-time">Taken: {{ img_time if latest_image else 'Never' }}</span>
                 </div>
                 <div style="margin-top: 10px;">
                     <button id="btn-cam" class="btn-blue" onclick="runCamera()">RUN CAM</button>
@@ -189,7 +189,7 @@
         </div>
 
         <!-- Vision -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Vision</h2>
             </div>
@@ -201,71 +201,71 @@
                     NO VISION DATA
                 </div>
                 <div style="text-align: right; margin-top: 5px;">
-                    <span class="time-tag" id="v-time"></span>
+                    <span class="time-tag" id="v-time">Taken: Never</span>
                 </div>
                 <div style="margin-top: 10px;">
                     <button id="btn-vision" class="btn-blue" onclick="runVision()">RUN VISION</button>
                 </div>
                 <div style="margin-top: 10px;">
-                    <div style="margin: 8px 0;">
-                        <div style="display:flex; align-items:center; font-size:0.8rem; gap:6px;">
+                    <div style="margin: 14px 0;">
+                        <div style="display:flex; align-items:center; font-size:0.85rem; gap:8px;">
                             <span style="display:inline-block; width:12px; height:12px; background:#FFFF00; border-radius:2px; flex-shrink:0;"></span>
+                            <span style="color:#ccc; font-weight:bold;">Chlorosis:</span>
                             <span class="data-tag" id="v-chlorosis" style="color:#4dc9f6;">--</span>
-                            <span style="color:#ccc;">Chlorosis</span>
                         </div>
-                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-chlorosis" style="left:0%;"></div></div>
-                        <div style="display:flex; font-size:0.6rem; color:#666;"><span style="flex:17; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
+                        <div class="vision-bar" style="margin-top:6px; background: linear-gradient(to right, var(--green) 0%, var(--green) 17%, #ffc107 17%, #ffc107 50%, var(--red) 50%, var(--red) 100%);"><div class="vision-bar-indicator" id="vbar-chlorosis" style="left:0%;"></div></div>
+                        <div style="display:flex; font-size:0.6rem; color:#666; margin-top:4px;"><span style="flex:17; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
                     </div>
-                    <div style="margin: 8px 0;">
-                        <div style="display:flex; align-items:center; font-size:0.8rem; gap:6px;">
+                    <div style="margin: 14px 0;">
+                        <div style="display:flex; align-items:center; font-size:0.85rem; gap:8px;">
                             <span style="display:inline-block; width:12px; height:12px; background:#8000FF; border-radius:2px; flex-shrink:0;"></span>
+                            <span style="color:#ccc; font-weight:bold;">Necrosis:</span>
                             <span class="data-tag" id="v-necrosis" style="color:#4dc9f6;">--</span>
-                            <span style="color:#ccc;">Necrosis</span>
                         </div>
-                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-necrosis" style="left:0%;"></div></div>
-                        <div style="display:flex; font-size:0.6rem; color:#666;"><span style="flex:17; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
+                        <div class="vision-bar" style="margin-top:6px; background: linear-gradient(to right, var(--green) 0%, var(--green) 17%, #ffc107 17%, #ffc107 50%, var(--red) 50%, var(--red) 100%);"><div class="vision-bar-indicator" id="vbar-necrosis" style="left:0%;"></div></div>
+                        <div style="display:flex; font-size:0.6rem; color:#666; margin-top:4px;"><span style="flex:17; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
                     </div>
-                    <div style="margin: 8px 0;">
-                        <div style="display:flex; align-items:center; font-size:0.8rem; gap:6px;">
+                    <div style="margin: 14px 0;">
+                        <div style="display:flex; align-items:center; font-size:0.85rem; gap:8px;">
                             <span style="display:inline-block; width:12px; height:12px; background:#FF0000; border-radius:2px; flex-shrink:0;"></span>
+                            <span style="color:#ccc; font-weight:bold;">Pest:</span>
                             <span class="data-tag" id="v-pest" style="color:#4dc9f6;">--</span>
-                            <span style="color:#ccc;">Pest</span>
                         </div>
-                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-pest" style="left:0%;"></div></div>
-                        <div style="display:flex; font-size:0.6rem; color:#666;"><span style="flex:17; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
+                        <div class="vision-bar" style="margin-top:6px; background: linear-gradient(to right, var(--green) 0%, var(--green) 20%, #ffc107 20%, #ffc107 60%, var(--red) 60%, var(--red) 100%);"><div class="vision-bar-indicator" id="vbar-pest" style="left:0%;"></div></div>
+                        <div style="display:flex; font-size:0.6rem; color:#666; margin-top:4px;"><span style="flex:20; text-align:center;">Good</span><span style="flex:40; text-align:center;">Watch</span><span style="flex:40; text-align:center;">Attention</span></div>
                     </div>
-                    <div style="margin: 8px 0;">
-                        <div style="display:flex; align-items:center; font-size:0.8rem; gap:6px;">
+                    <div style="margin: 14px 0;">
+                        <div style="display:flex; align-items:center; font-size:0.85rem; gap:8px;">
                             <span style="display:inline-block; width:12px; height:12px; background:#FFA500; border-radius:2px; flex-shrink:0;"></span>
+                            <span style="color:#ccc; font-weight:bold;">Tip Burn:</span>
                             <span class="data-tag" id="v-tipburn" style="color:#4dc9f6;">--</span>
-                            <span style="color:#ccc;">Tip Burn</span>
                         </div>
-                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-tipburn" style="left:0%;"></div></div>
-                        <div style="display:flex; font-size:0.6rem; color:#666;"><span style="flex:17; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
+                        <div class="vision-bar" style="margin-top:6px; background: linear-gradient(to right, var(--green) 0%, var(--green) 25%, #ffc107 25%, #ffc107 50%, var(--red) 50%, var(--red) 100%);"><div class="vision-bar-indicator" id="vbar-tipburn" style="left:0%;"></div></div>
+                        <div style="display:flex; font-size:0.6rem; color:#666; margin-top:4px;"><span style="flex:25; text-align:center;">Good</span><span style="flex:25; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
                     </div>
-                    <div style="margin: 8px 0;">
-                        <div style="display:flex; align-items:center; font-size:0.8rem; gap:6px;">
+                    <div style="margin: 14px 0;">
+                        <div style="display:flex; align-items:center; font-size:0.85rem; gap:8px;">
                             <span style="display:inline-block; width:12px; height:12px; background:#0064C8; border-radius:2px; flex-shrink:0;"></span>
+                            <span style="color:#ccc; font-weight:bold;">Wilting:</span>
                             <span class="data-tag" id="v-wilting" style="color:#4dc9f6;">--</span>
-                            <span style="color:#ccc;">Wilting</span>
                         </div>
-                        <div class="vision-bar"><div class="vision-bar-indicator" id="vbar-wilting" style="left:0%;"></div></div>
-                        <div style="display:flex; font-size:0.6rem; color:#666;"><span style="flex:17; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
+                        <div class="vision-bar" style="margin-top:6px; background: linear-gradient(to right, var(--green) 0%, var(--green) 17%, #ffc107 17%, #ffc107 50%, var(--red) 50%, var(--red) 100%);"><div class="vision-bar-indicator" id="vbar-wilting" style="left:0%;"></div></div>
+                        <div style="display:flex; font-size:0.6rem; color:#666; margin-top:4px;"><span style="flex:17; text-align:center;">Good</span><span style="flex:33; text-align:center;">Watch</span><span style="flex:50; text-align:center;">Attention</span></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Plant Health -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Plant Health</h2>
             </div>
-            <div class="panel-body">
+            <div class="panel-body" style="min-height: 320px;">
                 <div style="text-align: center; margin-bottom: 10px;">
                     <span id="health-prediction" class="data-tag" style="font-size: 1.3rem; font-weight: bold; color: #666;">No diagnosis yet</span>
                 </div>
-                <div id="health-features" style="margin: 10px 0; font-size: 0.8rem; line-height: 1.6; min-height: 160px;">
+                <div id="health-features" style="margin: 10px 0; font-size: 0.8rem; line-height: 1.6;">
                     <div class="grid-2" style="gap: 2px 10px; text-align: center;" id="health-features-grid">
                         <div><span style="color:#888;">Chlorosis:</span> <span class="data-tag">--</span></div>
                         <div><span style="color:#888;">Decay:</span> <span class="data-tag">--</span></div>
@@ -280,14 +280,14 @@
                     </div>
                 </div>
                 <div style="text-align: center; margin-bottom: 10px;">
-                    <span class="time-tag" id="health-time"></span>
+                    <span class="time-tag" id="health-time">Taken: Never</span>
                 </div>
                 <button id="btn-health" class="btn-blue" onclick="runHealth()">RUN PLANT HEALTH</button>
             </div>
         </div>
 
         <!-- Live Feed -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Live Feed</h2>
             </div>
@@ -309,7 +309,7 @@
         </div>
 
         <!-- Automation Cycles -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Automation Cycles</h2>
             </div>
@@ -332,7 +332,7 @@
         </div>
 
         <!-- Manual Control -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Manual Control</h2>
             </div>
@@ -353,32 +353,31 @@
         </div>
 
         <!-- Sensors -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Sensors</h2>
             </div>
             <div class="panel-body">
                 <button class="btn-blue" style="margin-bottom: 20px;" onclick="post('/api/run_sensor', {target: 'SENSORS'})">RUN ALL SENSORS</button>
 
-                <div style="margin-bottom: 10px;">
-                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENVIRONMENTAL</button>
-                    <div style="margin-top: 5px; text-align: center;">
+                <div style="margin-bottom: 20px;">
+                    <div style="text-align: center; margin-bottom: 10px;">
                         <span class="data-tag" id="env-value">{{ cache['temp_reading']['value'] }}&deg;F <span class="sep">|</span> {{ cache['humidity_reading']['value'] }}%</span>
                         <span class="sep">|</span>
-                        <span class="time-tag" id="env-time">Taken: {{ cache['temp_reading']['time'] }}</span>
+                        <span class="time-tag" id="env-time">Taken: {{ cache['temp_reading']['time'] or 'Never' }}</span>
                     </div>
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'ENVIRONMENT'})">RUN ENVIRONMENTAL</button>
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER LEVEL</button>
-                    <div style="margin-top: 5px; text-align: center;">
+                <div style="margin-bottom: 20px;">
+                    <div style="text-align: center; margin-bottom: 10px;">
                         <span class="data-tag" id="water-value">{{ cache['water_reading']['value'] }} mm</span>
                         <span class="sep">|</span>
-                        <span class="time-tag" id="water-time">Taken: {{ cache['water_reading']['time'] }}</span>
+                        <span class="time-tag" id="water-time">Taken: {{ cache['water_reading']['time'] or 'Never' }}</span>
                     </div>
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'WATER_LEVEL'})">RUN WATER LEVEL</button>
                 </div>
                 <div style="margin-bottom: 10px;">
-                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
-                    <div style="margin-top: 5px; text-align: center; font-size: 0.85rem;">
+                    <div style="text-align: center; margin-bottom: 10px; font-size: 0.85rem;">
                         <span class="data-tag" id="pi-temp">CPU: {{ cache['pi_health_reading']['value']['temp'] }}&deg;C</span>
                         <span class="sep">|</span>
                         <span class="data-tag" id="pi-ram">RAM: {{ cache['pi_health_reading']['value']['ram'] }}%</span>
@@ -387,14 +386,15 @@
                         <span class="sep">|</span>
                         <span class="data-tag" id="pi-uptime">UPT: {{ cache['pi_health_reading']['value']['uptime'] }}hr</span>
                         <span class="sep">|</span>
-                        <span class="time-tag" id="pi-time">Taken: {{ cache['pi_health_reading']['time'] }}</span>
+                        <span class="time-tag" id="pi-time">Taken: {{ cache['pi_health_reading']['time'] or 'Never' }}</span>
                     </div>
+                    <button class="btn-outline" onclick="post('/api/run_sensor', {target: 'PI_HEALTH'})">RUN PI HEALTH</button>
                 </div>
             </div>
         </div>
 
         <!-- Audio -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Audio</h2>
             </div>
@@ -404,8 +404,8 @@
                     <button class="btn-red" onclick="post('/api/music', {action: 'STOP'})">STOP MUSIC</button>
                 </div>
                 {% for category, songs in song_categories.items() %}
-                    <div style="margin-top: 10px;">
-                        <div style="text-align: center; margin-bottom: 5px;">
+                    <div style="margin-top: 20px;">
+                        <div style="text-align: center; margin-bottom: 10px;">
                             <span class="category-title" onclick="post('/api/music', {action: 'RANDOM_CATEGORY', category: '{{ category }}'})">&#9654; {{ category }}</span>
                         </div>
                         <div class="grid-3">
@@ -421,7 +421,7 @@
         </div>
 
         <!-- System -->
-        <div class="panel">
+        <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>System</h2>
             </div>
@@ -434,10 +434,10 @@
         </div>
 
         <!-- Developer Tools Divider -->
-        <div class="section-divider">DEVELOPER TOOLS</div>
+        <div class="section-divider" style="cursor:pointer;" onclick="toggleGroup('dev')">DEVELOPER TOOLS</div>
 
         <!-- Diagnostics -->
-        <div class="panel collapsed">
+        <div class="panel collapsed" data-group="dev">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Diagnostics</h2>
             </div>
@@ -454,7 +454,7 @@
                         <div style="margin-top: 5px; text-align: center;">
                             <span class="data-tag" id="ping-system-value">{{ cache['ping_system']['value'] }}</span>
                             <span class="sep">|</span>
-                            <span class="time-tag" id="ping-system-time">{{ cache['ping_system']['time'] }}</span>
+                            <span class="time-tag" id="ping-system-time">Taken: {{ cache['ping_system']['time'] or 'Never' }}</span>
                         </div>
                     </div>
                 </div>
@@ -470,7 +470,7 @@
                             <div style="margin-top: 5px; text-align: center;">
                                 <span class="data-tag" id="ping-pump-value">{{ cache['ping_pump']['value'] }}</span>
                                 <span class="sep">|</span>
-                                <span class="time-tag" id="ping-pump-time">{{ cache['ping_pump']['time'] }}</span>
+                                <span class="time-tag" id="ping-pump-time">Taken: {{ cache['ping_pump']['time'] or 'Never' }}</span>
                             </div>
                         </div>
                         <div>
@@ -478,7 +478,7 @@
                             <div style="margin-top: 5px; text-align: center;">
                                 <span class="data-tag" id="ping-lights-value">{{ cache['ping_lights']['value'] }}</span>
                                 <span class="sep">|</span>
-                                <span class="time-tag" id="ping-lights-time">{{ cache['ping_lights']['time'] }}</span>
+                                <span class="time-tag" id="ping-lights-time">Taken: {{ cache['ping_lights']['time'] or 'Never' }}</span>
                             </div>
                         </div>
                     </div>
@@ -495,7 +495,7 @@
                             <div style="margin-top: 5px; text-align: center;">
                                 <span class="data-tag" id="ping-env-value">{{ cache['ping_env']['value'] }}</span>
                                 <span class="sep">|</span>
-                                <span class="time-tag" id="ping-env-time">{{ cache['ping_env']['time'] }}</span>
+                                <span class="time-tag" id="ping-env-time">Taken: {{ cache['ping_env']['time'] or 'Never' }}</span>
                             </div>
                         </div>
                         <div>
@@ -503,7 +503,7 @@
                             <div style="margin-top: 5px; text-align: center;">
                                 <span class="data-tag" id="ping-water-value">{{ cache['ping_water']['value'] }}</span>
                                 <span class="sep">|</span>
-                                <span class="time-tag" id="ping-water-time">{{ cache['ping_water']['time'] }}</span>
+                                <span class="time-tag" id="ping-water-time">Taken: {{ cache['ping_water']['time'] or 'Never' }}</span>
                             </div>
                         </div>
                         <div>
@@ -511,7 +511,7 @@
                             <div style="margin-top: 5px; text-align: center;">
                                 <span class="data-tag" id="ping-cam-value">{{ cache['ping_cam']['value'] }}</span>
                                 <span class="sep">|</span>
-                                <span class="time-tag" id="ping-cam-time">{{ cache['ping_cam']['time'] }}</span>
+                                <span class="time-tag" id="ping-cam-time">Taken: {{ cache['ping_cam']['time'] or 'Never' }}</span>
                             </div>
                         </div>
                     </div>
@@ -527,7 +527,7 @@
                         <div style="margin-top: 5px; text-align: center;">
                             <span class="data-tag" id="ping-buzzer-value">{{ cache['ping_buzzer']['value'] }}</span>
                             <span class="sep">|</span>
-                            <span class="time-tag" id="ping-buzzer-time">{{ cache['ping_buzzer']['time'] }}</span>
+                            <span class="time-tag" id="ping-buzzer-time">Taken: {{ cache['ping_buzzer']['time'] or 'Never' }}</span>
                         </div>
                     </div>
                 </div>
@@ -541,7 +541,7 @@
         </div>
 
         <!-- Terminal -->
-        <div class="panel collapsed">
+        <div class="panel collapsed" data-group="dev">
             <div class="panel-header" onclick="togglePanel(this)">
                 <h2>Terminal</h2>
             </div>
@@ -565,6 +565,16 @@
         // --- Collapsible Panels ---
         function togglePanel(el) {
             el.closest('.panel').classList.toggle('collapsed');
+        }
+
+        // --- Group Toggle (AEROSENSE toggles main panels, DEVELOPER TOOLS toggles dev panels) ---
+        function toggleGroup(group) {
+            let panels = document.querySelectorAll('.panel[data-group="' + group + '"]');
+            let anyCollapsed = Array.from(panels).some(p => p.classList.contains('collapsed'));
+            panels.forEach(p => {
+                if (anyCollapsed) p.classList.remove('collapsed');
+                else p.classList.add('collapsed');
+            });
         }
 
         // --- Terminal Reset ---
@@ -725,13 +735,13 @@
                         document.getElementById('env-value').textContent = '--';
                     }
                     let envTime = c.temp_reading.time;
-                    document.getElementById('env-time').textContent = envTime && envTime !== '--' ? 'Taken: ' + envTime : '';
+                    document.getElementById('env-time').textContent = envTime && envTime !== '--' ? 'Taken: ' + envTime : 'Taken: Never';
 
                     let waterVal = c.water_reading.value;
                     document.getElementById('water-value').textContent =
                         (waterVal != null && waterVal !== '--') ? waterVal + ' mm' : '--';
                     let waterTime = c.water_reading.time;
-                    document.getElementById('water-time').textContent = waterTime && waterTime !== '--' ? 'Taken: ' + waterTime : '';
+                    document.getElementById('water-time').textContent = waterTime && waterTime !== '--' ? 'Taken: ' + waterTime : 'Taken: Never';
 
                     // Pi Health
                     let pi = c.pi_health_reading.value;
@@ -742,7 +752,7 @@
                         document.getElementById('pi-uptime').textContent = 'UPT: ' + (pi.uptime || '--') + 'hr';
                     }
                     let piTime = c.pi_health_reading.time;
-                    document.getElementById('pi-time').textContent = piTime && piTime !== '--' ? 'Taken: ' + piTime : '';
+                    document.getElementById('pi-time').textContent = piTime && piTime !== '--' ? 'Taken: ' + piTime : 'Taken: Never';
 
                     // --- Camera Image ---
                     let newImg = c.latest_photo.value;
@@ -760,7 +770,7 @@
                     }
                     let camTime = c.latest_photo.time;
                     document.getElementById('camera-time').textContent =
-                        (camTime && camTime !== '--') ? 'Taken: ' + camTime : '';
+                        (camTime && camTime !== '--') ? 'Taken: ' + camTime : 'Taken: Never';
 
                     // --- Vision Results ---
                     let vr = c.vision_result;
@@ -779,27 +789,25 @@
                         // Update class percentages and bar positions
                         if (v.class_pixels) {
                             let gp = v.green_pixels || 1;
-                            let classes = {
-                                'chlorosis': 'v-chlorosis', 'necrosis': 'v-necrosis',
-                                'pest': 'v-pest', 'tip_burn': 'v-tipburn', 'wilting': 'v-wilting'
+                            let visionConfig = {
+                                'chlorosis':  { elId: 'v-chlorosis',  barId: 'vbar-chlorosis',  max: 3.0 },
+                                'necrosis':   { elId: 'v-necrosis',   barId: 'vbar-necrosis',   max: 3.0 },
+                                'pest':       { elId: 'v-pest',       barId: 'vbar-pest',       max: 0.5 },
+                                'tip_burn':   { elId: 'v-tipburn',    barId: 'vbar-tipburn',    max: 2.0 },
+                                'wilting':    { elId: 'v-wilting',    barId: 'vbar-wilting',    max: 3.0 }
                             };
-                            let barIds = {
-                                'chlorosis': 'vbar-chlorosis', 'necrosis': 'vbar-necrosis',
-                                'pest': 'vbar-pest', 'tip_burn': 'vbar-tipburn', 'wilting': 'vbar-wilting'
-                            };
-                            for (let [key, elId] of Object.entries(classes)) {
+                            for (let [key, cfg] of Object.entries(visionConfig)) {
                                 let raw = ((v.class_pixels[key] || 0) / gp * 100);
                                 let pctStr = raw.toFixed(1) + '%';
-                                document.getElementById(elId).textContent = pctStr;
-                                // Position bar: 3% maps to 100% of bar width
-                                let barPos = Math.min(Math.max(raw / 3.0 * 100, 0), 100);
-                                let barEl = document.getElementById(barIds[key]);
+                                document.getElementById(cfg.elId).textContent = pctStr;
+                                let barPos = Math.min(Math.max(raw / cfg.max * 100, 0), 100);
+                                let barEl = document.getElementById(cfg.barId);
                                 if (barEl) barEl.style.left = barPos + '%';
                             }
                         }
 
                         let vTime = vr.time;
-                        document.getElementById('v-time').textContent = vTime && vTime !== '--' ? 'Taken: ' + vTime : '';
+                        document.getElementById('v-time').textContent = vTime && vTime !== '--' ? 'Taken: ' + vTime : 'Taken: Never';
 
                         // Restore button
                         let vBtn = document.getElementById('btn-vision');
@@ -813,19 +821,22 @@
                         let pred = hr.value.prediction || '--';
                         let conf = hr.value.confidence;
                         let el = document.getElementById('health-prediction');
+                        let displayPred = pred.replace(/_/g, ' ');
                         if (pred !== 'NO_MODEL' && conf !== undefined && conf !== null) {
-                            el.textContent = pred + ' (' + conf.toFixed(1) + '%)';
+                            el.textContent = displayPred + ' (' + conf.toFixed(1) + '%)';
                         } else {
-                            el.textContent = pred;
+                            el.textContent = displayPred;
                         }
-                        if (pred === 'Healthy') el.style.color = '#28a745';
-                        else if (pred === 'NO_MODEL') el.style.color = '#dc3545';
-                        else if (pred === '--') el.style.color = '#666';
-                        else el.style.color = '#ffc107';
+                        let healthColors = {
+                            'Healthy': '#28a745', 'Underwatered': '#ffc107', 'Overwatered': '#17a2b8',
+                            'More_Light': '#ff9800', 'Less_Light': '#9c27b0', 'Nutrient_Burn': '#ff5722',
+                            'Pathogen': '#dc3545', 'NO_MODEL': '#dc3545', '--': '#666'
+                        };
+                        el.style.color = healthColors[pred] || '#ffc107';
 
                         let hTime = hr.time;
                         document.getElementById('health-time').textContent =
-                            hTime && hTime !== '--' ? 'Taken: ' + hTime : '';
+                            hTime && hTime !== '--' ? 'Taken: ' + hTime : 'Taken: Never';
 
                         // Populate feature grid
                         let feats = hr.value.features;
@@ -883,7 +894,7 @@
                         }
                         if (timeEl) {
                             let rawTime = c[cacheKey] ? c[cacheKey].time : '';
-                            timeEl.textContent = rawTime && rawTime !== '--' ? 'Taken: ' + rawTime : '';
+                            timeEl.textContent = rawTime && rawTime !== '--' ? 'Taken: ' + rawTime : 'Taken: Never';
                         }
                     });
 
