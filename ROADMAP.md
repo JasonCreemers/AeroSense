@@ -16,6 +16,8 @@ This document outlines the development trajectory for the AeroSense project. Tas
 
 - README.md full revamp.
 
+- Promt engineer MOSS some more.
+
 ---
 
 ## Long Term Tasks
