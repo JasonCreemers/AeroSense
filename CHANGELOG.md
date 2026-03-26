@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.11.1] - 2026-03-26
+### Changed
+- Modified GUI page.
+
 ## [v5.11.0] - 2026-03-26
 ### Changed
 - Revamp of entire GUI page.
