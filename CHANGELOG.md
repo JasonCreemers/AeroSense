@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.13.2] - 2026-03-27
+### Changed
+- Added explicit capabilities block to MOSS system prompt.
+
 ## [v5.13.1] - 2026-03-27
 ### Fixed
 - Fixed MOSS hallucinating.
