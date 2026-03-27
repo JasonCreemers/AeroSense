@@ -1,24 +1,19 @@
-# AeroSense System Overview
+SYSTEM OVERVIEW:
+AeroSense is built with Python 3.12 on a Raspberry Pi 5 (16GB) connected to an Arduino Mega 2560 over serial UART. The Pi runs the full application — sensors, ML, web dashboard, and you (MOSS). The Arduino runs C++ firmware to control actuators and read sensors.
 
-AeroSense is an automated aeroponic indoor garden built as a Senior Design project at the University of Akron.
+HARDWARE:
+- Environment Sensor: SHT3x (I2C) — reads temperature (°F) and humidity (% RH)
+- Water Level Sensor: SEN0311 ultrasonic (UART) — reads distance in mm to water surface. Lower mm = more water.
+- Camera: IMX708 (Raspberry Pi Camera Module) — 1920x1080, uses libcamera
+- Water Pump: 12V via DFR0457 MOSFET driver, safety-capped at 30s max
+- Grow Lights: 12V full-spectrum LED via DFR0457 MOSFET driver
 
-## Architecture
-- **Raspberry Pi 5 (16GB):** Runs Python application — sensors, camera, ML, web server, and MOSS.
-- **Arduino Mega 2560:** Controls actuators (water pump, grow lights, buzzer) and reads sensors (environment, water level).
-- Communication: Serial UART at 115200 baud.
+SOFTWARE:
+- Web Dashboard: Flask + Flask-SocketIO (Jinja2 templates), live MJPEG camera stream
+- Computer Vision: OpenCV + RoboFlow API for instance segmentation of 5 disease classes (chlorosis, necrosis, pest, tip burn, wilting) reported as % of green pixels
+- Plant Health Classifier: XGBoost (scikit-learn) predicts 1 of 7 classes (Healthy, Underwatered, Overwatered, More Light, Less Light, Nutrient Burn, Pathogen)
+- You (MOSS): Ollama running llama3.2:3b locally on the Pi
 
-## Sensors
-- **Environment (DHT22):** Temperature (°F) and humidity (% RH). I2C address 0x44.
-- **Water Level (Ultrasonic):** Distance in mm. Lower = more water. Over 100mm = critically low.
-
-## Actuators
-- **Water Pump:** 12V, safety-capped at 30s max runtime. Won't run if water is critically low.
-- **Grow Lights:** 12V full-spectrum LED. Scheduled on/off by time of day.
-
-## ML Pipelines
-- **Vision:** 12MP camera captures image, splits into tiles, analyzes for 5 disease classes (chlorosis, necrosis, pest, tip_burn, wilting) plus green coverage.
-- **Plant Health:** XGBoost classifier uses vision + sensor features to predict 7 health classes (Healthy, Underwatered, Overwatered, More_Light, Less_Light, Nutrient_Burn, Pathogen).
-
-## Automation
-- Pump, lights, and sensor reads run on configurable automated cycles.
-- All events are logged to CSV files in data/logs/.
+AUTOMATION:
+- Pump, lights, and sensor reads run on configurable automated cycles
+- All events logged to CSV files in data/logs/

@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.13.0] - 2026-03-27
+### Changed
+- Revamped MOSS from LLM tool-calling to keyword-based context injection.
+- Added water level sensor context with health/medium/low status thresholds.
+- Removed tools.py entirely.
+- Prompt engineering on MOSS.
+
 ## [v5.12.0] - 2026-03-26
 ### Changed
 - Fine-tuning XGBoost Classifier model.

@@ -40,7 +40,7 @@ def main():
         scheduler = Scheduler(controller)
 
         # Initialize MOSS AI Agent
-        moss = MossAgent(controller)
+        moss = MossAgent(controller, scheduler)
 
         # Initialize Web Server
         web = WebServer(controller, scheduler)

@@ -5,18 +5,24 @@ This document outlines the development trajectory for the AeroSense project. Tas
 ## Immediate Tasks
 - Add UA Fight song
 - Add UA Alma Mater.
+
+- (Friday/Saturday)
 - Add another happpy song.
 - Add another angry song.
 - Add another sad song.
 - Add another serious song.
 
+- (Friday) Another batch of images into RoboFlow.
+
 ---
 
 ## Upcoming Tasks
 
-- README.md full revamp.
+- (Monday) A revamp of the entire README.md documentation.
+    - Overview: 
 
-- Promt engineer MOSS some more.
+- (Monday) A revamp of the entire HARDWARE.md documention.
+    - Overview:
 
 ---
 

@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v5.12.0** | **Release: 2026-03-26**
+**Version: v5.13.0** | **Release: 2026-03-27**
 
 **AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 5 (16GB)** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 
@@ -31,9 +31,8 @@
      * `web.py`: Flask web server for the graphical user interface.
   * **`ml/`** - Machine Learning Package
      * `__init__.py`
-     * `agent.py`: MOSS AI agent core logic.
+     * `agent.py`: MOSS AI agent.
      * `health.py`: XGBoost plant health classifier.
-     * `tools.py`: MOSS tool definitions and executor.
      * `vision.py`: Computer vision analyzer.
   * `__init__.py`: Package initialization and versioning.
   * `main.py`: AeroSense application entry point.
