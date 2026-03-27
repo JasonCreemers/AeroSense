@@ -24,7 +24,7 @@
         .row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        input[type="text"], input[type="number"] { background: #444; border: 1px solid #555; color: white; padding: 8px; border-radius: 4px; width: 60px; text-align: center;}
+        input[type="text"], input[type="number"] { background: #444; border: 1px solid #555; color: white; padding: 8px; border-radius: 4px; width: 60px; text-align: center; color-scheme: dark; }
 
         /* Buttons */
         button { border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; color: white; width: 100%; }
@@ -337,6 +337,37 @@
             </div>
         </div>
 
+        <!-- Settings -->
+        <div class="panel" data-group="main">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Settings</h2>
+            </div>
+            <div class="panel-body">
+                <div class="grid-2" style="margin-bottom:20px; text-align:center;">
+                    <div>
+                        <span style="color:#888;">Lights Window</span><br>
+                        <span class="data-tag" id="cfg-lights-window" style="font-size:1.1rem;">--</span>
+                    </div>
+                    <div>
+                        <span style="color:#888;">Pump Cycle</span><br>
+                        <span class="data-tag" id="cfg-pump-cycle" style="font-size:1.1rem;">--</span>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 80px; gap:10px; align-items:center;">
+                    <span style="color:#ccc;">Lights Start (hr)</span>
+                    <input type="number" id="cfg-lights-start" min="0" max="23" placeholder="0-23" style="width:100%;">
+                    <span style="color:#ccc;">Lights End (hr)</span>
+                    <input type="number" id="cfg-lights-end" min="0" max="23" placeholder="0-23" style="width:100%;">
+                    <span style="color:#ccc;">Pump Duration (s)</span>
+                    <input type="number" id="cfg-pump-duration" min="1" max="30" placeholder="1-30" style="width:100%;">
+                    <span style="color:#ccc;">Pump Interval (min)</span>
+                    <input type="number" id="cfg-pump-interval" min="1" max="1440" placeholder="1-1440" style="width:100%;">
+                </div>
+                <button class="btn-blue" style="margin-top:15px; width:100%;" onclick="applySettings()">APPLY</button>
+                <div id="cfg-status" style="font-size:0.75rem; color:#888; margin-top:6px; min-height:1.2em;"></div>
+            </div>
+        </div>
+
         <!-- Manual Control -->
         <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
@@ -355,31 +386,6 @@
                     <input type="number" id="dur_pump" placeholder="Sec (0)" style="width:100%;">
                     <button class="btn-red" onclick="manualRun('PUMP', 'OFF')">OFF</button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Settings -->
-        <div class="panel" data-group="main">
-            <div class="panel-header" onclick="togglePanel(this)">
-                <h2>Settings</h2>
-            </div>
-            <div class="panel-body">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px 16px; margin-bottom:12px; font-size:0.85rem;">
-                    <span>Lights Window: <strong id="cfg-lights-window">--</strong></span>
-                    <span>Pump Cycle: <strong id="cfg-pump-cycle">--</strong></span>
-                </div>
-                <div style="display:grid; grid-template-columns: 1fr 80px; gap:8px; align-items:center;">
-                    <span>Lights Start (hr)</span>
-                    <input type="number" id="cfg-lights-start" min="0" max="23" placeholder="0-23" style="width:100%;">
-                    <span>Lights End (hr)</span>
-                    <input type="number" id="cfg-lights-end" min="0" max="23" placeholder="0-23" style="width:100%;">
-                    <span>Pump Duration (s)</span>
-                    <input type="number" id="cfg-pump-duration" min="1" max="30" placeholder="1-30" style="width:100%;">
-                    <span>Pump Interval (min)</span>
-                    <input type="number" id="cfg-pump-interval" min="1" max="1440" placeholder="1-1440" style="width:100%;">
-                </div>
-                <button class="btn-blue" style="margin-top:10px; width:100%;" onclick="applySettings()">APPLY</button>
-                <div id="cfg-status" style="font-size:0.75rem; color:#888; margin-top:6px; min-height:1.2em;"></div>
             </div>
         </div>
 

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.14.1] - 2026-03-27
+### Fixed
+- Slight changes to settings on GUI.
+
 ## [v5.14.0] - 2026-03-27
 ### Added
 - Added methods to allow user to change system parameters.
