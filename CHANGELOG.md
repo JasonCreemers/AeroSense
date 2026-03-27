@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.13.1] - 2026-03-27
+### Fixed
+- Fixed MOSS hallucinating.
+- Fixed MOSS chat auto-scroll jank during streaming responses.
+
 ## [v5.13.0] - 2026-03-27
 ### Changed
 - Revamped MOSS from LLM tool-calling to keyword-based context injection.

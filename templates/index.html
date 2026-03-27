@@ -984,6 +984,10 @@
         let mossStreaming = false;
         let mossStreamEl = null;
 
+        function isMossNearBottom() {
+            return mossMessages.scrollHeight - mossMessages.scrollTop - mossMessages.clientHeight < 60;
+        }
+
         function addMossMessage(text, role) {
             const msg = document.createElement('div');
             msg.className = 'moss-msg ' + role;
@@ -1017,8 +1021,9 @@
         if (socket) {
             socket.on('moss_token', function(data) {
                 if (mossStreamEl) {
+                    const wasNear = isMossNearBottom();
                     mossStreamEl.textContent += data.data;
-                    mossMessages.scrollTop = mossMessages.scrollHeight;
+                    if (wasNear) mossMessages.scrollTop = mossMessages.scrollHeight;
                 }
             });
 

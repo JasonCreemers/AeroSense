@@ -377,7 +377,8 @@ class MossAgent:
         if self.scheduler:
             cycle = "ENABLED" if self.scheduler.cycles.get("pump", False) else "DISABLED"
 
-        return f"PUMP: {hw} | cycle: {cycle}"
+        schedule = f"every {settings.PUMP_INTERVAL_MINS}min for {settings.PUMP_DURATION_SEC}s"
+        return f"PUMP: {hw} | cycle: {cycle} | schedule: {schedule}"
 
     def _gather_lights_context(self) -> str:
         """Gather lights hardware state and automation cycle status."""
@@ -394,7 +395,8 @@ class MossAgent:
         if self.scheduler:
             cycle = "ENABLED" if self.scheduler.cycles.get("lights", False) else "DISABLED"
 
-        return f"LIGHTS: {hw} | cycle: {cycle}"
+        schedule = f"{settings.LIGHTS_START_HOUR}:00-{settings.LIGHTS_END_HOUR}:00"
+        return f"LIGHTS: {hw} | cycle: {cycle} | schedule: {schedule}"
 
     def _gather_water_level_context(self, stream_callback: Optional[Callable] = None) -> str:
         """Gather water level data. Checks CSV freshness, takes fresh reading if stale."""
