@@ -212,6 +212,10 @@ class WebServer:
         self.app.add_url_rule('/api/run_manual', 'run_manual', self.run_manual, methods=['POST'])
         self.app.add_url_rule('/api/run_sensor', 'run_sensor', self.run_sensor, methods=['POST'])
 
+        # API Routes - Settings
+        self.app.add_url_rule('/api/settings', 'get_settings', self.get_settings, methods=['GET'])
+        self.app.add_url_rule('/api/settings', 'update_setting', self.update_setting, methods=['POST'])
+
         # API Routes - Diagnostics & Utilities
         self.app.add_url_rule('/api/music', 'music', self.control_music, methods=['POST'])
         self.app.add_url_rule('/api/ping', 'ping', self.ping_component, methods=['POST'])
@@ -388,11 +392,19 @@ class WebServer:
             "pump_expected_duration": self.controller.state["pump_expected_duration"],
         }
 
+        current_settings = {
+            "lights_start": settings.LIGHTS_START_HOUR,
+            "lights_end": settings.LIGHTS_END_HOUR,
+            "pump_duration": settings.PUMP_DURATION_SEC,
+            "pump_interval": settings.PUMP_INTERVAL_MINS,
+        }
+
         return jsonify(
             cache=formatted_cache,
             cycles=self.scheduler.cycles,
             actuators=actuators,
             is_streaming=self.controller.camera.is_streaming,
+            settings=current_settings,
         )
 
     def toggle_cycle(self):
@@ -468,6 +480,45 @@ class WebServer:
             self.controller.set_pump(state, duration)
 
         return jsonify(success=True)
+
+    def get_settings(self):
+        """
+        API: Return current system settings as JSON.
+        """
+        return jsonify(
+            lights_start=settings.LIGHTS_START_HOUR,
+            lights_end=settings.LIGHTS_END_HOUR,
+            pump_duration=settings.PUMP_DURATION_SEC,
+            pump_interval=settings.PUMP_INTERVAL_MINS,
+        )
+
+    def update_setting(self):
+        """
+        API: Update a system setting.
+        Expects JSON: {"key": "lights_start", "value": 8}
+        """
+        data = request.json
+        if not data:
+            return jsonify(success=False, message="Missing JSON body."), 400
+
+        key = data.get('key', '')
+        value = data.get('value')
+
+        valid_keys = ("lights_start", "lights_end", "pump_duration", "pump_interval")
+        if key not in valid_keys:
+            return jsonify(success=False, message=f"Unknown setting: {key}"), 400
+
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return jsonify(success=False, message="Value must be an integer."), 400
+
+        result = self.controller.set_setting(key, value)
+
+        if result.startswith("Error"):
+            return jsonify(success=False, message=result), 400
+
+        return jsonify(success=True, message=result)
 
     def run_sensor(self):
         """

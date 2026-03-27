@@ -358,6 +358,31 @@
             </div>
         </div>
 
+        <!-- Settings -->
+        <div class="panel" data-group="main">
+            <div class="panel-header" onclick="togglePanel(this)">
+                <h2>Settings</h2>
+            </div>
+            <div class="panel-body">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px 16px; margin-bottom:12px; font-size:0.85rem;">
+                    <span>Lights Window: <strong id="cfg-lights-window">--</strong></span>
+                    <span>Pump Cycle: <strong id="cfg-pump-cycle">--</strong></span>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 80px; gap:8px; align-items:center;">
+                    <span>Lights Start (hr)</span>
+                    <input type="number" id="cfg-lights-start" min="0" max="23" placeholder="0-23" style="width:100%;">
+                    <span>Lights End (hr)</span>
+                    <input type="number" id="cfg-lights-end" min="0" max="23" placeholder="0-23" style="width:100%;">
+                    <span>Pump Duration (s)</span>
+                    <input type="number" id="cfg-pump-duration" min="1" max="30" placeholder="1-30" style="width:100%;">
+                    <span>Pump Interval (min)</span>
+                    <input type="number" id="cfg-pump-interval" min="1" max="1440" placeholder="1-1440" style="width:100%;">
+                </div>
+                <button class="btn-blue" style="margin-top:10px; width:100%;" onclick="applySettings()">APPLY</button>
+                <div id="cfg-status" style="font-size:0.75rem; color:#888; margin-top:6px; min-height:1.2em;"></div>
+            </div>
+        </div>
+
         <!-- Sensors -->
         <div class="panel" data-group="main">
             <div class="panel-header" onclick="togglePanel(this)">
@@ -621,6 +646,69 @@
             post('/api/run_manual', {target: target, state: state, duration: duration});
         }
 
+        function applySettings() {
+            let statusEl = document.getElementById('cfg-status');
+            let fields = [
+                {id: 'cfg-lights-start', key: 'lights_start'},
+                {id: 'cfg-lights-end', key: 'lights_end'},
+                {id: 'cfg-pump-duration', key: 'pump_duration'},
+                {id: 'cfg-pump-interval', key: 'pump_interval'}
+            ];
+            let updates = [];
+            let hasInvalid = false;
+            fields.forEach(f => {
+                let val = document.getElementById(f.id).value.trim();
+                if (val === '') return;
+                let num = parseInt(val, 10);
+                if (isNaN(num) || String(num) !== val) {
+                    hasInvalid = true;
+                    return;
+                }
+                updates.push({key: f.key, value: num});
+            });
+            if (hasInvalid) {
+                statusEl.textContent = 'Invalid input. Enter whole numbers only.';
+                statusEl.style.color = '#dc3545';
+                return;
+            }
+            if (updates.length === 0) {
+                statusEl.textContent = 'No values entered.';
+                statusEl.style.color = '#ffc107';
+                return;
+            }
+            statusEl.textContent = 'Applying...';
+            statusEl.style.color = '#888';
+            let errors = [];
+            let done = 0;
+            updates.forEach(u => {
+                fetch('/api/settings', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(u)
+                })
+                .then(r => r.json().then(d => ({ok: r.ok, data: d})))
+                .then(({ok, data}) => {
+                    if (!ok) errors.push(data.message);
+                    done++;
+                    if (done === updates.length) {
+                        if (errors.length > 0) {
+                            statusEl.textContent = errors.join(' | ');
+                            statusEl.style.color = '#dc3545';
+                        } else {
+                            statusEl.textContent = 'Settings updated.';
+                            statusEl.style.color = '#28a745';
+                            fields.forEach(f => document.getElementById(f.id).value = '');
+                        }
+                        setTimeout(refreshUI, 300);
+                    }
+                })
+                .catch(() => {
+                    done++;
+                    errors.push('Network error');
+                });
+            });
+        }
+
         function runCamera() {
             let btn = document.getElementById("btn-cam");
             btn.innerHTML = "CAPTURING...";
@@ -875,6 +963,13 @@
                         let hBtn = document.getElementById('btn-health');
                         hBtn.innerHTML = 'RUN PLANT HEALTH';
                         hBtn.style.opacity = '1';
+                    }
+
+                    // --- Settings Display ---
+                    if (data.settings) {
+                        let s = data.settings;
+                        document.getElementById('cfg-lights-window').textContent = s.lights_start + ':00 - ' + s.lights_end + ':00';
+                        document.getElementById('cfg-pump-cycle').textContent = 'Every ' + s.pump_interval + 'min for ' + s.pump_duration + 's';
                     }
 
                     // --- Cycle Toggles ---

@@ -34,6 +34,11 @@ MULTI_WORD_TOKENS = {
     "PI HEALTH": "PI_HEALTH",
 
     "PLANT HEALTH": "PLANT_HEALTH",
+
+    "SET LIGHTS START": "SET_LIGHTS_START",
+    "SET LIGHTS END": "SET_LIGHTS_END",
+    "SET PUMP DURATION": "SET_PUMP_DURATION",
+    "SET PUMP INTERVAL": "SET_PUMP_INTERVAL",
 }
 
 # Component normalization
@@ -216,6 +221,10 @@ class CLI:
             elif cmd == "PUMP":
                 self._handle_pump(args)
 
+            # --- SETTINGS ---
+            elif cmd in ("SET_LIGHTS_START", "SET_LIGHTS_END", "SET_PUMP_DURATION", "SET_PUMP_INTERVAL"):
+                self._handle_set(cmd, args)
+
             # --- MANUAL SENSORS ---
 
             elif cmd == "RUN":
@@ -343,6 +352,35 @@ class CLI:
             self.scheduler.register_manual_light_change(state, duration)
             suffix = f" for {duration}s" if duration > 0 else ""
             print(f">> Lights set to {'ON' if state else 'OFF'}{suffix}")
+
+    def _handle_set(self, cmd: str, args: List[str]):
+        """
+        Handle SET commands. If no value is given, prints the current value.
+        Usage: SET LIGHTS START [HOUR] | SET LIGHTS END [HOUR] | SET PUMP DURATION [SEC] | SET PUMP INTERVAL [MIN]
+        """
+        # Map tokenized command to setting key and display info
+        setting_map = {
+            "SET_LIGHTS_START":  ("lights_start",  settings.LIGHTS_START_HOUR,  "Lights Start Hour", "hour (0-23)"),
+            "SET_LIGHTS_END":    ("lights_end",    settings.LIGHTS_END_HOUR,    "Lights End Hour",   "hour (0-23)"),
+            "SET_PUMP_DURATION": ("pump_duration", settings.PUMP_DURATION_SEC,  "Pump Duration",     f"seconds (1-{settings.PUMP_MAX_DURATION_SEC})"),
+            "SET_PUMP_INTERVAL": ("pump_interval", settings.PUMP_INTERVAL_MINS, "Pump Interval",     "minutes (1-1440)"),
+        }
+
+        key, current, label, unit = setting_map[cmd]
+
+        # No value given — query mode
+        if not args:
+            print(f">> {label}: {current}")
+            return
+
+        # Parse the value
+        value = self._parse_arg(args, 0)
+        if value is None:
+            return
+
+        # Apply via controller
+        result = self.controller.set_setting(key, value)
+        print(f">> {result}")
 
     def _handle_run(self, args: List[str]):
         """
@@ -754,6 +792,12 @@ HARDWARE (MANUAL):
   LIGHTS OFF                   - Turn lights off
   PUMP ON [SEC]                - Turn pump on (0s for 30s max)
   PUMP OFF                     - Turn pump off
+
+SETTINGS:
+  SET LIGHTS START [HOUR]      - Get/set lights start hour (0-23)
+  SET LIGHTS END [HOUR]        - Get/set lights end hour (0-23)
+  SET PUMP DURATION [SEC]      - Get/set pump duration in seconds
+  SET PUMP INTERVAL [MIN]      - Get/set pump interval in minutes
 
 
 SENSORS (MANUAL):

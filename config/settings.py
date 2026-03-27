@@ -100,14 +100,22 @@ MOSS_MODEL_FILES_DIR.mkdir(parents=True, exist_ok=True)
 MOSS_STATS_PATH: Path = MOSS_MODEL_FILES_DIR / "stats.json"
 
 # --- Birthdays ---
-BIRTHDAYS = [
-    (REDACTED),
-    (REDACTED),
-    (REDACTED),
-    (REDACTED),
-    (REDACTED),
-    (REDACTED)
-]
+# Loaded from .env as "month,day,name;month,day,name;..."
+def _parse_birthdays() -> list:
+    raw = os.getenv("BIRTHDAYS", "")
+    if not raw:
+        return []
+    result = []
+    for entry in raw.split(";"):
+        parts = entry.strip().split(",", 2)
+        if len(parts) == 3:
+            try:
+                result.append((int(parts[0]), int(parts[1]), parts[2].strip()))
+            except ValueError:
+                continue
+    return result
+
+BIRTHDAYS = _parse_birthdays()
 
 # --- Countdown Configuration ---
 COUNTDOWN_TARGET_DATE: date = date(2026, 4, 16)

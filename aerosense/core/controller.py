@@ -330,6 +330,59 @@ class Controller:
                 self.log.error("Failed to send LIGHTS command.")
                 self.play_music("DENIED")
 
+    def set_setting(self, key: str, value: int) -> str:
+        """
+        Update a runtime system setting with validation.
+
+        Args:
+            key (str): The setting name (lights_start, lights_end, pump_duration, pump_interval).
+            value (int): The new integer value.
+
+        Returns:
+            str: Success or error message.
+        """
+        if not isinstance(value, int):
+            return "Error: Value must be an integer."
+
+        if key == "lights_start":
+            if value < 0 or value > 23:
+                return "Error: Lights start hour must be 0-23."
+            if value >= settings.LIGHTS_END_HOUR:
+                return f"Error: Start hour ({value}) must be before end hour ({settings.LIGHTS_END_HOUR})."
+            old = settings.LIGHTS_START_HOUR
+            settings.LIGHTS_START_HOUR = value
+            self.log.info(f"Setting LIGHTS_START_HOUR changed: {old} -> {value}")
+            return f"Lights start hour set to {value}:00 (was {old}:00)."
+
+        elif key == "lights_end":
+            if value < 0 or value > 23:
+                return "Error: Lights end hour must be 0-23."
+            if value <= settings.LIGHTS_START_HOUR:
+                return f"Error: End hour ({value}) must be after start hour ({settings.LIGHTS_START_HOUR})."
+            old = settings.LIGHTS_END_HOUR
+            settings.LIGHTS_END_HOUR = value
+            self.log.info(f"Setting LIGHTS_END_HOUR changed: {old} -> {value}")
+            return f"Lights end hour set to {value}:00 (was {old}:00)."
+
+        elif key == "pump_duration":
+            if value < 1 or value > settings.PUMP_MAX_DURATION_SEC:
+                return f"Error: Pump duration must be 1-{settings.PUMP_MAX_DURATION_SEC}s."
+            old = settings.PUMP_DURATION_SEC
+            settings.PUMP_DURATION_SEC = value
+            self.log.info(f"Setting PUMP_DURATION_SEC changed: {old} -> {value}")
+            return f"Pump duration set to {value}s (was {old}s)."
+
+        elif key == "pump_interval":
+            if value < 1 or value > 1440:
+                return "Error: Pump interval must be 1-1440 minutes."
+            old = settings.PUMP_INTERVAL_MINS
+            settings.PUMP_INTERVAL_MINS = value
+            self.log.info(f"Setting PUMP_INTERVAL_MINS changed: {old} -> {value}")
+            return f"Pump interval set to {value}min (was {old}min)."
+
+        else:
+            return f"Error: Unknown setting '{key}'."
+
     def stop_all(self, scheduler=None):
         """
         Emergency stop command. Shuts down all actuators immediately.
