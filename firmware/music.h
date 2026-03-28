@@ -113,6 +113,14 @@ const NoteLookup kNoteTable[] PROGMEM = {
 const int kNoteTableSize = sizeof(kNoteTable) / sizeof(kNoteTable[0]);
 
 // --- SONGS ---
+// UA Fight Song (Fight)
+const Note kFight[] PROGMEM = {
+    {NOTE_AS4, 2}, {NOTE_DS5, 3}, {NOTE_AS4, 1}, {NOTE_D5, 2}, {NOTE_AS4, 2}, {NOTE_C5, 1}, {NOTE_AS4, 1}, {NOTE_G4, 4},
+    {NOTE_G4, 2}, {NOTE_AS4, 2}, {NOTE_AS4, 1.5}, {NOTE_AS4, 0.5}, {NOTE_AS4, 1}, {NOTE_GS4, 2}, {NOTE_G4, 1}, {NOTE_AS4, 5}, {REST, 1},
+    {NOTE_AS4, 1}, {NOTE_D5, 1.5}, {NOTE_CS5, 0.5}, {NOTE_D5, 4}, {NOTE_AS4, 2}, {NOTE_DS5, 1.5}, {NOTE_D5, 0.5}, {NOTE_C5, 4},
+    {NOTE_AS4, 1}, {NOTE_C5, 1}, {NOTE_D5, 2}, {NOTE_C5, 2}, {NOTE_AS4, 2}, {NOTE_A4, 2}, {NOTE_AS4, 1}, {NOTE_F5, 1}, {REST, 1}, {NOTE_F5, 1}, {REST, 1}, {NOTE_F5, 1}
+};
+
 // Daisy Bell (Daisy)
 const Note kDaisy[] PROGMEM = {
   {NOTE_G5, 3}, {NOTE_E5, 3}, {NOTE_C5, 3}, {NOTE_G4, 3}, {NOTE_A4, 1}, {NOTE_B4, 1}, {NOTE_C5, 1}, {NOTE_A4, 2}, {NOTE_C5, 1}, {NOTE_G4, 4}, {REST, 2},
@@ -196,6 +204,14 @@ const Note kFnaf[] PROGMEM = {
     {NOTE_F3, 1}, {NOTE_D3, 0.75}, {NOTE_G3, 0.25}, {NOTE_CS3, 2}
 };
 
+// Alma (Alma)
+const Note kAlma[] PROGMEM = {
+    {NOTE_GS4, 1.5}, {NOTE_AS4, 0.5}, {NOTE_C5, 1.5}, {NOTE_AS4, 0.5}, {NOTE_GS4, 1}, {NOTE_F4, 1}, {NOTE_F4, 1}, {NOTE_DS4, 1}, {NOTE_AS4, 1.5}, {NOTE_GS4, 0.5}, {NOTE_G4, 1}, {NOTE_GS4, 1}, {NOTE_AS4, 3}, {REST, 1},
+    {NOTE_GS4, 1.5}, {NOTE_AS4, 0.5}, {NOTE_C5, 1.5}, {NOTE_AS4, 0.5}, {NOTE_GS4, 1}, {NOTE_F4, 1}, {NOTE_F4, 1}, {NOTE_DS4, 1}, {NOTE_AS4, 1.5}, {NOTE_C5, 0.5}, {NOTE_CS5, 1}, {NOTE_G4, 1}, {NOTE_GS4, 3}, {REST, 1},
+    {NOTE_C5, 1.5}, {NOTE_C5, 0.5}, {NOTE_AS4, 1}, {NOTE_AS4, 1}, {NOTE_GS4, 1.5}, {NOTE_GS4, 0.5}, {NOTE_G4, 1}, {NOTE_G4, 1}, {NOTE_F4, 1.5}, {NOTE_F4, 0.5}, {NOTE_DS4, 1}, {NOTE_GS4, 1}, {NOTE_AS4, 3}, {REST, 1},
+    {NOTE_GS4, 1.5}, {NOTE_AS4, 0.5}, {NOTE_C5, 1.5}, {NOTE_AS4, 0.5}, {NOTE_GS4, 1}, {NOTE_F4, 1}, {NOTE_F4, 1}, {NOTE_DS4, 1}, {NOTE_AS4, 1}, {NOTE_C5, 1}, {NOTE_CS5, 2.5}, {NOTE_G4, 1}, {NOTE_GS4, 2.5}
+};
+
 // SpongeBob Sad Theme (Sponge)
 const Note kSponge[] PROGMEM = {
     {NOTE_G3, 1}, {NOTE_G4, 3}, {NOTE_G4, 0.5}, {NOTE_FS4, 0.5}, {NOTE_F4, 3}, {NOTE_D4, 1}, {NOTE_A4, 2}, {NOTE_G4, 4},
@@ -206,6 +222,14 @@ const Note kSponge[] PROGMEM = {
 const Note kViolin[] PROGMEM = {
     {NOTE_F5, 2}, {NOTE_B4, 2}, {NOTE_G5, 1.5}, {NOTE_F5, 0.5}, {NOTE_E5, 1.5}, {NOTE_D5, 0.5}, {NOTE_C5, 1}, {NOTE_A4, 1}, {NOTE_A5, 1.5}, {NOTE_G5, 0.5}, {NOTE_F5, 4},
     {NOTE_E5, 1.5}, {NOTE_F5, 0.5}, {NOTE_G5, 1}, {NOTE_E5, 1}, {NOTE_F5, 1.5}, {NOTE_B4, 0.5}, {NOTE_C5, 1}, {NOTE_D5, 1}, {NOTE_B5, 1.5}, {NOTE_E5, 0.5}, {NOTE_F5, 1}, {NOTE_G5, 1}, {NOTE_A5, 4}
+};
+
+// F1 Theme (F1)
+const Note kF1[] PROGMEM = {
+    {NOTE_D4, 0.5}, {NOTE_D4, 0.5}, {NOTE_C5, 0.5}, {NOTE_D5, 1.5}, {NOTE_C5, 0.5}, {NOTE_B4, 1.5}, {NOTE_C5, 0.5}, {NOTE_D5, 1}, {NOTE_C5, 0.5}, {NOTE_B4, 0.5}, {NOTE_G4, 0.5},
+    {NOTE_C4, 0.5}, {NOTE_C4, 0.5}, {NOTE_B4, 0.5}, {NOTE_C5, 1.5}, {NOTE_C5, 0.5}, {NOTE_B4, 1.5}, {NOTE_B4, 0.5}, {NOTE_C5, 1}, {NOTE_C5, 0.5}, {NOTE_B4, 0.5}, {NOTE_G4, 0.5},
+    {NOTE_C4, 0.5}, {NOTE_C4, 0.5}, {NOTE_B4, 0.5}, {NOTE_C5, 1.5}, {NOTE_C5, 0.5}, {NOTE_B4, 1.5}, {NOTE_B4, 0.5}, {NOTE_C5, 1}, {NOTE_C5, 0.5}, {NOTE_B4, 0.5}, {NOTE_G4, 0.5},
+    {NOTE_D4, 0.5}, {NOTE_D4, 0.5}, {NOTE_C5, 0.5}, {NOTE_D5, 1.5}, {NOTE_C5, 0.5}, {NOTE_B4, 1.5}, {NOTE_C5, 0.5}, {NOTE_D5, 1}, {NOTE_C5, 0.5}, {NOTE_B4, 0.5}, {NOTE_G4, 0.5}
 };
 
 // Succession Theme (Succession)
@@ -275,6 +299,7 @@ const Note kWarning[] PROGMEM = {
 // --- SONG REGISTRY ---
 #define COUNT(x) (sizeof(x) / sizeof(x[0]))
 Song kSongList[] = {
+  {"Fight", kFight, COUNT(kFight), 300},
   {"Daisy", kDaisy, COUNT(kDaisy), 200},
   {"Curiosity", kCuriosity, COUNT(kCuriosity), 120},
   {"Ultron", kUltron, COUNT(kUltron), 120},
@@ -284,8 +309,10 @@ Song kSongList[] = {
   {"Morning", kMorning, COUNT(kMorning), 100},
   {"Sleep", kLullaby, COUNT(kLullaby), 100},
   {"Fnaf", kFnaf, COUNT(kFnaf), 108},
+  {"Alma", kAlma, COUNT(kAlma), 60},
   {"Sponge", kSponge, COUNT(kSponge), 108},
   {"Violin", kViolin, COUNT(kViolin), 110},
+  {"F1", kF1, COUNT(kF1), 110},
   {"Succession", kSuccession, COUNT(kSuccession), 70},
   {"Test", kTest, COUNT(kTest), 160},
   {"Granted", kGranted, COUNT(kGranted), 240},
