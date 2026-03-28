@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.15.0] - 2026-03-27
+### Changed
+- Updated Roboflow model to version 3.
+
 ## [v5.14.2] - 2026-03-27
 ### Added
 - Added new songs.
