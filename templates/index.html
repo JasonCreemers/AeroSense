@@ -353,15 +353,15 @@
                         <span class="data-tag" id="cfg-pump-cycle" style="font-size:1.1rem;">--</span>
                     </div>
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 80px; gap:10px; align-items:center;">
+                <div style="display:grid; grid-template-columns: 1fr 100px; gap:10px; align-items:center;">
                     <span style="color:#ccc;">Lights Start (hr)</span>
-                    <input type="number" id="cfg-lights-start" min="0" max="23" placeholder="0-23" style="width:100%;">
+                    <input type="number" id="cfg-lights-start" min="0" max="23" placeholder="0-23" style="width:100%; box-sizing:border-box;">
                     <span style="color:#ccc;">Lights End (hr)</span>
-                    <input type="number" id="cfg-lights-end" min="0" max="23" placeholder="0-23" style="width:100%;">
+                    <input type="number" id="cfg-lights-end" min="0" max="23" placeholder="0-23" style="width:100%; box-sizing:border-box;">
                     <span style="color:#ccc;">Pump Duration (s)</span>
-                    <input type="number" id="cfg-pump-duration" min="1" max="30" placeholder="1-30" style="width:100%;">
+                    <input type="number" id="cfg-pump-duration" min="1" max="30" placeholder="1-30" style="width:100%; box-sizing:border-box;">
                     <span style="color:#ccc;">Pump Interval (min)</span>
-                    <input type="number" id="cfg-pump-interval" min="1" max="1440" placeholder="1-1440" style="width:100%;">
+                    <input type="number" id="cfg-pump-interval" min="1" max="1440" placeholder="1-1440" style="width:100%; box-sizing:border-box;">
                 </div>
                 <button class="btn-blue" style="margin-top:15px; width:100%;" onclick="applySettings()">APPLY</button>
                 <div id="cfg-status" style="font-size:0.75rem; color:#888; margin-top:6px; min-height:1.2em;"></div>
@@ -374,16 +374,16 @@
                 <h2>Manual Control</h2>
             </div>
             <div class="panel-body">
-                <div style="display:grid; grid-template-columns: 80px 1fr 80px 1fr; gap:10px; align-items:center; margin-bottom:10px;">
+                <div style="display:grid; grid-template-columns: 80px 1fr 90px 1fr; gap:10px; align-items:center; margin-bottom:10px;">
                     <span style="font-weight: bold;">LIGHTS:</span>
                     <button class="btn-green" onclick="manualRun('LIGHTS', 'ON')">ON</button>
-                    <input type="number" id="dur_lights" placeholder="Sec (0)" style="width:100%;">
+                    <input type="number" id="dur_lights" placeholder="Sec (0)" style="width:100%; box-sizing:border-box;">
                     <button class="btn-red" onclick="manualRun('LIGHTS', 'OFF')">OFF</button>
                 </div>
-                <div style="display:grid; grid-template-columns: 80px 1fr 80px 1fr; gap:10px; align-items:center;">
+                <div style="display:grid; grid-template-columns: 80px 1fr 90px 1fr; gap:10px; align-items:center;">
                     <span style="font-weight: bold;">PUMP:</span>
                     <button class="btn-green" onclick="manualRun('PUMP', 'ON')">ON</button>
-                    <input type="number" id="dur_pump" placeholder="Sec (0)" style="width:100%;">
+                    <input type="number" id="dur_pump" placeholder="Sec (0)" style="width:100%; box-sizing:border-box;">
                     <button class="btn-red" onclick="manualRun('PUMP', 'OFF')">OFF</button>
                 </div>
             </div>

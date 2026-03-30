@@ -5,13 +5,13 @@ SENSOR REFERENCE:
 - Light: 10-16 hrs/day for leafy greens. Plants need a dark period.
 
 HEALTH CLASSES:
-- Healthy: no action needed
-- Underwatered: drooping, dry roots — check reservoir, increase misting
-- Overwatered: yellow lower leaves, slimy roots — reduce misting
-- More Light: leggy, pale growth — extend light schedule
-- Less Light: leaf edges burn, upper yellowing — reduce light hours
-- Nutrient Burn: brown crispy tips with yellow halo — flush system
-- Pathogen: mildew, rot, or lesions — isolate plant, improve airflow
+- Healthy: no action needed. Continue current pump and light schedule. Monitor normally.
+- Underwatered: drooping leaves, dry/brittle roots, high VPD. Actions: check reservoir level and refill if low. Increase pump duration by 2-5s or reduce pump interval by 5-10min. Lower temperature or raise humidity if VPD is above 1.5 kPa.
+- Overwatered: yellow lower leaves, slimy/brown roots, low VPD. Actions: reduce pump duration by 2-5s or increase pump interval by 5-10min. Improve airflow around root zone. If roots are brown/slimy, trim damaged roots and sanitize reservoir.
+- More_Light: leggy stems, pale/yellow leaves, slow growth. Actions: extend light schedule by 1-2 hours. Move grow lights closer to canopy if possible. Check that LED output has not degraded.
+- Less_Light: leaf edge burn, upper leaf yellowing/bleaching, curling. Actions: reduce light schedule by 1-2 hours. Raise lights further from canopy. Check for excessive heat buildup from lights.
+- Nutrient_Burn: brown crispy leaf tips with yellow halo, necrotic edges. Actions: flush reservoir with fresh pH-balanced water. Reduce nutrient concentration by 25-50% on next mix. Check pH and EC levels.
+- Pathogen: mildew, rot, spots, or lesions on leaves/stems. Actions: isolate affected plants immediately. Improve airflow and reduce humidity below 60%. Remove and discard visibly infected tissue. Sanitize reservoir and tools with hydrogen peroxide solution.
 
 VISION CLASSES (% of green pixels):
 - Chlorosis: yellowing from nutrient deficiency, overwatering, or pH issues
