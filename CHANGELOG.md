@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.16.0] - 2026-04-05
+### Changed
+- Major overhaul of `README.md`.
+
 ## [v5.15.1] - 2026-04-05
 ### Changed
 - Modified MOSS guidelines.
