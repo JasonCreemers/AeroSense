@@ -1,5 +1,5 @@
 # AeroSense Garden Controller
-**Version: v5.15.0** | **Release: 2026-03-27**
+**Version: v5.15.1** | **Release: 2026-04-05**
 
 **AeroSense** is a high-performance, hybrid automation system designed for aeroponic gardening. It utilizes a **Raspberry Pi 5 (16GB)** for high-level system control, data logging, and computer vision, while an **Arduino Mega 2560** handles low-level actuation and real-time sensor monitoring.
 

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.15.1] - 2026-04-05
+### Changed
+- Modified MOSS guidelines.
+
 ## [v5.15.0] - 2026-03-27
 ### Changed
 - Updated Roboflow model to version 3.
