@@ -1,5 +1,5 @@
 # AeroSense
-**Version: v5.16.0** | **Release: 2026-04-05**
+**Version: v5.16.1** | **Release: 2026-04-05**
 
 Aeroponics is one of the most efficient ways to grow plants, using up to 90% less water than soil while producing faster growth. But most aeroponic systems on the market are industrial grade, expensive, and require a lot of background knowledge to run. They're not built for everyday people. **AeroSense** was built to change that. It's a smart controller that automates the hard parts so anyone can grow, regardless of experience.
 
@@ -144,7 +144,7 @@ At its core, AeroSense follows a **Sense → Analyze → Act** pipeline. Sensors
 ## Getting Started
 
 ### Prerequisites
-* Raspberry Pi 5 (16GB) running Raspberry Pi OS
+* Raspberry Pi 5 (16GB) running Raspberry Pi OS (Debian Trixie)
 * Arduino Mega 2560
 * Python 3.12.9 (exact, required for inference compatibility)
 * Arduino IDE

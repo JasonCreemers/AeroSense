@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.16.1] - 2026-04-05
+### Changed
+- Added Raspberry Pi OS to README prerequisites.
+
 ## [v5.16.0] - 2026-04-05
 ### Changed
 - Major overhaul of `README.md`.
