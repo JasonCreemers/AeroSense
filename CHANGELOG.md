@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.17.2] - 2026-04-15
+### Changed
+- Increased MOSS time from 30m to 3h.
+
 ## [v5.17.1] - 2026-04-15
 ### Added
 - GUI now hydrates the plant health box from the most recent classifier prediction.
