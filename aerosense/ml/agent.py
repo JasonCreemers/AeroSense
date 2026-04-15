@@ -29,7 +29,7 @@ from config import settings
 ARCHIVE_MAX_AGE_DAYS: int = 7
 
 # Max age (minutes) before stale data triggers a fresh reading
-DATA_MAX_AGE_MINUTES: int = 30
+DATA_MAX_AGE_MINUTES: int = 1440
 
 
 class MossAgent:
