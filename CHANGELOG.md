@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.17.1] - 2026-04-15
+### Added
+- GUI now hydrates the plant health box from the most recent classifier prediction.
+
 ## [v5.17.0] - 2026-04-15
 ### Added
 - GUI now hydrates the camera and vision feed from the most recent capture.

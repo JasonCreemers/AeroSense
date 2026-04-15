@@ -1,5 +1,5 @@
 # AeroSense
-**Version: v5.17.0** | **Release: 2026-04-15**
+**Version: v5.17.1** | **Release: 2026-04-15**
 
 Aeroponics is one of the most efficient ways to grow plants, using up to 90% less water than soil while producing faster growth. But most aeroponic systems on the market are industrial grade, expensive, and require a lot of background knowledge to run. They're not built for everyday people. **AeroSense** was built to change that. It's a smart controller that automates the hard parts so anyone can grow, regardless of experience.
 

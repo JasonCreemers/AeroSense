@@ -11,7 +11,7 @@ import random
 import shutil
 import time
 import threading
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Dict, Optional, Tuple, List
 
@@ -294,6 +294,41 @@ class Controller:
             }
         except Exception as e:
             self.log.warning(f"Hydrate: could not restore vision result: {e}")
+
+        # Latest plant health prediction (features + prediction + confidence from CSV)
+        try:
+            health_log = self.logger.paths.get("health")
+            if not health_log or not health_log.exists():
+                return
+            with open(health_log, 'r', newline='') as f:
+                rows = list(csv.reader(f))
+            feature_keys = [
+                "chlorosis_ratio", "decay_ratio", "tip_burn_ratio", "pest_density",
+                "wilting_ratio", "growth_velocity", "instant_temp", "delta_temp",
+                "temp_slope", "instant_humidity", "instant_vpd", "vpd_shock",
+                "water_volume", "light_interval", "time_of_day_x", "time_of_day_y",
+            ]
+            for row in reversed(rows[1:]):
+                if len(row) < 19:
+                    continue
+                try:
+                    features = {k: float(row[i + 1]) for i, k in enumerate(feature_keys)}
+                    prediction = row[17]
+                    confidence = float(row[18])
+                    ts = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S").timestamp()
+                except (ValueError, IndexError):
+                    continue
+                self.data_cache["health_result"] = {
+                    "value": {
+                        "prediction": prediction,
+                        "confidence": confidence,
+                        "features": features,
+                    },
+                    "timestamp": ts,
+                }
+                break
+        except Exception as e:
+            self.log.warning(f"Hydrate: could not restore health result: {e}")
 
     def _update_cache(self, key: str, value):
         """
