@@ -121,6 +121,9 @@ class Controller:
         self._last_heartbeat_time: float = 0.0
         self._heartbeat_fail_count: int = 0
 
+        # Restore last-known photo/vision from disk so the GUI is not empty on load
+        self._hydrate_cache_from_disk()
+
         # Startup safety: Clear any lingering hardware state from a prior session
         self.arduino.send("STOP")
         self.log.info("Startup Safety: Sent preemptive STOP to hardware.")
@@ -219,6 +222,78 @@ class Controller:
                     self.sync_state()
                 else:
                     self.log.critical("Arduino reconnection failed.")
+
+    def _hydrate_cache_from_disk(self) -> None:
+        """
+        Seed the data cache with the most recent photo and vision artifacts on disk
+        so the GUI shows last-known state after a restart, instead of empty placeholders.
+        """
+        # Latest camera photo
+        try:
+            if settings.IMG_DIR.exists():
+                img_files = [p for p in settings.IMG_DIR.iterdir()
+                             if p.is_file() and p.suffix.lower() in ('.jpg', '.jpeg', '.png')]
+                if img_files:
+                    latest = max(img_files, key=lambda p: p.stat().st_mtime)
+                    self.data_cache["latest_photo"] = {
+                        "value": latest.name,
+                        "timestamp": latest.stat().st_mtime,
+                    }
+        except Exception as e:
+            self.log.warning(f"Hydrate: could not scan images dir: {e}")
+
+        # Latest vision result (masked tile + class ratios from CSV)
+        try:
+            if not settings.VISION_DIR.exists():
+                return
+            vis_files = [p for p in settings.VISION_DIR.iterdir()
+                         if p.is_file() and p.name.endswith('_vision.jpg')]
+            if not vis_files:
+                return
+            latest_vis = max(vis_files, key=lambda p: p.stat().st_mtime)
+            source_stem = latest_vis.name[:-len('_vision.jpg')]
+
+            total_px = green_px = 0
+            class_pixels: Dict[str, int] = {}
+            src_image = ""
+
+            vision_log = self.logger.paths.get("vision")
+            if vision_log and vision_log.exists():
+                with open(vision_log, 'r', newline='') as f:
+                    rows = list(csv.reader(f))
+                for row in reversed(rows[1:]):
+                    if len(row) < 9:
+                        continue
+                    if Path(row[1]).stem != source_stem:
+                        continue
+                    try:
+                        total_px = int(row[2])
+                        green_px = int(row[3])
+                        class_pixels = {
+                            "chlorosis": int(row[4]),
+                            "necrosis":  int(row[5]),
+                            "pest":      int(row[6]),
+                            "tip_burn":  int(row[7]),
+                            "wilting":   int(row[8]),
+                        }
+                        src_image = row[1]
+                    except ValueError:
+                        continue
+                    break
+
+            self.data_cache["vision_result"] = {
+                "value": {
+                    "total_pixels": total_px,
+                    "green_pixels": green_px,
+                    "class_pixels": class_pixels,
+                    "vision_image": latest_vis.name,
+                    "model_active": False,
+                    "source_image": src_image,
+                },
+                "timestamp": latest_vis.stat().st_mtime,
+            }
+        except Exception as e:
+            self.log.warning(f"Hydrate: could not restore vision result: {e}")
 
     def _update_cache(self, key: str, value):
         """

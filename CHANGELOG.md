@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v5.17.0] - 2026-04-15
+### Added
+- GUI now hydrates the camera and vision feed from the most recent capture.
+### Changed
+- Reduced MOSS conversation history to 1 message pair.
+
 ## [v5.16.1] - 2026-04-05
 ### Changed
 - Added Raspberry Pi OS to README prerequisites.

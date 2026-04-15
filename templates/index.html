@@ -1032,7 +1032,9 @@
                 .catch(() => {});
         }
 
-        // Poll every 2 seconds for live updates
+        // Immediate first refresh so hydrated vision/camera data appears on load,
+        // then poll every 2 seconds for live updates.
+        refreshUI();
         setInterval(refreshUI, 2000);
 
         // --- WebSocket Terminal ---
