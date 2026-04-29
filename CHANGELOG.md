@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the **AeroSense** project will be documented in this file.
 
+## [v6.0.0] - 2026-04-29
+- Pushed final AeroSense release
+
 ## [v5.17.3] - 2026-04-15
 ### Changed
 - Increased MOSS data staleness threshold from 30m to 24h across all injected context.

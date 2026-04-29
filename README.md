@@ -1,5 +1,5 @@
 # AeroSense
-**Version: v5.17.3** | **Release: 2026-04-15**
+**Version: v6.0.0** | **Release: 2026-04-29**
 
 Aeroponics is one of the most efficient ways to grow plants, using up to 90% less water than soil while producing faster growth. But most aeroponic systems on the market are industrial grade, expensive, and require a lot of background knowledge to run. They're not built for everyday people. **AeroSense** was built to change that. It's a smart controller that automates the hard parts so anyone can grow, regardless of experience.
 
@@ -436,7 +436,7 @@ Each prediction is built from 16 engineered features computed from vision analys
 * **Context Window:** 2,048 tokens.
 * **Architecture:** Keyword-based context injection, chosen over a tool-based architecture for faster and more reliable responses. When a user message contains keywords related to plant health, environment, water, lights, or system status (~50 keywords across 5 categories), the relevant data is gathered from CSV logs or live sensors and injected directly into the system prompt before calling the LLM in a single pass.
 * **Streaming:** Responses stream token-by-token via WebSocket (GUI) or stdout (CLI).
-* **Conversation Management:** Auto-trims at 3 message pairs to fit the context window. Conversations are archived after reset and auto-cleaned after 7 days.
+* **Conversation Management:** Auto-trims to the most recent 3 messages to fit the context window. Conversations are archived after reset and auto-cleaned after 7 days.
 * **Personality:** Friendly, concise, and knowledgeable — like a gardening expert friend. Proactively flags issues in sensor data but never fabricates readings.
 * **Reference Files:** `models/moss/system_prompt.md`, `models/moss/overview.md`, `models/moss/guidelines.md`.
 
@@ -463,7 +463,7 @@ Key settings from `config/settings.py` with their defaults:
 | `MOSS_MODEL` | `llama3.2:3b` | Ollama model name for MOSS. |
 | `MOSS_CONTEXT_LENGTH` | `2048` | LLM context window (tokens). |
 | `MOSS_KEEP_ALIVE` | `30m` | Time to keep model loaded in RAM. |
-| `MOSS_MAX_CONVERSATION_MESSAGES` | `3` | Message pairs before auto-trim. |
+| `MOSS_MAX_CONVERSATION_MESSAGES` | `3` | Most recent messages retained before auto-trim. |
 
 ---
 

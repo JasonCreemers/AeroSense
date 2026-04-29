@@ -4,8 +4,6 @@ This document outlines the development trajectory for the AeroSense project. Tas
 
 ## Immediate Tasks
 
-- A revamp of the entire HARDWARE.md documention.
-
 ---
 
 ## Upcoming Tasks

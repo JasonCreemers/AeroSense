@@ -296,7 +296,7 @@ class HealthClassifier:
         Returns:
             float: Water volume in mL, or 0.0 if insufficient data.
         """
-        water_path = log_dir / "water_level_log.csv"
+        water_path = log_dir / "water_log.csv"
         rows = self._read_csv_recent(water_path, hours=24)
 
         if len(rows) < 2:
